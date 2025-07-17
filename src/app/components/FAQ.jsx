@@ -2,48 +2,41 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function FAQ() {
-  const faqs = [
-    {
-      q: "What is DigiNote?",
-      a: "DigiNote is an AI-powered note-making tool that automatically generates summaries and structured notes from videos, audio, PDFs, and text content—designed to accelerate learning and boost retention.",
-    },
-    {
-      q: "How does DigiNote work?",
-      a: "DigiNote uses advanced natural language processing (NLP) to analyze your input content and generate concise, meaningful notes by extracting key points, highlights, and summaries.",
-    },
-    {
-      q: "What types of content can I use with DigiNote?",
-      a: "You can upload or paste content from YouTube videos, PDFs, audio files, Word documents, and web articles. Support for more formats is continuously being expanded.",
-    },
-    {
-      q: "Can DigiNote summarize YouTube videos?",
-      a: "Yes! You can paste a YouTube link and DigiNote will extract the transcript and create a clear, readable summary or structured notes.",
-    },
-    {
-      q: "Is DigiNote free to use?",
-      a: "Yes, DigiNote is free to use and offers core features like summarization, note generation, and keyword extraction at no cost.",
-    },
-    {
-      q: "Do I need an account to use DigiNote?",
-      a: "In most cases, you can start summarizing content without signing up. However, creating an account gives you access to saved notes, history, and more customization options.",
-    },
-    {
-      q: "Is my uploaded data safe?",
-      a: "Absolutely. All uploaded content is encrypted and processed securely. We don’t share or store your data beyond what's necessary to generate your notes.",
-    },
-    {
-      q: "Can I use DigiNote during live meetings or classes?",
-      a: "Live summarization is not yet available, but it’s in development. Currently, you can upload recorded sessions or transcripts to get instant notes.",
-    },
-    {
-      q: "Can I customize how notes are generated?",
-      a: "Yes, DigiNote lets you choose between formats like bullet points, paragraph summaries, or key takeaways. You can also adjust summary length.",
-    },
-    {
-      q: "Which platforms or extensions are available?",
-      a: "DigiNote is available via the web app and Chrome extension. The extension works with platforms like YouTube, Udemy, Coursera, and more.",
-    },
-  ];
+ const faqs = [
+  {
+    q: "What is DigiNote?",
+    a: "DigiNote is an AI-powered platform that helps students and educators create instant notes, practice MCQs, watch related videos, and build unit tests — all in one place.",
+  },
+  {
+    q: "Who can use DigiNote?",
+    a: "DigiNote is perfect for school and college students, teachers, and self-learners who want to study smarter, not harder.",
+  },
+  {
+    q: "How does the AI notes generator work?",
+    a: "You simply enter a topic or chapter name, and DigiNote’s AI will generate concise, easy-to-understand notes based on that subject.",
+  },
+  {
+    q: "Can I practice MCQs on DigiNote?",
+    a: "Yes! DigiNote lets you take chapter-based or mixed MCQ quizzes to test your knowledge and track your improvement.",
+  },
+  {
+    q: "Are YouTube videos integrated into notes?",
+    a: "Absolutely. DigiNote automatically suggests high-quality YouTube videos that match your topic for better visual understanding.",
+  },
+  {
+    q: "Can I create my own unit tests?",
+    a: "Yes. You can either manually select questions or let DigiNote generate a custom unit test with balanced difficulty levels.",
+  },
+  {
+    q: "Is DigiNote free to use?",
+    a: "Yes, DigiNote offers free access to its core features — no sign-up required to get started.",
+  },
+  {
+    q: "Do I need to sign up to use DigiNote?",
+    a: "No sign-up is needed for basic use. However, creating an account lets you save notes, quizzes, and track your progress.",
+  },
+];
+
 
   const [openIndex, setOpenIndex] = useState(null);
 
