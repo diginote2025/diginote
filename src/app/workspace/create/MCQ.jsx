@@ -17,7 +17,7 @@ const MCQ = ({ onBack, selected, takeAMCQ }) => {
   const [error, setError] = useState(null);
 
   const generateMCQs = useCallback(async () => {
-    if (!topic) return;
+    
 
     setIsLoading(true);
     setError(null);
@@ -93,15 +93,10 @@ Do not include explanations, numbering, or extra formatting.`
     }
   }, []);
 
-const handleStart = () => {
-  if (!topic) {
-    setError("⚠️ Topic not found. Please reload the page.");
-    return;
-  }
-  setQuizStarted(true);
-  generateMCQs();
-};
-
+  const handleStart = () => {
+    setQuizStarted(true);
+    generateMCQs();
+  };
 
   const handleSubmit = () => {
     const current = mcqs[currentIndex];
