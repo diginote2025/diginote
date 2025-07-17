@@ -25,7 +25,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [editing, setEditing] = useState({ chapter: "", topic: "", value: "" });
   const [aiResponse, setAiResponse] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showMCQ, setShowMCQ] = useState(true);
+  const [showMCQ, setShowMCQ] = useState(false);
   const [takeTest, settakeTest] = useState(false);
   const [quizFinished, setQuizFinished] = useState(false);
   const [questions, setQuestions] = useState([]);

@@ -93,10 +93,15 @@ Do not include explanations, numbering, or extra formatting.`
     }
   }, []);
 
-  const handleStart = () => {
-    setQuizStarted(true);
-    generateMCQs();
-  };
+const handleStart = () => {
+  if (!topic) {
+    setError("⚠️ Topic not found. Please reload the page.");
+    return;
+  }
+  setQuizStarted(true);
+  generateMCQs();
+};
+
 
   const handleSubmit = () => {
     const current = mcqs[currentIndex];
