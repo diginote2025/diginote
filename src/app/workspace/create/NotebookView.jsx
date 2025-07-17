@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 
@@ -9,6 +9,7 @@ export default function NotebookView({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedResponses, setEditedResponses] = useState(savedResponses);
+  const textareaRefs = useRef({});
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
@@ -28,7 +29,23 @@ export default function NotebookView({
     setIsEditing(false);
     // Optionally, you can pass editedResponses to a parent component or save it elsewhere
   };
-  
+
+  // Auto-resize textarea function
+  const autoResize = (textarea) => {
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+  };
+
+  // Effect to resize textareas when editing mode is enabled
+  useEffect(() => {
+    if (isEditing) {
+      Object.values(textareaRefs.current).forEach(textarea => {
+        autoResize(textarea);
+      });
+    }
+  }, [isEditing]);
 
   return (
     <>
@@ -85,12 +102,19 @@ export default function NotebookView({
                 <div className="whitespace-pre-wrap text-sm">
                   {isEditing ? (
                     <textarea
-                      className="w-full p-2 border rounded h-[100vh]"
+                      ref={(el) => {
+                        if (el) {
+                          textareaRefs.current[`${chapter}-${topic}`] = el;
+                          autoResize(el);
+                        }
+                      }}
+                      className="w-full p-2 border rounded resize-none overflow-hidden"
                       value={content}
-                      onChange={(e) =>
-                        handleContentChange(chapter, topic, e.target.value)
-                      }
-                      rows={6}
+                      onChange={(e) => {
+                        handleContentChange(chapter, topic, e.target.value);
+                        autoResize(e.target);
+                      }}
+                      style={{ minHeight: '50px' }}
                     />
                   ) : (
                     <ReactMarkdown>{content}</ReactMarkdown>

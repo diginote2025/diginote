@@ -1,15 +1,19 @@
 "use client";
+
 import { ArrowLeft } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSubjectbar } from "@/redux/subjectbar";
-
 import {
   TbLayoutSidebarLeftCollapse,
   TbLayoutSidebarRightCollapse,
 } from "react-icons/tb";
 import NotebookView from "./NotebookView";
+import MCQ from "./MCQ";
+import axios from "axios";
+import { motion } from "framer-motion";
+import TakeTest from "./TakeTest";
 
 export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [hasMounted, setHasMounted] = useState(false);
@@ -22,28 +26,75 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [aiResponse, setAiResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [showMCQ, setShowMCQ] = useState(false);
+  const [takeTest, settakeTest] = useState(false);
   const [quizFinished, setQuizFinished] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [showNotebook, setShowNotebook] = useState(false);
-const [onlyDefinition, setOnlyDefinition] = useState(true);
+  const [onlyDefinition, setOnlyDefinition] = useState(true);
+  const [video, setVideo] = useState(true); 
 
-
-
-    const themeSelector = useSelector((state) => state.theme.isDark);
-
-  const dispatch = useDispatch(); // ✅ FIXED: added dispatch
+  const themeSelector = useSelector((state) => state.theme.isDark);
+  const dispatch = useDispatch();
   const isSubjectbarOpen = useSelector(
     (state) => state.subjectbar.isSubjectbarOpen
   );
   const { isDark } = useSelector((state) => state.theme);
+
   const openSubjectbar = () => {
     dispatch(toggleSubjectbar());
   };
 
+  // YouTube video fetch function
+  const fetchYouTubeVideo = async (topic) => {
+    const apiKey = "AIzaSyDnlqKMLVXtf3_JPMwZxHePYjWTwhovoJM";
+    const baseUrl = "https://www.googleapis.com/youtube/v3/search";
+    const reputableChannels = {
+      "Traversy Media": "UC29ju8bIPH5as8OGnQzwJyA",
+      "freeCodeCamp.org": "UC8butISFwT-Wl7EV0hUK0BQ",
+      "The Net Ninja": "UCW5YeuERMmlnqo4oq8vwUpg",
+      Academind: "UCSJbGtTlrDami-tDGPUV9-w",
+    };
+
+    try {
+      setLoading(true);
+      const response = await axios.get(baseUrl, {
+        params: {
+          part: "snippet",
+          q: `${topic} tutorial`,
+          type: "video",
+          maxResults: 10,
+          order: "relevance",
+          key: apiKey,
+        },
+      });
+      const videos = response.data.items;
+      if (!videos || videos.length === 0) {
+        setVideo(true);
+        return;
+      }
+
+      const reputableVideos = videos.filter((video) =>
+        Object.values(reputableChannels).includes(video.snippet.channelId)
+      );
+      const bestVideo =
+        reputableVideos.length > 0 ? reputableVideos[0] : videos[0];
+
+      setVideo({
+        title: bestVideo.snippet.title,
+        url: `https://www.youtube.com/watch?v=${bestVideo.id.videoId}`,
+        channel: bestVideo.snippet.channelTitle,
+      });
+    } catch (error) {
+      console.error("Error fetching YouTube video:", error.message);
+      setVideo(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load for current subject
-  // In AiStudyTool.jsx
   useEffect(() => {
     setHasMounted(true);
     const allTopics = JSON.parse(localStorage.getItem("chapterTopics") || "{}");
@@ -51,7 +102,6 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
       localStorage.getItem("savedResponses") || "{}"
     );
 
-    // Initialize chapterTopics and savedResponses for the subject if not present
     if (!allTopics[selectedSubject]) allTopics[selectedSubject] = {};
     if (!allResponses[selectedSubject]) allResponses[selectedSubject] = {};
 
@@ -59,11 +109,13 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
     setSavedResponses(allResponses[selectedSubject] || {});
     setSelected({ chapter: "", topic: "" });
     setAiResponse("");
-    setChapter(""); // Reset chapter input
-    setTopic(""); // Reset topic input
-    setShowMCQ(false); // Reset quiz state
-    setShowNotebook(false); // Reset notebook state
-    localStorage.setItem("-chapterTopics", JSON.stringify(allTopics));
+    setChapter("");
+    setTopic("");
+    setShowMCQ(false);
+    settakeTest(false);
+    setShowNotebook(false);
+    setVideo(true); // Reset video state
+    localStorage.setItem("chapterTopics", JSON.stringify(allTopics));
     localStorage.setItem("savedResponses", JSON.stringify(allResponses));
   }, [selectedSubject]);
 
@@ -75,7 +127,7 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
     localStorage.setItem("chapterTopics", JSON.stringify(allTopics));
   }, [chapterTopics, hasMounted, selectedSubject]);
 
-  // Save AI responses per subject automatically inside fetch
+  // Fetch AI response and YouTube video when topic is selected
   useEffect(() => {
     if (!selected.chapter || !selected.topic) return;
 
@@ -101,9 +153,7 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
                 {
                   parts: [
                     {
-                 text: `give standerd definition of topic "${selected.topic}" from the chapter 
-                      "${selected.chapter}" `,
-
+                      text: `Give standard definition of topic "${selected.topic}" from the chapter "${selected.chapter}"`,
                     },
                   ],
                 },
@@ -129,6 +179,13 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
         );
         allResponses[selectedSubject] = updated;
         localStorage.setItem("savedResponses", JSON.stringify(allResponses));
+
+        // Fetch YouTube video only if onlyDefinition is true
+        if (video) {
+          await fetchYouTubeVideo(selected.topic);
+        } else {
+          setVideo(true);
+        }
       } catch (err) {
         console.error(err);
         setAiResponse(
@@ -136,8 +193,8 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
             ? "❌ Request timed out."
             : `❌ Error: ${err.message}`
         );
+        setVideo(true);
       } finally {
-        clearTimeout(timeoutId);
         setLoading(false);
       }
     };
@@ -146,7 +203,6 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
   }, [selected.chapter, selected.topic]);
 
   // Add topic
-  // In AiStudyTool.jsx
   const handleAddTopic = (e) => {
     e.preventDefault();
     if (!chapter.trim() || !topic.trim()) return;
@@ -156,8 +212,8 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
       if (!curr[chapter].includes(topic)) curr[chapter].push(topic);
       return curr;
     });
-    setChapter(""); // Clear chapter input
-    setTopic(""); // Clear topic input
+    setChapter("");
+    setTopic("");
   };
 
   // Delete topic
@@ -184,6 +240,7 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
     if (selected.chapter === chapName && selected.topic === topicName) {
       setSelected({ chapter: "", topic: "" });
       setAiResponse("");
+      setVideo(true);
     }
   };
 
@@ -203,7 +260,7 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
       return curr;
     });
 
-    const updated = { ...savedResponses };
+    constupdates = { ...savedResponses };
     if (updated[chap] && updated[chap][oldT]) {
       updated[chap][newT] = updated[chap][oldT];
       delete updated[chap][oldT];
@@ -222,7 +279,7 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
     setEditing({ chapter: "", topic: "", value: "" });
   };
 
-  // Quiz logic — same as before
+  // Quiz logic
   const startQuiz = () => {
     const mock = [
       {
@@ -241,6 +298,8 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
     setScore(0);
     setQuizFinished(false);
     setShowMCQ(true);
+
+    setVideo(true); // Clear video when starting quiz
   };
   const handleAnswer = (i) => {
     if (i === questions[current].correct) setScore((s) => s + 1);
@@ -272,7 +331,15 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
     }
   };
 
-  if (!hasMounted) return null;
+  if (!hasMounted) return true;
+
+  const takeATest = () => {
+    settakeTest((prev) => !prev);
+  };
+
+  const takeAMCQ = () => {
+    setShowMCQ((prev) => !prev);
+  };
 
   return (
     <div className="flex flex-row h-[90vh] ">
@@ -285,7 +352,10 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
           >
             <ArrowLeft size={20} />
           </button>
-          <button className="text-2xl hidden max-lg:block" onClick={openSubjectbar}>
+          <button
+            className="text-2xl hidden max-lg:block"
+            onClick={openSubjectbar}
+          >
             {isSubjectbarOpen ? (
               <TbLayoutSidebarLeftCollapse />
             ) : (
@@ -306,18 +376,7 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
             </h2>
             {!quizFinished ? (
               <>
-                <p className="text-lg font-medium">
-                  {questions[current].question}
-                </p>
-                {questions[current].options.map((opt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleAnswer(i)}
-                    className="block w-full bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
-                  >
-                    {opt}
-                  </button>
-                ))}
+                <MCQ selected={selected} takeAMCQ={takeAMCQ} />
               </>
             ) : (
               <>
@@ -332,6 +391,10 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
                 </button>
               </>
             )}
+          </>
+        ) : takeTest ? (
+          <>
+            <TakeTest selected={selected} takeATest={takeATest} />
           </>
         ) : selected.topic ? (
           <>
@@ -351,20 +414,49 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
             ) : aiResponse ? (
               <div className=" prose whitespace-pre-wrap custom-scrollbar">
                 <ReactMarkdown>{aiResponse}</ReactMarkdown>
+               
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4"
+                  >
+                    <p className="text-lg font-semibold">Recommended Video:</p>
+                    <a
+                      href={video.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline hover:text-blue-300 transition-colors"
+                    >
+                      {video.title}
+                    </a>
+                    <p className="text-gray-400">by {video.channel}</p>
+                  </motion.div>
+           
               </div>
             ) : (
               <p className="text-red-500">No response available.</p>
             )}
-            {/* <button
-              onClick={startQuiz}
-              className="mt-4 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
-            >
-              🧪 Practice MCQs
-            </button> */}
+            <div className="mt-6 flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={startQuiz}
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-white py-3 px-6 rounded-xl shadow transition-all duration-200"
+              >
+                🧪 Practice MCQs
+              </button>
+
+              <button
+                onClick={takeATest}
+                className="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white py-3 px-6 rounded-xl shadow transition-all duration-200"
+              >
+                📝 Take a Test
+              </button>
+            </div>
           </>
         ) : (
           <p className="text-gray-600 text-lg">
-             Please select a chapter and topic from the sidebar to view its AI-generated explanation. 👉
+            Please select a chapter and topic from the sidebar to view its
+            AI-generated explanation. 👉
           </p>
         )}
       </div>
@@ -418,24 +510,22 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
           >
             Add Topic
           </button>
- {/* <div className="flex items-center justify-between mt-4 px-1">
-  <span className="text-sm font-medium text-gray-600">Only Definition</span>
-  <button
-    type="button"
-    onClick={() => setOnlyDefinition((prev) => !prev)}
-    className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
-      onlyDefinition ? "bg-green-500" : "bg-gray-300"
-    }`}
-  >
-    <div
-      className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
-        onlyDefinition ? "translate-x-6" : "translate-x-0"
-      }`}
-    />
-  </button>
-</div> */}
-
-
+          {/* <div className="flex items-center justify-between mt-4 px-1">
+            <span className="text-sm font-medium text-gray-600">Only Definition</span>
+            <button
+              type="button"
+              onClick={() => setOnlyDefinition((prev) => !prev)}
+              className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
+                onlyDefinition ? "bg-green-500" : "bg-gray-300"
+              }`}
+            >
+              <div
+                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
+                  onlyDefinition ? "translate-x-6" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div> */}
         </form>
 
         <div className="space-y-6">
@@ -501,7 +591,10 @@ const [onlyDefinition, setOnlyDefinition] = useState(true);
         </div>
 
         <button
-          onClick={() => {setShowNotebook(true); openSubjectbar()}}
+          onClick={() => {
+            setShowNotebook(true);
+            openSubjectbar();
+          }}
           className="mt-8 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg"
         >
           Open Notebook
