@@ -4,6 +4,8 @@ import asidebarReducer from "./asidebarSlice"; // ✅ Import
 import subjectReducer from "./subjectSlice";
 import todoReducer from "./test";
 import subjectbarReducer from "./subjectbar"
+import notebookReducer from "./notebookSlice";
+import studyToolReducer from './studyToolSlice';
 export const store = configureStore({
   reducer: {
     theme: themeReducer,
@@ -11,5 +13,7 @@ export const store = configureStore({
     subjectbar: subjectbarReducer,
     subject: subjectReducer,
     todotasks: todoReducer,
+      notebook: notebookReducer,
+      studyTool: studyToolReducer,
   },
 });

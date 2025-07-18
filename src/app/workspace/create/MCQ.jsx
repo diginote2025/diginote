@@ -121,12 +121,12 @@ Do not include explanations, numbering, or extra formatting.`
 
   return (
     <div className="p-6 max-w-2xl mx-auto overflow-y-scroll custom-scrollbar h-[43rem] max-xl:mt-[4rem]">
-      <button
+      {/* <button
         onClick={takeAMCQ}
         className="mb-4 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300 text-sm"
       >
         🔙 Back to Chat
-      </button>
+      </button> */}
 
       {!quizStarted ? (
         <div className="text-center mt-10">

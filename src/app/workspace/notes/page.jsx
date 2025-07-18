@@ -1,5 +1,3 @@
-// FIXED NotesPage Component - Key Changes
-
 "use client";
 
 import React, { useEffect } from 'react';
@@ -17,48 +15,59 @@ const NotesPage = () => {
   const { isDark } = useSelector((state) => state.theme);
   const downloadPDF = useSelector((state) => state.studyTool.downloadPDF);
 
-  // FIXED: Load saved responses from localStorage on component mount
-  useEffect(() => {
-    const loadSavedResponses = () => {
-      try {
-        // Always use study_tool_responses as the primary source
-        const savedData = localStorage.getItem('study_tool_responses');
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          // Only update if there's actual data
-          if (parsedData && Object.keys(parsedData).length > 0) {
-            dispatch(setSavedResponses(parsedData));
-            console.log('Loaded saved responses from localStorage:', parsedData);
-          } else {
-            // If no data, clear the Redux state
-            dispatch(setSavedResponses({}));
-            console.log('No saved responses found, cleared state');
-          }
-        } else {
-          // If no localStorage data, clear the Redux state
-          dispatch(setSavedResponses({}));
-          console.log('No localStorage data found, cleared state');
-        }
-      } catch (error) {
-        console.error('Error loading saved responses from localStorage:', error);
-        dispatch(setSavedResponses({}));
-      }
-    };
-
-    loadSavedResponses();
-  }, [dispatch]);
-
-  // FIXED: Save responses to localStorage whenever savedResponses changes
-  useEffect(() => {
+  // Load saved responses from localStorage on component mount
+useEffect(() => {
+  const loadSavedResponses = () => {
     try {
+      // Try to get the current subject's data first
+      const currentSubject = localStorage.getItem('currentSubject'); // You might need to set this in AiStudyTool
+      const allResponses = JSON.parse(localStorage.getItem('savedResponses') || '{}');
+      
+      let savedData;
+      if (currentSubject && allResponses[currentSubject]) {
+        savedData = allResponses[currentSubject];
+      } else {
+        // Fallback to the old key for backward compatibility
+        savedData = localStorage.getItem('study_tool_responses');
+        if (savedData) {
+          savedData = JSON.parse(savedData);
+        }
+      }
+      
+      if (savedData && Object.keys(savedData).length > 0) {
+        dispatch(setSavedResponses(savedData));
+        console.log('Loaded saved responses from localStorage:', savedData);
+      }
+    } catch (error) {
+      console.error('Error loading saved responses from localStorage:', error);
+    }
+  };
+
+  loadSavedResponses();
+}, [dispatch]);
+  // Save responses to localStorage whenever savedResponses changes
+useEffect(() => {
+  if (Object.keys(savedResponses).length > 0) {
+    try {
+      // Update both keys to maintain compatibility
       localStorage.setItem('study_tool_responses', JSON.stringify(savedResponses));
+      
+      // Also update the main savedResponses structure
+      const currentSubject = localStorage.getItem('currentSubject');
+      if (currentSubject) {
+        const allResponses = JSON.parse(localStorage.getItem('savedResponses') || '{}');
+        allResponses[currentSubject] = savedResponses;
+        localStorage.setItem('savedResponses', JSON.stringify(allResponses));
+      }
+      
       console.log('Saved responses to localStorage:', savedResponses);
     } catch (error) {
       console.error('Error saving responses to localStorage:', error);
     }
-  }, [savedResponses]);
+  }
+}, [savedResponses]);
 
-  // FIXED: Download PDF function with better error handling
+  // Download PDF function with Redux integration
   const handleDownloadPDF = async () => {
     const element = document.getElementById("notebook-content");
     if (!element) {
@@ -75,7 +84,6 @@ const NotesPage = () => {
         timestamp: new Date().toISOString()
       }));
 
-      // Dynamic import to avoid SSR issues
       const html2pdf = (await import("html2pdf.js")).default;
       const filename = `Study_Notes_${new Date().toISOString().split('T')[0]}.pdf`;
       
@@ -83,17 +91,8 @@ const NotesPage = () => {
         margin: 0.5,
         filename: filename,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true,
-          allowTaint: true,
-          logging: false
-        },
-        jsPDF: { 
-          unit: "in", 
-          format: "letter", 
-          orientation: "portrait" 
-        },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
       };
 
       await html2pdf().set(opt).from(element).save();
@@ -132,42 +131,67 @@ const NotesPage = () => {
     }
   };
 
-  // FIXED: Clear all saved data function
-  const handleClearAllData = () => {
-    if (confirm('Are you sure you want to clear all saved study notes? This action cannot be undone.')) {
-      try {
-        localStorage.removeItem('study_tool_responses');
-        dispatch(setSavedResponses({}));
-        console.log('Cleared all saved responses');
-        alert('All study notes have been cleared.');
-      } catch (error) {
-        console.error('Error clearing localStorage:', error);
-        alert('Error clearing data. Please try again.');
+  // Clear all saved data function
+const handleClearAllData = () => {
+  if (confirm('Are you sure you want to clear all saved study notes? This action cannot be undone.')) {
+    try {
+      localStorage.removeItem('study_tool_responses');
+      
+      const currentSubject = localStorage.getItem('currentSubject');
+      if (currentSubject) {
+        const allResponses = JSON.parse(localStorage.getItem('savedResponses') || '{}');
+        delete allResponses[currentSubject];
+        localStorage.setItem('savedResponses', JSON.stringify(allResponses));
       }
+      
+      dispatch(setSavedResponses({}));
+      console.log('Cleared all saved responses');
+      alert('All study notes have been cleared.');
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+      alert('Error clearing data. Please try again.');
     }
-  };
+  }
+};
 
-  // FIXED: Delete specific chapter function
-  const handleDeleteChapter = (chapterToDelete) => {
-    if (confirm(`Are you sure you want to delete the "${chapterToDelete}" chapter? This action cannot be undone.`)) {
-      try {
-        // Create a deep copy to avoid mutation issues
-        const updatedResponses = JSON.parse(JSON.stringify(savedResponses));
-        delete updatedResponses[chapterToDelete];
-        
-        dispatch(setSavedResponses(updatedResponses));
-        
-        // Update localStorage
+  // Delete specific chapter function
+ const handleDeleteChapter = (chapterToDelete) => {
+  if (confirm(`Are you sure you want to delete the "${chapterToDelete}" chapter? This action cannot be undone.`)) {
+    try {
+      const updatedResponses = { ...savedResponses };
+      delete updatedResponses[chapterToDelete];
+      
+      dispatch(setSavedResponses(updatedResponses));
+      
+      // Update both localStorage keys
+      if (Object.keys(updatedResponses).length > 0) {
         localStorage.setItem('study_tool_responses', JSON.stringify(updatedResponses));
         
-        console.log(`Deleted chapter: ${chapterToDelete}`);
-        alert(`Chapter "${chapterToDelete}" has been deleted.`);
-      } catch (error) {
-        console.error('Error deleting chapter:', error);
-        alert('Error deleting chapter. Please try again.');
+        const currentSubject = localStorage.getItem('currentSubject');
+        if (currentSubject) {
+          const allResponses = JSON.parse(localStorage.getItem('savedResponses') || '{}');
+          allResponses[currentSubject] = updatedResponses;
+          localStorage.setItem('savedResponses', JSON.stringify(allResponses));
+        }
+      } else {
+        localStorage.removeItem('study_tool_responses');
+        
+        const currentSubject = localStorage.getItem('currentSubject');
+        if (currentSubject) {
+          const allResponses = JSON.parse(localStorage.getItem('savedResponses') || '{}');
+          delete allResponses[currentSubject];
+          localStorage.setItem('savedResponses', JSON.stringify(allResponses));
+        }
       }
+      
+      console.log(`Deleted chapter: ${chapterToDelete}`);
+      alert(`Chapter "${chapterToDelete}" has been deleted.`);
+    } catch (error) {
+      console.error('Error deleting chapter:', error);
+      alert('Error deleting chapter. Please try again.');
     }
-  };
+  }
+};
 
   // Get button text and styling based on download state
   const getDownloadButtonProps = () => {
@@ -210,7 +234,7 @@ const NotesPage = () => {
   const buttonProps = getDownloadButtonProps();
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <div className={` ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -248,16 +272,14 @@ const NotesPage = () => {
             )}
             
             {/* Download PDF Button */}
-            {Object.keys(savedResponses).length > 0 && (
-              <button
-                onClick={handleDownloadPDF}
-                className={buttonProps.className}
-                disabled={buttonProps.disabled}
-              >
-                <Download size={20} />
-                {buttonProps.text}
-              </button>
-            )}
+            <button
+              onClick={handleDownloadPDF}
+              className={buttonProps.className}
+              disabled={buttonProps.disabled}
+            >
+              <Download size={20} />
+              {buttonProps.text}
+            </button>
           </div>
         </div>
 
@@ -285,7 +307,7 @@ const NotesPage = () => {
 
         {/* Data Status Info */}
         {Object.keys(savedResponses).length > 0 && (
-          <div className={`mb-4 p-3 rounded-lg ${
+          <div className={`mb-4 p-3 rounded-lg  ${
             isDark ? 'bg-gray-800 border border-gray-700' : 'bg-blue-50 border border-blue-200'
           }`}>
             <div className="flex items-center gap-2 text-sm">
@@ -317,9 +339,9 @@ const NotesPage = () => {
               </p>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-8 custom-scrollbar h-[40vh]">
               {Object.entries(savedResponses).map(([chapter, topics]) => (
-                <div key={chapter} className="chapter-section">
+                <div key={chapter} className="chapter-section ">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
                       <div className="h-1 w-8 bg-blue-600 rounded"></div>
@@ -342,7 +364,7 @@ const NotesPage = () => {
                     </button>
                   </div>
                   
-                  <div className="grid gap-6">
+                  <div className="grid gap-6 ">
                     {Object.entries(topics).map(([topic, content]) => (
                       <div 
                         key={topic} 

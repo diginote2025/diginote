@@ -83,12 +83,13 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
         <h2 className="text-2xl font-bold text-blue-700">
           🧪 Test on: {selected.topic}
         </h2>
+       
         <button
-          onClick={takeATest}
-          className="text-sm text-gray-600 hover:underline"
-        >
-          ⬅ Back
-        </button>
+      onClick={takeATest}
+        className="mb-4 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300 text-sm"
+      >
+        🔙 Back to Chat
+      </button>
       </div>
 
       {loading ? (
