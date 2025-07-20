@@ -617,26 +617,27 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
               ) : null}
             </div>
 
-            <div className="flex gap-4 mb-6">
-              <button
-                onClick={startQuiz}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl transition-colors"
-              >
-                🧪 Practice MCQs
-              </button>
-              <button
-                onClick={takeATest}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
-              >
-                📝 Take a Test
-              </button>
-              <button
-                onClick={downloadPDF}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
-              >
-                📄 Download PDF
-              </button>
-            </div>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+  <button
+    onClick={startQuiz}
+    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl transition-colors"
+  >
+    🧪 Practice MCQs
+  </button>
+  <button
+    onClick={takeATest}
+    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
+  >
+    📝 Take a Test
+  </button>
+  <button
+    onClick={downloadPDF}
+    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
+  >
+    📄 Download PDF
+  </button>
+</div>
+
           </>
         ) : (
           <p className="text-gray-600 text-lg">
