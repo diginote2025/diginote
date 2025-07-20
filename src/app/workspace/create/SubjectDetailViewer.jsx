@@ -759,12 +759,12 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
           ))}
         </div>
 
-        <button
+        {/* <button
           onClick={openNotebook}
           className="mt-8 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg"
         >
           📓 Save Notebook
-        </button>
+        </button> */}
         {/* <button
           onClick={clearAllSubjectData}
           className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg"
