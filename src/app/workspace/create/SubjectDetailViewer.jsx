@@ -36,11 +36,12 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
-  const [onlyDefinition, setOnlyDefinition] = useState(true);
+  const [onlyDefinition, setOnlyDefinition] = useState(false);
+  const [includeExamples, setIncludeExamples] = useState(false); // New state for examples toggle
   const [video, setVideo] = useState(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [apiError, setApiError] = useState("");
-  
+
   const dispatch = useDispatch();
   const router = useRouter();
   const isSubjectbarOpen = useSelector((state) => state.subjectbar.isSubjectbarOpen);
@@ -55,7 +56,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   // YouTube video fetch function with better error handling
   const fetchYouTubeVideo = useCallback(async (topic) => {
     const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-    
+
     if (!apiKey) {
       console.error("YouTube API key is not configured.");
       setVideo({ error: "YouTube API key is missing. Please add NEXT_PUBLIC_YOUTUBE_API_KEY to your environment variables." });
@@ -73,7 +74,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
     try {
       setVideoLoading(true);
       setVideo(null);
-      
+
       const response = await axios.get(baseUrl, {
         params: {
           part: "snippet",
@@ -83,13 +84,13 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
           order: "relevance",
           key: apiKey,
           videoDuration: "medium",
-          videoDefinition: "high"
+          videoDefinition: "high",
         },
-        timeout: 10000
+        timeout: 10000,
       });
 
       const videos = response.data.items || [];
-      
+
       if (videos.length === 0) {
         console.warn(`No videos found for topic: ${topic}`);
         setVideo({ error: `No educational videos found for "${topic}". Try a different search term.` });
@@ -104,19 +105,19 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
         const title = video.snippet.title.toLowerCase();
         const description = video.snippet.description.toLowerCase();
         return (
-          title.includes('tutorial') ||
-          title.includes('explained') ||
-          title.includes('guide') ||
-          title.includes('learn') ||
-          description.includes('tutorial') ||
-          description.includes('education')
+          title.includes("tutorial") ||
+          title.includes("explained") ||
+          title.includes("guide") ||
+          title.includes("learn") ||
+          description.includes("tutorial") ||
+          description.includes("education")
         );
       });
 
-      const bestVideo = reputableVideos.length > 0 
-        ? reputableVideos[0] 
-        : qualityVideos.length > 0 
-        ? qualityVideos[0] 
+      const bestVideo = reputableVideos.length > 0
+        ? reputableVideos[0]
+        : qualityVideos.length > 0
+        ? qualityVideos[0]
         : videos[0];
 
       setVideo({
@@ -124,19 +125,18 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
         url: `https://www.youtube.com/watch?v=${bestVideo.id.videoId}`,
         channel: bestVideo.snippet.channelTitle,
         thumbnail: bestVideo.snippet.thumbnails?.medium?.url || bestVideo.snippet.thumbnails?.default?.url,
-        description: bestVideo.snippet.description?.slice(0, 100) + "..." || ""
+        description: bestVideo.snippet.description?.slice(0, 100) + "..." || "",
       });
 
       console.log("Successfully fetched video:", bestVideo.snippet.title);
-      
     } catch (error) {
       console.error("Error fetching YouTube video:", error);
-      
+
       if (error.response?.status === 403) {
         setVideo({ error: "YouTube API quota exceeded or invalid API key. Please check your API key and quota limits." });
       } else if (error.response?.status === 400) {
         setVideo({ error: "Invalid search parameters. Please try a different topic." });
-      } else if (error.code === 'ECONNABORTED') {
+      } else if (error.code === "ECONNABORTED") {
         setVideo({ error: "Request timed out. Please check your internet connection and try again." });
       } else {
         setVideo({ error: `Failed to fetch video: ${error.message}` });
@@ -213,7 +213,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   // Fetch AI response with better error handling
   const fetchAIResponse = useCallback(async (chapter, topic) => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    
+
     if (!apiKey) {
       setAiResponse("❌ Gemini API key is not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your environment variables.");
       setApiError("Missing API key");
@@ -222,27 +222,29 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
 
     setLoading(true);
     setApiError("");
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-      const prompt = `Please provide a comprehensive explanation of the topic "${topic}" from the chapter "${chapter}". 
-      Include:
-      1. A clear definition
-      2. Key concepts and principles
-      3. Real-world applications or examples
-      4. Important points to remember
-      
-      Format the response in a clear, educational manner suitable for study purposes.`;
+      // Modified prompt based on onlyDefinition and includeExamples toggles
+      let prompt = "";
+      if (onlyDefinition) {
+        prompt = `Please provide a concise definition of the topic "${topic}" from the chapter "${chapter}". Keep it brief and to the point, focusing only on what it is and its key characteristics.`;
+      } else {
+        prompt = `Please provide a comprehensive explanation of the topic "${topic}" from the chapter "${chapter}".`;
+        if (includeExamples) {
+          prompt += ` Include practical examples to illustrate the concept, ensuring the examples are relevant to the topic and chapter.`;
+        }
+      }
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
           },
           body: JSON.stringify({
             contents: [
@@ -258,7 +260,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
               temperature: 0.7,
               topK: 40,
               topP: 0.95,
-              maxOutputTokens: 1024,
+              maxOutputTokens: onlyDefinition ? 256 : 1024,
             },
           }),
           signal: controller.signal,
@@ -266,20 +268,20 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
       );
 
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
         throw new Error("Invalid response format from Gemini API");
       }
 
       const text = data.candidates[0].content.parts[0].text || "No response generated.";
-      
+
       if (text.includes("I can't") || text.includes("I cannot")) {
         throw new Error("AI declined to provide information");
       }
@@ -298,12 +300,11 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
       localStorage.setItem("study_tool_responses", JSON.stringify(updated));
 
       console.log("AI response fetched successfully");
-
     } catch (error) {
       console.error("Error fetching AI response:", error);
-      
+
       let errorMessage = "❌ Failed to get AI response. ";
-      
+
       if (error.name === "AbortError") {
         errorMessage += "Request timed out. Please try again.";
       } else if (error.message.includes("403")) {
@@ -315,20 +316,20 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
       } else {
         errorMessage += error.message || "Unknown error occurred.";
       }
-      
+
       setAiResponse(errorMessage);
       setApiError(error.message);
     } finally {
       setLoading(false);
     }
-  }, [savedResponses, dispatch, selectedSubject]);
+  }, [savedResponses, dispatch, selectedSubject, onlyDefinition, includeExamples]);
 
   // Combined effect for fetching AI response and YouTube video
   useEffect(() => {
     if (!selected.chapter || !selected.topic) return;
 
     const existingResponse = savedResponses[selected.chapter]?.[selected.topic];
-    
+
     if (existingResponse) {
       setAiResponse(existingResponse);
       console.log("Using cached AI response");
@@ -337,7 +338,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
     }
 
     fetchYouTubeVideo(selected.topic);
-    
   }, [selected.chapter, selected.topic, savedResponses, fetchAIResponse, fetchYouTubeVideo]);
 
   const handleAddTopic = (e) => {
@@ -517,21 +517,21 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
             )}
           </button>
         </div>
-        
+
         {showNotebook ? (
           <NotebookView downloadPDF={downloadPDF} />
         ) : showMCQ ? (
           <>
             <div className="flex justify-between">
               <h2 className="text-xl font-bold text-green-700 mb-4">
-              📝 Quiz: {selected.topic}
-            </h2>
-             <button
-        onClick={takeAMCQ}
-        className="mb-4 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300 text-sm"
-      >
-        🔙 Back to Chat
-      </button>
+                📝 Quiz: {selected.topic}
+              </h2>
+              <button
+                onClick={takeAMCQ}
+                className="mb-4 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300 text-sm"
+              >
+                🔙 Back to Chat
+              </button>
             </div>
             {!quizFinished ? (
               <MCQ selected={selected} takeAMCQ={takeAMCQ} />
@@ -572,8 +572,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                 </div>
               ) : aiResponse ? (
                 <div id="notebook-content" className="prose max-w-none whitespace-pre-wrap">
-      <ReactMarkdown>{aiResponse}</ReactMarkdown>
-    </div>
+                  <ReactMarkdown>{aiResponse}</ReactMarkdown>
+                </div>
               ) : (
                 <p className="text-red-500">No AI response available.</p>
               )}
@@ -618,26 +618,25 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-  <button
-    onClick={startQuiz}
-    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl transition-colors"
-  >
-    🧪 Practice MCQs
-  </button>
-  <button
-    onClick={takeATest}
-    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
-  >
-    📝 Take a Test
-  </button>
-  <button
-    onClick={downloadPDF}
-    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
-  >
-    📄 Download PDF
-  </button>
-</div>
-
+              <button
+                onClick={startQuiz}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl transition-colors"
+              >
+                🧪 Practice MCQs
+              </button>
+              <button
+                onClick={takeATest}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
+              >
+                📝 Take a Test
+              </button>
+              <button
+                onClick={downloadPDF}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
+              >
+                📄 Download PDF
+              </button>
+            </div>
           </>
         ) : (
           <p className="text-gray-600 text-lg">
@@ -677,7 +676,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
           </h2>
         </div>
 
-        <form onSubmit={handleAddTopic} className="space-y-3 mb-6">
+        <form onSubmit={handleAddTopic} className="space-y-3 mb-4">
           <input
             value={chapter}
             onChange={(e) => setChapter(e.target.value)}
@@ -697,6 +696,62 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
             Add Topic
           </button>
         </form>
+
+        {/* Only Definition Toggle */}
+        <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                📖 Only Definition
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Get concise definitions instead of detailed explanations
+              </p>
+            </div>
+            <button
+              onClick={() => setOnlyDefinition(!onlyDefinition)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                onlyDefinition 
+                  ? "bg-blue-600" 
+                  : "bg-gray-300 dark:bg-gray-600"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  onlyDefinition ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Include Examples Toggle */}
+        {/* <div className="mb-6 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                💡 Include Examples
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Include practical examples with the explanation
+              </p>
+            </div>
+            <button
+              onClick={() => setIncludeExamples(!includeExamples)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                includeExamples 
+                  ? "bg-blue-600" 
+                  : "bg-gray-300 dark:bg-gray-600"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  includeExamples ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        </div> */}
 
         <div className="space-y-6">
           {Object.entries(chapterTopics).map(([chap, topics]) => (
@@ -749,7 +804,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                           onClick={() => handleDeleteTopic(chap, t)}
                           className="text-red-500"
                         >
-                          ❌
+                          🗑️
                         </button>
                       </>
                     )}
@@ -760,18 +815,37 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
           ))}
         </div>
 
-        {/* <button
-          onClick={openNotebook}
-          className="mt-8 w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg"
-        >
-          📓 Save Notebook
-        </button> */}
-        {/* <button
-          onClick={clearAllSubjectData}
-          className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg"
-        >
-          🗑️ Clear All Data
-        </button> */}
+        {/* Clear All Data Button */}
+        {/* <div className="mt-6">
+          <button
+            onClick={clearAllSubjectData}
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors"
+          >
+            🗑️ Clear All Subject Data
+          </button>
+        </div> */}
+
+        {/* Debug Button for Development */}
+        {/* {process.env.NODE_ENV === "development" && (
+          <div className="mt-4">
+            <button
+              onClick={debugLocalStorage}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors"
+            >
+              🛠️ Debug LocalStorage
+            </button>
+          </div>
+        )} */}
+
+        {/* Notebook Button */}
+        {/* <div className="mt-4">
+          <button
+            onClick={() => dispatch(setShowNotebook(!showNotebook))}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition-colors"
+          >
+            📓 {showNotebook ? "Back to Study Tool" : "View Notebook"}
+          </button>
+        </div> */}
       </div>
     </div>
   );
