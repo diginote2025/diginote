@@ -1,216 +1,165 @@
-// FIXED NotesPage Component - Key Changes
-
 "use client";
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, Download, BookOpen } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { setDownloadPDF, setSavedResponses, updateSavedResponses } from '@/redux/studyToolSlice';
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { ArrowLeft, Download, BookOpen } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import {
+  setDownloadPDF,
+  setSavedResponses,
+} from "@/redux/studyToolSlice";
 
 const NotesPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
-  
+
   const savedResponses = useSelector((state) => state.studyTool.savedResponses);
   const { isDark } = useSelector((state) => state.theme);
   const downloadPDF = useSelector((state) => state.studyTool.downloadPDF);
 
-  // FIXED: Load saved responses from localStorage on component mount
-  useEffect(() => {
-    const loadSavedResponses = () => {
-      try {
-        // Always use study_tool_responses as the primary source
-        const savedData = localStorage.getItem('study_tool_responses');
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          // Only update if there's actual data
-          if (parsedData && Object.keys(parsedData).length > 0) {
-            dispatch(setSavedResponses(parsedData));
-            console.log('Loaded saved responses from localStorage:', parsedData);
-          } else {
-            // If no data, clear the Redux state
-            dispatch(setSavedResponses({}));
-            console.log('No saved responses found, cleared state');
-          }
-        } else {
-          // If no localStorage data, clear the Redux state
-          dispatch(setSavedResponses({}));
-          console.log('No localStorage data found, cleared state');
-        }
-      } catch (error) {
-        console.error('Error loading saved responses from localStorage:', error);
-        dispatch(setSavedResponses({}));
-      }
-    };
-
-    loadSavedResponses();
-  }, [dispatch]);
-
-  // FIXED: Save responses to localStorage whenever savedResponses changes
+  // Load Redux from localStorage ONCE on mount
   useEffect(() => {
     try {
-      localStorage.setItem('study_tool_responses', JSON.stringify(savedResponses));
-      console.log('Saved responses to localStorage:', savedResponses);
-    } catch (error) {
-      console.error('Error saving responses to localStorage:', error);
+      const ls = localStorage.getItem("study_tool_responses");
+      if (ls) {
+        const parsed = JSON.parse(ls);
+        dispatch(setSavedResponses(parsed || {}));
+      } else {
+        dispatch(setSavedResponses({}));
+      }
+    } catch (e) {
+      dispatch(setSavedResponses({}));
     }
+    // eslint-disable-next-line
+  }, []);
+
+  // Save Redux to localStorage on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem("study_tool_responses", JSON.stringify(savedResponses));
+    } catch {}
   }, [savedResponses]);
 
-  // FIXED: Download PDF function with better error handling
+  // DEBUG: Shows what will get printed in PDF
+  const handleTestContentOutput = () => {
+    const el = document.getElementById("notebook-content");
+    if (el) {
+      // DevTool console
+      // eslint-disable-next-line
+      console.log("PDF will export this HTML:\n", el.innerHTML);
+      alert(
+        "Check your dev console for the HTML being exported to PDF.\nIf blank: rendering is broken."
+      );
+    } else {
+      alert("notebook-content DIV missing!");
+    }
+  };
+
+  // PDF Handler
   const handleDownloadPDF = async () => {
     const element = document.getElementById("notebook-content");
     if (!element) {
-      console.error("Notebook content element not found!");
-      alert("Cannot generate PDF: Notebook content is not available.");
+      alert("Notebook content is not available for PDF.");
       return;
     }
-
     try {
-      // Set loading state
-      dispatch(setDownloadPDF({
-        status: 'loading',
-        filename: null,
-        timestamp: new Date().toISOString()
-      }));
-
-      // Dynamic import to avoid SSR issues
-      const html2pdf = (await import("html2pdf.js")).default;
-      const filename = `Study_Notes_${new Date().toISOString().split('T')[0]}.pdf`;
-      
+      dispatch(setDownloadPDF({ status: "loading", filename: null, timestamp: new Date().toISOString() }));
+      const html2pdfModule = await import("html2pdf.js");
+      const html2pdf = html2pdfModule.default || html2pdfModule;
+      const filename = `Study_Notes_${new Date().toISOString().split("T")[0]}.pdf`;
       const opt = {
         margin: 0.5,
-        filename: filename,
+        filename,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true,
-          allowTaint: true,
-          logging: false
-        },
-        jsPDF: { 
-          unit: "in", 
-          format: "letter", 
-          orientation: "portrait" 
-        },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
       };
-
       await html2pdf().set(opt).from(element).save();
-      
-      // Set success state
-      dispatch(setDownloadPDF({
-        status: 'success',
-        filename: filename,
-        timestamp: new Date().toISOString()
-      }));
-
-      console.log("PDF generation successful");
-      
-      // Reset state after 3 seconds
-      setTimeout(() => {
-        dispatch(setDownloadPDF(null));
-      }, 3000);
-
+      dispatch(setDownloadPDF({ status: "success", filename, timestamp: new Date().toISOString() }));
+      setTimeout(() => dispatch(setDownloadPDF(null)), 3000);
     } catch (error) {
-      console.error("Error generating PDF:", error);
-      
-      // Set error state
-      dispatch(setDownloadPDF({
-        status: 'error',
-        filename: null,
-        timestamp: new Date().toISOString(),
-        error: error.message
-      }));
-
-      alert("Failed to generate PDF. Please try again.");
-      
-      // Reset state after 3 seconds
-      setTimeout(() => {
-        dispatch(setDownloadPDF(null));
-      }, 3000);
+      dispatch(
+        setDownloadPDF({
+          status: "error",
+          filename: null,
+          timestamp: new Date().toISOString(),
+          error: error.message,
+        })
+      );
+      alert("PDF generation failed. See console for details.");
+      setTimeout(() => dispatch(setDownloadPDF(null)), 3000);
     }
   };
 
-  // FIXED: Clear all saved data function
-  const handleClearAllData = () => {
-    if (confirm('Are you sure you want to clear all saved study notes? This action cannot be undone.')) {
-      try {
-        localStorage.removeItem('study_tool_responses');
-        dispatch(setSavedResponses({}));
-        console.log('Cleared all saved responses');
-        alert('All study notes have been cleared.');
-      } catch (error) {
-        console.error('Error clearing localStorage:', error);
-        alert('Error clearing data. Please try again.');
-      }
-    }
-  };
-
-  // FIXED: Delete specific chapter function
-  const handleDeleteChapter = (chapterToDelete) => {
-    if (confirm(`Are you sure you want to delete the "${chapterToDelete}" chapter? This action cannot be undone.`)) {
-      try {
-        // Create a deep copy to avoid mutation issues
-        const updatedResponses = JSON.parse(JSON.stringify(savedResponses));
-        delete updatedResponses[chapterToDelete];
-        
-        dispatch(setSavedResponses(updatedResponses));
-        
-        // Update localStorage
-        localStorage.setItem('study_tool_responses', JSON.stringify(updatedResponses));
-        
-        console.log(`Deleted chapter: ${chapterToDelete}`);
-        alert(`Chapter "${chapterToDelete}" has been deleted.`);
-      } catch (error) {
-        console.error('Error deleting chapter:', error);
-        alert('Error deleting chapter. Please try again.');
-      }
-    }
-  };
-
-  // Get button text and styling based on download state
+  // Utility: Download button logic
   const getDownloadButtonProps = () => {
-    if (!downloadPDF) {
+    if (!downloadPDF)
       return {
-        text: 'Download PDF',
-        className: 'flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md transition-colors',
-        disabled: false
+        text: "Download PDF",
+        className: "flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md transition-colors",
+        disabled: false,
       };
-    }
-
     switch (downloadPDF.status) {
-      case 'loading':
+      case "loading":
         return {
-          text: 'Generating PDF...',
-          className: 'flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md cursor-not-allowed',
-          disabled: true
+          text: "Generating PDF...",
+          className: "flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md cursor-not-allowed",
+          disabled: true,
         };
-      case 'success':
+      case "success":
         return {
-          text: 'PDF Downloaded!',
-          className: 'flex items-center gap-2 bg-green-800 text-white px-6 py-3 rounded-lg shadow-md cursor-not-allowed',
-          disabled: true
+          text: "PDF Downloaded!",
+          className: "flex items-center gap-2 bg-green-800 text-white px-6 py-3 rounded-lg shadow-md cursor-not-allowed",
+          disabled: true,
         };
-      case 'error':
+      case "error":
         return {
-          text: 'Download Failed',
-          className: 'flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg shadow-md cursor-not-allowed',
-          disabled: true
+          text: "Download Failed",
+          className: "flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg shadow-md cursor-not-allowed",
+          disabled: true,
         };
       default:
         return {
-          text: 'Download PDF',
-          className: 'flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md transition-colors',
-          disabled: false
+          text: "Download PDF",
+          className: "flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-md transition-colors",
+          disabled: false,
         };
     }
   };
 
   const buttonProps = getDownloadButtonProps();
 
+  // Remove chapter
+  const handleDeleteChapter = (chapter) => {
+    if (confirm(`Delete "${chapter}" chapter? This action cannot be undone.`)) {
+      try {
+        const updated = { ...savedResponses };
+        delete updated[chapter];
+        dispatch(setSavedResponses(updated));
+        localStorage.setItem("study_tool_responses", JSON.stringify(updated));
+        alert(`Chapter "${chapter}" deleted.`);
+      } catch {
+        alert("Error deleting chapter. Please try again.");
+      }
+    }
+  };
+
+  // Remove ALL notes
+  const handleClearAllData = () => {
+    if (confirm("Clear ALL study notes? This action cannot be undone.")) {
+      try {
+        localStorage.removeItem("study_tool_responses");
+        dispatch(setSavedResponses({}));
+        alert("All study notes cleared.");
+      } catch {
+        alert("Error clearing data. Please try again.");
+      }
+    }
+  };
+
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <div className={`min-h-screen ${isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -218,9 +167,9 @@ const NotesPage = () => {
             <button
               onClick={() => router.back()}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                isDark 
-                  ? 'bg-gray-800 hover:bg-gray-700 text-white' 
-                  : 'bg-white hover:bg-gray-100 text-gray-700'
+                isDark
+                  ? "bg-gray-800 hover:bg-gray-700 text-white"
+                  : "bg-white hover:bg-gray-100 text-gray-700"
               } shadow-md`}
             >
               <ArrowLeft size={20} />
@@ -231,23 +180,17 @@ const NotesPage = () => {
               <h1 className="text-3xl font-bold">📓 Study Notebook</h1>
             </div>
           </div>
-          
           <div className="flex items-center gap-3">
-            {/* Clear Data Button */}
             {Object.keys(savedResponses).length > 0 && (
               <button
                 onClick={handleClearAllData}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  isDark 
-                    ? 'bg-red-800 hover:bg-red-700 text-white' 
-                    : 'bg-red-600 hover:bg-red-700 text-white'
+                  isDark ? "bg-red-800 hover:bg-red-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"
                 } shadow-md`}
               >
                 🗑️ Clear All
               </button>
             )}
-            
-            {/* Download PDF Button */}
             {Object.keys(savedResponses).length > 0 && (
               <button
                 onClick={handleDownloadPDF}
@@ -258,51 +201,71 @@ const NotesPage = () => {
                 {buttonProps.text}
               </button>
             )}
+            {/* Dev/debug button — remove in production */}
+            {process.env.NODE_ENV !== "production" && (
+              <button
+                onClick={handleTestContentOutput}
+                className="ml-1 bg-gray-200 border border-gray-400 rounded px-3 py-2 text-xs text-gray-700"
+                title="Dev: Log HTML for PDF"
+              >
+                🕵️‍♂️ Test Content Output
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Download Status Display */}
+        {/* Download status info */}
         {downloadPDF && (
-          <div className={`mb-4 p-3 rounded-lg ${
-            downloadPDF.status === 'success' ? 'bg-green-100 border border-green-300 text-green-800' :
-            downloadPDF.status === 'error' ? 'bg-red-100 border border-red-300 text-red-800' :
-            'bg-blue-100 border border-blue-300 text-blue-800'
-          }`}>
-            {downloadPDF.status === 'loading' && (
+          <div
+            className={`mb-4 p-3 rounded-lg ${
+              downloadPDF.status === "success"
+                ? "bg-green-100 border border-green-300 text-green-800"
+                : downloadPDF.status === "error"
+                ? "bg-red-100 border border-red-300 text-red-800"
+                : "bg-blue-100 border border-blue-300 text-blue-800"
+            }`}
+          >
+            {downloadPDF.status === "loading" && (
               <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
                 <span>Generating PDF...</span>
               </div>
             )}
-            {downloadPDF.status === 'success' && (
+            {downloadPDF.status === "success" && (
               <span>✅ PDF "{downloadPDF.filename}" downloaded successfully!</span>
             )}
-            {downloadPDF.status === 'error' && (
-              <span>❌ Error: {downloadPDF.error || 'Failed to generate PDF'}</span>
+            {downloadPDF.status === "error" && (
+              <span>❌ Error: {downloadPDF.error || "Failed to generate PDF"}</span>
             )}
           </div>
         )}
 
-        {/* Data Status Info */}
+        {/* Info on chapters count */}
         {Object.keys(savedResponses).length > 0 && (
-          <div className={`mb-4 p-3 rounded-lg ${
-            isDark ? 'bg-gray-800 border border-gray-700' : 'bg-blue-50 border border-blue-200'
-          }`}>
+          <div
+            className={`mb-4 p-3 rounded-lg ${
+              isDark ? "bg-gray-800 border border-gray-700" : "bg-blue-50 border border-blue-200"
+            }`}
+          >
             <div className="flex items-center gap-2 text-sm">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span className={isDark ? 'text-gray-300' : 'text-blue-700'}>
-                💾 Data saved locally - {Object.keys(savedResponses).length} chapter(s) with {
-                  Object.values(savedResponses).reduce((total, topics) => total + Object.keys(topics).length, 0)
-                } topic(s)
+              <span className="w-2 h-2 bg-green-500 rounded-full" />
+              <span className={isDark ? "text-gray-300" : "text-blue-700"}>
+                💾 Data saved locally — {Object.keys(savedResponses).length} chapter(s) with{" "}
+                {Object.values(savedResponses).reduce(
+                  (total, topics) => total + Object.keys(topics).length,
+                  0
+                )}{" "}
+                topic(s)
               </span>
             </div>
           </div>
         )}
 
-        {/* Content */}
-        <div 
-          id="notebook-content" 
-          className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-8`}
+        {/* The MAIN exportable content */}
+        <div
+          id="notebook-content"
+          className={`${isDark ? "bg-gray-800" : "bg-white"} rounded-xl shadow-lg p-8`}
+          style={{ minHeight: 300 }}
         >
           {Object.keys(savedResponses).length === 0 ? (
             <div className="text-center py-12">
@@ -322,39 +285,36 @@ const NotesPage = () => {
                 <div key={chapter} className="chapter-section">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="h-1 w-8 bg-blue-600 rounded"></div>
+                      <div className="h-1 w-8 bg-blue-600 rounded" />
                       <h2 className="text-2xl font-bold uppercase text-blue-600 tracking-wide">
                         {chapter}
                       </h2>
                     </div>
-                    
-                    {/* Delete Chapter Button */}
                     <button
                       onClick={() => handleDeleteChapter(chapter)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                        isDark 
-                          ? 'bg-red-800 hover:bg-red-700 text-white' 
-                          : 'bg-red-600 hover:bg-red-700 text-white'
+                        isDark
+                          ? "bg-red-800 hover:bg-red-700 text-white"
+                          : "bg-red-600 hover:bg-red-700 text-white"
                       } shadow-md text-sm`}
                       title={`Delete ${chapter} chapter`}
                     >
                       🗑️ Delete Chapter
                     </button>
                   </div>
-                  
                   <div className="grid gap-6">
                     {Object.entries(topics).map(([topic, content]) => (
-                      <div 
-                        key={topic} 
+                      <div
+                        key={topic}
                         className={`topic-section ${
-                          isDark ? 'bg-gray-700' : 'bg-gray-50'
+                          isDark ? "bg-gray-700" : "bg-gray-50"
                         } rounded-lg p-6 border-l-4 border-blue-500 shadow-sm`}
                       >
                         <h3 className="text-xl font-semibold text-blue-600 mb-4 flex items-center gap-2">
-                          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                          <span className="w-2 h-2 bg-blue-600 rounded-full" />
                           {topic}
                         </h3>
-                        <div className={`prose max-w-none ${isDark ? 'prose-invert' : ''}`}>
+                        <div className={`prose max-w-none ${isDark ? "prose-invert" : ""}`}>
                           <ReactMarkdown>{content}</ReactMarkdown>
                         </div>
                       </div>
