@@ -571,11 +571,9 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                   <p>Generating AI explanation...</p>
                 </div>
               ) : aiResponse ? (
-                <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap">
-                    <ReactMarkdown>{aiResponse}</ReactMarkdown>
-                  </div>
-                </div>
+                <div id="notebook-content" className="prose max-w-none whitespace-pre-wrap">
+      <ReactMarkdown>{aiResponse}</ReactMarkdown>
+    </div>
               ) : (
                 <p className="text-red-500">No AI response available.</p>
               )}
