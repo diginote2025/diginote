@@ -765,12 +765,12 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
         >
           📓 Save Notebook
         </button>
-        <button
+        {/* <button
           onClick={clearAllSubjectData}
           className="mt-4 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg"
         >
           🗑️ Clear All Data
-        </button>
+        </button> */}
       </div>
     </div>
   );
