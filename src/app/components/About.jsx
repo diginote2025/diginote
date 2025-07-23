@@ -41,7 +41,7 @@ export default function About() {
         <div className="w-full md:w-1/2 text-center md:text-left">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 flex justify-center md:justify-start items-center gap-2">
             <Sparkles className="text-blue-500 w-6 h-6" />
-            Why DigiNote?
+            Why Use DigiNote?
           </h2>
           <p className="text-gray-700 text-lg mb-4">
             DigiNote is your all-in-one AI-powered study assistant. Whether you're preparing for exams or reviewing a topic, DigiNote helps you study smarter with features designed specifically for students.
