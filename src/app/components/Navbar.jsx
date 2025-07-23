@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FiMenu } from "react-icons/fi";
 import { FaSun } from "react-icons/fa";
 import { IoIosMoon } from "react-icons/io";
+import Image from "next/image";
 
 export default function Navbar({ theme, themeHandle }) {
   return (
@@ -17,7 +18,7 @@ export default function Navbar({ theme, themeHandle }) {
             <FiMenu size={30} />
           </div> */}
           <a href="/" className="text-2xl">
-            DigiNote
+            <Image src={'/images/homepage/navbar/logo.png'} alt="diginote logo" width={1000} height={1000} className="w-36"/>
           </a>
         </div>
         {/* <div className="hidden">

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import { FaPencil } from "react-icons/fa6";
 
 export default function Hero() {
   const fadeInUp = {
@@ -41,8 +42,8 @@ export default function Hero() {
           className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-snug"
         >
           Study Smarter with <span className="text-blue-600">DigiNote</span>{" "}
-          
-          Your <span className="text-green-500">AI-Powered Notes</span> & Test Companion
+          Your <span className="text-green-500">AI-Powered Notes</span> & Test
+          Companion
         </motion.h1>
 
         {/* Subtext */}
@@ -53,8 +54,8 @@ export default function Hero() {
           variants={fadeInUp}
           className="mt-6 text-gray-700 text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
         >
-          Instantly generate chapter-wise notes, practice MCQs, watch curated YouTube videos, 
-          and take custom unit tests – all in one place.
+          Instantly generate chapter-wise notes, practice MCQs, watch curated
+          YouTube videos, and take custom unit tests – all in one place.
         </motion.p>
 
         {/* CTA Button */}
@@ -63,21 +64,31 @@ export default function Hero() {
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
-          className="mt-10 flex justify-center"
+          className="mt-10 flex justify-center  "
         >
           <Link href="/workspace/create" passHref>
             <button
-              className="flex items-center border border-blue-500/30 gap-2 px-6 py-3 bg-blue-600/10 text-gray-800 font-semibold
-               text-base rounded-full shadow-lg hover:border-blue-500/80 transition duration-300 focus:outline-none 
-               focus:ring-4 focus:ring-blue-300"
-              aria-label="Create your digital notebook"
+              className="group flex items-center relative justify-center gap-2 p-1 pl-4 text-gray-900 hover:text-black 
+    bg-gradient-to-r from-green-500/30 to-blue-500/30 
+    hover:from-green-500/50 hover:to-blue-500/50 
+    font-semibold text-base rounded-full border border-blue-500/40
+    shadow-md hover:shadow-xl hover:scale-105 hover:border-blue-500/80 
+    transition-all duration-300 
+    focus:outline-none focus:ring-4 focus:ring-blue-300/50 active:scale-95"
+              role="button"
+              aria-label="Create a new digital notebook"
             >
-              <Plus size={18} />
-              Make Digital Notebook
+              Create Digital Notebook
+              {/* Pencil Icon with group-hover animation */}
+              <div
+                className="bg-purple-500 rounded-full text-gray-200 p-2 transform transition-transform duration-300 
+      group-hover:rotate-45 "
+              >
+                <FaPencil size={28} />
+              </div>
             </button>
           </Link>
         </motion.div>
-     
       </div>
     </section>
   );
