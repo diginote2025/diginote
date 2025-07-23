@@ -29,10 +29,10 @@ export default function About() {
         {/* Image Left */}
         <div className="flex-shrink-0 w-full md:w-1/2">
           <Image
-            src="/images/homepage/hero.png"
+            src={"/images/homepage/hero.png"}
             alt="DigiNote Hero"
-            width={630}
-            height={475}
+            width={1000}
+            height={1000}
             className="w-full h-auto"
           />
         </div>

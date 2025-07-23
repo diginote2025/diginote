@@ -99,7 +99,7 @@ export default function AddSubjectName() {
           <div className="flex flex-col items-center ">
             <div className="mb-4">
               <Image
-                src="/images/box.png"
+                src={"/images/workspace/create/box.png"}
                 alt="no notes"
                 width={100}
                 height={100}
