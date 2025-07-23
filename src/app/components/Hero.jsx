@@ -27,7 +27,7 @@ export default function Hero() {
         alt="Abstract background with educational elements"
         width={1920}
         height={1080}
-        className="absolute inset-0 w-full h-full object-cover opacity-40 blur-2xl scale-105"
+        className="absolute inset-0 w-full h-full object-cover opacity-40 max-lg:opacity-100 blur-2xl scale-105"
         priority
       />
 
@@ -72,7 +72,7 @@ export default function Hero() {
     bg-gradient-to-r from-green-500/30 to-blue-500/30 
     hover:from-green-500/50 hover:to-blue-500/50 
     font-semibold text-base rounded-full border border-blue-500/40
-    shadow-md hover:shadow-xl hover:scale-105 hover:border-blue-500/80 
+    shadow-md hover:shadow-xl hover:scale-105 hover:border-blue-800 
     transition-all duration-300 
     focus:outline-none focus:ring-4 focus:ring-blue-300/50 active:scale-95"
               role="button"
