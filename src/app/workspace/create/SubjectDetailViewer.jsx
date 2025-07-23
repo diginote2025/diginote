@@ -854,7 +854,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                        >
                          {topicName}
                        </span>
-                       <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                       <div className=" flex gap-1">
                          <button
                            onClick={() => startEdit(chapterName, topicName)}
                            className="text-blue-600 hover:text-blue-800 text-xs"
