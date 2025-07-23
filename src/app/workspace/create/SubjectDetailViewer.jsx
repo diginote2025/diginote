@@ -37,7 +37,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [onlyDefinition, setOnlyDefinition] = useState(false);
-  const [includeExamples, setIncludeExamples] = useState(false); // New state for examples toggle
+  const [includeExamples, setIncludeExamples] = useState(false);
   const [video, setVideo] = useState(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -210,8 +210,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
     localStorage.setItem("chapterTopics", JSON.stringify(allTopics));
   }, [chapterTopics, hasMounted, selectedSubject]);
 
-  // Fetch AI response with better error handling
-  const fetchAIResponse = useCallback(async (chapter, topic) => {
+  // Fixed fetchAIResponse function with better object handling
+  const fetchAIResponse = useCallback(async (chapter, topic, forceRefresh = false) => {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -220,8 +220,16 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
       return;
     }
 
+    // Check if we already have a cached response and don't need to force refresh
+    if (!forceRefresh && savedResponses[chapter]?.[topic]) {
+      console.log("Using cached response for:", chapter, topic);
+      setAiResponse(savedResponses[chapter][topic]);
+      return;
+    }
+
     setLoading(true);
     setApiError("");
+    setAiResponse(""); // Clear previous response
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -238,6 +246,24 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
         }
       }
 
+      const requestBody = {
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: onlyDefinition ? 256 : 1024,
+        },
+      };
+
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
         {
@@ -246,23 +272,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
             "Content-Type": "application/json",
             "Accept": "application/json",
           },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: prompt,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: onlyDefinition ? 256 : 1024,
-            },
-          }),
+          body: JSON.stringify(requestBody),
           signal: controller.signal,
         }
       );
@@ -270,11 +280,21 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          console.warn("Could not parse error response as JSON");
+        }
         throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
       }
 
-      const data = await response.json();
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error("Invalid JSON response from API");
+      }
 
       if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
         throw new Error("Invalid response format from Gemini API");
@@ -288,18 +308,26 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
 
       setAiResponse(text);
 
-      const updated = { ...savedResponses };
-      if (!updated[chapter]) updated[chapter] = {};
-      updated[chapter][topic] = text;
+      // Create a completely new object to avoid extensibility issues
+      const currentResponses = JSON.parse(JSON.stringify(savedResponses));
+      if (!currentResponses[chapter]) {
+        currentResponses[chapter] = {};
+      }
+      currentResponses[chapter][topic] = text;
 
-      dispatch(setSavedResponses(updated));
+      dispatch(setSavedResponses(currentResponses));
 
+      // Update localStorage with fresh object
       const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
-      allResponses[selectedSubject] = updated;
+      if (!allResponses[selectedSubject]) {
+        allResponses[selectedSubject] = {};
+      }
+      allResponses[selectedSubject] = currentResponses;
+      
       localStorage.setItem("savedResponses", JSON.stringify(allResponses));
-      localStorage.setItem("study_tool_responses", JSON.stringify(updated));
+      localStorage.setItem("study_tool_responses", JSON.stringify(currentResponses));
 
-      console.log("AI response fetched successfully");
+      console.log("AI response fetched successfully for:", chapter, topic);
     } catch (error) {
       console.error("Error fetching AI response:", error);
 
@@ -324,31 +352,56 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
     }
   }, [savedResponses, dispatch, selectedSubject, onlyDefinition, includeExamples]);
 
-  // Combined effect for fetching AI response and YouTube video
+  // Effect for fetching AI response when selected topic changes
   useEffect(() => {
-    if (!selected.chapter || !selected.topic) return;
-
-    const existingResponse = savedResponses[selected.chapter]?.[selected.topic];
-
-    if (existingResponse) {
-      setAiResponse(existingResponse);
-      console.log("Using cached AI response");
-    } else {
-      fetchAIResponse(selected.chapter, selected.topic);
+    if (!selected.chapter || !selected.topic) {
+      setAiResponse("");
+      return;
     }
 
+    console.log("Selected changed:", selected.chapter, selected.topic);
+    
+    // Check if we have a cached response
+    const existingResponse = savedResponses[selected.chapter]?.[selected.topic];
+    
+    if (existingResponse) {
+      console.log("Found cached response");
+      setAiResponse(existingResponse);
+    } else {
+      console.log("No cached response, fetching new one");
+      fetchAIResponse(selected.chapter, selected.topic);
+    }
+  }, [selected.chapter, selected.topic, fetchAIResponse]);
+
+  // Separate effect for YouTube video
+  useEffect(() => {
+    if (!selected.topic) {
+      setVideo(null);
+      return;
+    }
+    
     fetchYouTubeVideo(selected.topic);
-  }, [selected.chapter, selected.topic, savedResponses, fetchAIResponse, fetchYouTubeVideo]);
+  }, [selected.topic, fetchYouTubeVideo]);
+
+  // Effect to refetch AI response when settings change
+  useEffect(() => {
+    if (selected.chapter && selected.topic) {
+      console.log("Settings changed, refetching AI response");
+      fetchAIResponse(selected.chapter, selected.topic, true); // Force refresh
+    }
+  }, [onlyDefinition, includeExamples]);
 
   const handleAddTopic = (e) => {
     e.preventDefault();
     if (!chapter.trim() || !topic.trim()) return;
+    
     setChapterTopics((prev) => {
       const curr = { ...prev };
       if (!curr[chapter]) curr[chapter] = [];
       if (!curr[chapter].includes(topic)) curr[chapter].push(topic);
       return curr;
     });
+    
     setChapter("");
     setTopic("");
   };
@@ -363,7 +416,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
       return curr;
     });
 
-    const updated = { ...savedResponses };
+    // Create a fresh copy to avoid extensibility issues
+    const updated = JSON.parse(JSON.stringify(savedResponses));
     if (updated[chapName]) {
       delete updated[chapName][topicName];
       if (Object.keys(updated[chapName]).length === 0) delete updated[chapName];
@@ -397,7 +451,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
       return curr;
     });
 
-    const updated = { ...savedResponses };
+    // Create fresh copy to avoid extensibility issues
+    const updated = JSON.parse(JSON.stringify(savedResponses));
     if (updated[chap] && updated[chap][oldT]) {
       updated[chap][newT] = updated[chap][oldT];
       delete updated[chap][oldT];
@@ -479,7 +534,9 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
     console.log("savedResponses:", localStorage.getItem("savedResponses"));
     console.log("currentSubject:", localStorage.getItem("currentSubject"));
     console.log("Redux savedResponses:", savedResponses);
+    console.log("Selected:", selected);
     console.log("API Error:", apiError);
+    console.log("AI Response length:", aiResponse.length);
     console.log("========================");
   };
 
@@ -575,7 +632,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                   <ReactMarkdown>{aiResponse}</ReactMarkdown>
                 </div>
               ) : (
-                <p className="text-red-500">No AI response available.</p>
+                <p className="text-gray-500">Click on a topic to get AI explanation...</p>
               )}
             </div>
 
@@ -712,141 +769,135 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
               onClick={() => setOnlyDefinition(!onlyDefinition)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                 onlyDefinition 
-                  ? "bg-blue-600" 
-                  : "bg-gray-300 dark:bg-gray-600"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  onlyDefinition ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
-        </div>
+                  ? "bg-blue-600" : "bg-gray-300"
+             }`}
+           >
+             <span
+               className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                 onlyDefinition ? "translate-x-5" : "translate-x-1"
+               }`}
+             />
+           </button>
+         </div>
+       </div>
 
-        {/* Include Examples Toggle */}
-        {/* <div className="mb-6 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                💡 Include Examples
-              </label>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Include practical examples with the explanation
-              </p>
-            </div>
-            <button
-              onClick={() => setIncludeExamples(!includeExamples)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                includeExamples 
-                  ? "bg-blue-600" 
-                  : "bg-gray-300 dark:bg-gray-600"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  includeExamples ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
-          </div>
-        </div> */}
+       {/* Include Examples Toggle */}
+       {!onlyDefinition && (
+         <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+           <div className="flex items-center justify-between">
+             <div>
+               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                 💡 Include Examples
+               </label>
+               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                 Add practical examples to explanations
+               </p>
+             </div>
+             <button
+               onClick={() => setIncludeExamples(!includeExamples)}
+               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                 includeExamples 
+                   ? "bg-blue-600" : "bg-gray-300"
+               }`}
+             >
+               <span
+                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                   includeExamples ? "translate-x-5" : "translate-x-1"
+                 }`}
+               />
+             </button>
+           </div>
+         </div>
+       )}
 
-        <div className="space-y-6">
-          {Object.entries(chapterTopics).map(([chap, topics]) => (
-            <div key={chap}>
-              <h3 className="uppercase font-semibold mb-2">{chap}</h3>
-              <ul className="ml-3 space-y-1">
-                {topics.map((t, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    {editing.chapter === chap && editing.topic === t ? (
-                      <>
-                        <input
-                          value={editing.value}
-                          onChange={(e) =>
-                            setEditing((ed) => ({
-                              ...ed,
-                              value: e.target.value,
-                            }))
-                          }
-                          className="px-2 w-[13vw] max-lg:w-[30vw] py-1 border rounded"
-                        />
-                        <button onClick={saveEdit} className="text-green-600">
-                          ✅
-                        </button>
-                        <button
-                          onClick={() =>
-                            setEditing({ chapter: "", topic: "", value: "" })
-                          }
-                        >
-                          ❌
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <span
-                          onClick={() => {
-                            setSelected({ chapter: chap, topic: t });
-                            openSubjectbar();
-                          }}
-                          className="flex-1 cursor-pointer hover:text-blue-600"
-                        >
-                          {t}
-                        </span>
-                        <button
-                          onClick={() => startEdit(chap, t)}
-                          className="text-yellow-500"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTopic(chap, t)}
-                          className="text-red-500"
-                        >
-                          🗑️
-                        </button>
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+       <div className="space-y-4">
+         {Object.entries(chapterTopics).map(([chapterName, topics]) => (
+           <div key={chapterName} className="border-b pb-3">
+             <h3 className="font-semibold text-blue-600 mb-2">{chapterName}</h3>
+             <div className="space-y-1">
+               {topics.map((topicName) => (
+                 <div
+                   key={topicName}
+                   className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                     selected.chapter === chapterName && selected.topic === topicName
+                       ? "bg-blue-100 dark:bg-blue-900/30"
+                       : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                   }`}
+                 >
+                   {editing.chapter === chapterName && editing.topic === topicName ? (
+                     <div className="flex-1 flex gap-2">
+                       <input
+                         value={editing.value}
+                         onChange={(e) => setEditing(prev => ({ ...prev, value: e.target.value }))}
+                         className="flex-1 px-1 py-1 border rounded text-sm"
+                         onKeyPress={(e) => e.key === "Enter" && saveEdit()}
+                         autoFocus
+                       />
+                       <button
+                         onClick={saveEdit}
+                         className="text-green-600 hover:text-green-800 text-xs"
+                       >
+                         ✓
+                       </button>
+                       <button
+                         onClick={() => setEditing({ chapter: "", topic: "", value: "" })}
+                         className="text-red-600 hover:text-red-800 text-xs"
+                       >
+                         ✗
+                       </button>
+                     </div>
+                   ) : (
+                     <>
+                       <span
+                         onClick={() => setSelected({ chapter: chapterName, topic: topicName })}
+                         className="flex-1 text-sm text-gray-700 dark:text-gray-300"
+                       >
+                         {topicName}
+                       </span>
+                       <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                         <button
+                           onClick={() => startEdit(chapterName, topicName)}
+                           className="text-blue-600 hover:text-blue-800 text-xs"
+                         >
+                           ✏️
+                         </button>
+                         <button
+                           onClick={() => handleDeleteTopic(chapterName, topicName)}
+                           className="text-red-600 hover:text-red-800 text-xs"
+                         >
+                           🗑️
+                         </button>
+                       </div>
+                     </>
+                   )}
+                 </div>
+               ))}
+             </div>
+           </div>
+         ))}
+       </div>
 
-        {/* Clear All Data Button */}
-        {/* <div className="mt-6">
-          <button
-            onClick={clearAllSubjectData}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors"
-          >
-            🗑️ Clear All Subject Data
-          </button>
-        </div> */}
-
-        {/* Debug Button for Development */}
-        {/* {process.env.NODE_ENV === "development" && (
-          <div className="mt-4">
-            <button
-              onClick={debugLocalStorage}
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors"
-            >
-              🛠️ Debug LocalStorage
-            </button>
-          </div>
-        )} */}
-
-        {/* Notebook Button */}
-        {/* <div className="mt-4">
-          <button
-            onClick={() => dispatch(setShowNotebook(!showNotebook))}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg transition-colors"
-          >
-            📓 {showNotebook ? "Back to Study Tool" : "View Notebook"}
-          </button>
-        </div> */}
-      </div>
-    </div>
-  );
+       <div className="mt-6 space-y-2">
+         <button
+           onClick={openNotebook}
+           className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm"
+         >
+           📔 Open Notebook
+         </button>
+         <button
+           onClick={clearAllSubjectData}
+           className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm"
+         >
+           🗑️ Clear All Data
+         </button>
+         <button
+           onClick={debugLocalStorage}
+           className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm"
+         >
+           🐛 Debug Storage
+         </button>
+       </div>
+     </div>
+   </div>
+ );
 }
