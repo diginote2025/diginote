@@ -101,8 +101,8 @@ export default function AddSubjectName() {
               <Image
                 src={"/images/workspace/create/box.png"}
                 alt="no notes"
-                width={100}
-                height={100}
+                width={1000} 
+                height={1000}
               />
             </div>
             <p className="mb-4">Oops, no notes saved yet.</p>
