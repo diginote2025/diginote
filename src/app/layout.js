@@ -10,14 +10,14 @@ export const metadata = {
     "DigiNote is an AI-powered notes maker for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
   keywords:
     "DigiNote, AI notes maker, student notes, MCQ tests, YouTube chapter videos, unit tests, AI study tool, digital learning",
-  metadataBase: new URL("https://aiguru.vercel.app"),
+  metadataBase: new URL("https://diginote.in"),
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="canonical" href="https://aiguru.vercel.app/" />
+        <link rel="canonical" href="https://diginote.in/" />
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={geist.className}>
