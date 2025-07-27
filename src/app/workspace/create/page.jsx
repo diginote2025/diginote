@@ -105,7 +105,7 @@ export default function AddSubjectName() {
                 height={100}
               />
             </div>
-            <p className="mb-4">Oops, no notes saved yet.</p>
+            <p className="mb-4">Your digital notebook is empty</p>
             <button
               onClick={subjecthandle}
               className="px-22 py-4 rounded-lg text-3xl border border-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
