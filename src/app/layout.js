@@ -5,11 +5,11 @@ import Script from "next/script";
 const geist = Geist({ subsets: ["latin"], weight: ["400"] });
 
 export const metadata = {
-  title: "DigiNote – AI Notes Maker | MCQs, Chapter Videos & Tests",
+  title: "DigiNote – Best AI Notebook Generator for Students",
   description:
-    "DigiNote is an AI-powered notes maker for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
+    "DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
   keywords:
-    "DigiNote, AI notes maker, student notes, MCQ tests, YouTube chapter videos, unit tests, AI study tool, digital learning",
+    "diginote, AI notes maker, student notes, MCQ tests, youtube video, unit tests, AI study tool, digital learning",
   metadataBase: new URL("https://diginote.in"),
 };
 
@@ -24,6 +24,14 @@ export default function RootLayout({ children }) {
         <link rel="canonical" href="https://diginote.in/" />
         <link rel="icon" href="/favicon.ico" />
         <title>{metadata.title}</title>
+
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content={metadata.title} />
+        <meta property="og:description" content={metadata.description} />
+        <meta property="og:url" content="https://diginote.in/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://diginote.in/og-image.png" />
+        <meta property="og:site_name" content="DigiNote" />
       </head>
       <body className={geist.className}>
         <Script
