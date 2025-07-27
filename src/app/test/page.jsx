@@ -1,405 +1,321 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Home, 
-  Plus, 
-  BookOpen, 
-  Search, 
-  Edit3, 
-  Trash2, 
-  Save, 
-  FolderPlus, 
-  Book, 
-  Calendar,
-  Clock,
-  Star,
-  Archive,
-  Settings
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { Home, Plus, BookOpen, ChevronLeft, Edit3, Trash2, Search, Moon, Sun, Settings, Save, Eye, Code, Monitor } from 'lucide-react';
 
-export default function StudyNote() {
-  const [subjects, setSubjects] = useState([
-    { id: 1, name: 'Mathematics', color: 'bg-blue-500', topics: [] },
-    { id: 2, name: 'Physics', color: 'bg-green-500', topics: [] },
-    { id: 3, name: 'Chemistry', color: 'bg-purple-500', topics: [] }
-  ]);
-  
-  const [selectedSubject, setSelectedSubject] = useState(null);
-  const [selectedTopic, setSelectedTopic] = useState(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [newSubjectName, setNewSubjectName] = useState('');
-  const [newTopicName, setNewTopicName] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+export default function EnhancedDigiNote() {
+  const [darkMode, setDarkMode] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeView, setActiveView] = useState('edit');
+  const [chapterName, setChapterName] = useState('');
+  const [topicTitle, setTopicTitle] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
-  const subjectColors = [
-    'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 
-    'bg-yellow-500', 'bg-indigo-500', 'bg-pink-500', 'bg-teal-500'
+  const notes = [
+    { id: 1, title: 'html', subject: 'HTML', lastModified: '2 hours ago', color: 'bg-blue-500' },
+    { id: 2, title: 'css-basics', subject: 'CSS', lastModified: '1 day ago', color: 'bg-green-500' },
+    { id: 3, title: 'javascript-fundamentals', subject: 'JavaScript', lastModified: '3 days ago', color: 'bg-yellow-500' }
   ];
 
-  const addSubject = () => {
-    if (newSubjectName.trim()) {
-      const newSubject = {
-        id: Date.now(),
-        name: newSubjectName,
-        color: subjectColors[subjects.length % subjectColors.length],
-        topics: []
-      };
-      setSubjects([...subjects, newSubject]);
-      setNewSubjectName('');
-      setIsCreating(false);
-    }
-  };
-
-  const addTopic = () => {
-    if (newTopicName.trim() && selectedSubject) {
-      const newTopic = {
-        id: Date.now(),
-        title: newTopicName,
-        content: '',
-        createdAt: new Date().toLocaleDateString(),
-        lastModified: new Date().toLocaleString(),
-        starred: false
-      };
-      
-      setSubjects(subjects.map(subject => 
-        subject.id === selectedSubject.id 
-          ? { ...subject, topics: [...subject.topics, newTopic] }
-          : subject
-      ));
-      setNewTopicName('');
-    }
-  };
-
-  const toggleStar = (topicId) => {
-    setSubjects(subjects.map(subject => 
-      subject.id === selectedSubject.id
-        ? {
-            ...subject,
-            topics: subject.topics.map(topic =>
-              topic.id === topicId ? { ...topic, starred: !topic.starred } : topic
-            )
-          }
-        : subject
-    ));
-  };
-
-  const deleteTopic = (topicId) => {
-    setSubjects(subjects.map(subject => 
-      subject.id === selectedSubject.id
-        ? { ...subject, topics: subject.topics.filter(topic => topic.id !== topicId) }
-        : subject
-    ));
-    if (selectedTopic && selectedTopic.id === topicId) {
-      setSelectedTopic(null);
-    }
-  };
-
-  const updateTopicContent = (content) => {
-    if (selectedTopic) {
-      setSubjects(subjects.map(subject => 
-        subject.id === selectedSubject.id
-          ? {
-              ...subject,
-              topics: subject.topics.map(topic =>
-                topic.id === selectedTopic.id 
-                  ? { ...topic, content, lastModified: new Date().toLocaleString() }
-                  : topic
-              )
-            }
-          : subject
-      ));
-    }
-  };
-
-  const filteredTopics = selectedSubject 
-    ? selectedSubject.topics.filter(topic => 
-        topic.title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : [];
-
-  const currentSubject = subjects.find(s => s.id === selectedSubject?.id) || selectedSubject;
-  const currentTopic = currentSubject?.topics.find(t => t.id === selectedTopic?.id) || selectedTopic;
+  const toggleTheme = () => setDarkMode(!darkMode);
+  
+  const themeClasses = darkMode 
+    ? 'bg-slate-900 text-white' 
+    : 'bg-gray-50 text-gray-900';
+  
+  const cardClasses = darkMode 
+    ? 'bg-slate-800 border-slate-700' 
+    : 'bg-white border-gray-200';
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80' : 'w-16'} transition-all duration-300 bg-slate-800/50 backdrop-blur-sm border-r border-slate-700/50 flex flex-col`}>
+    <div className={`min-h-screen flex ${themeClasses} transition-colors duration-300`}>
+      {/* Enhanced Sidebar */}
+      <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 ${cardClasses} border-r flex flex-col`}>
         {/* Header */}
-        <div className="p-6 border-b border-slate-700/50">
+        <div className="p-6 border-b border-slate-700">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Book className="w-6 h-6" />
-              </div>
-              {sidebarOpen && (
-                <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    StudyNote
-                  </h1>
-                  <p className="text-xs text-slate-400">Smart Study Companion</p>
-                </div>
-              )}
-            </div>
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-slate-700/50 rounded-lg transition-colors"
+            {!sidebarCollapsed && (
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                DigiNote
+              </h1>
+            )}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
             >
-              <Settings className="w-4 h-4" />
+              <ChevronLeft className={`w-5 h-5 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
             </button>
           </div>
         </div>
 
-        {sidebarOpen && (
-          <>
-            {/* Navigation */}
-            <div className="p-4 space-y-2">
-              <button className="w-full flex items-center space-x-3 p-3 bg-blue-600/20 text-blue-400 rounded-lg">
-                <Home className="w-5 h-5" />
-                <span>Dashboard</span>
-              </button>
-              <button 
-                onClick={() => setIsCreating(true)}
-                className="w-full flex items-center space-x-3 p-3 hover:bg-slate-700/50 rounded-lg transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Add Subject</span>
-              </button>
-            </div>
-
-            {/* Create Subject Form */}
-            {isCreating && (
-              <div className="p-4 border-b border-slate-700/50">
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Subject name..."
-                    value={newSubjectName}
-                    onChange={(e) => setNewSubjectName(e.target.value)}
-                    className="w-full p-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    onKeyPress={(e) => e.key === 'Enter' && addSubject()}
-                  />
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={addSubject}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                    >
-                      Add
-                    </button>
-                    <button
-                      onClick={() => {setIsCreating(false); setNewSubjectName('');}}
-                      className="flex-1 bg-slate-600 hover:bg-slate-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Subjects List */}
-            <div className="flex-1 overflow-y-auto p-4">
-              <h2 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">Subjects</h2>
-              <div className="space-y-2">
-                {subjects.map(subject => (
-                  <button
-                    key={subject.id}
-                    onClick={() => setSelectedSubject(subject)}
-                    className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all hover:bg-slate-700/50 ${
-                      selectedSubject?.id === subject.id ? 'bg-slate-700/70 ring-1 ring-blue-500/50' : ''
-                    }`}
-                  >
-                    <div className={`w-4 h-4 ${subject.color} rounded-full`} />
-                    <div className="flex-1 text-left">
-                      <div className="font-medium">{subject.name}</div>
-                      <div className="text-xs text-slate-400">{subject.topics.length} topics</div>
-                    </div>
-                    <BookOpen className="w-4 h-4 text-slate-400" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Topics Panel */}
-      {selectedSubject && (
-        <div className="w-80 bg-slate-800/30 backdrop-blur-sm border-r border-slate-700/50 flex flex-col">
-          {/* Topics Header */}
-          <div className="p-6 border-b border-slate-700/50">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className={`w-8 h-8 ${selectedSubject.color} rounded-lg`} />
-              <div>
-                <h2 className="font-bold text-lg">{selectedSubject.name}</h2>
-                <p className="text-sm text-slate-400">{filteredTopics.length} topics</p>
-              </div>
-            </div>
-            
-            {/* Search */}
+        {/* Search Bar */}
+        {!sidebarCollapsed && (
+          <div className="p-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search topics..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Search notes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               />
             </div>
           </div>
+        )}
 
-          {/* Add Topic */}
-          <div className="p-4 border-b border-slate-700/50">
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                placeholder="New topic title..."
-                value={newTopicName}
-                onChange={(e) => setNewTopicName(e.target.value)}
-                className="flex-1 p-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                onKeyPress={(e) => e.key === 'Enter' && addTopic()}
-              />
-              <button
-                onClick={addTopic}
-                className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
+        {/* Navigation */}
+        <nav className="flex-1 p-4">
+          <div className="space-y-2">
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600 text-white transition-colors">
+              <Home className="w-5 h-5" />
+              {!sidebarCollapsed && <span>Home</span>}
+            </button>
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors">
+              <Plus className="w-5 h-5" />
+              {!sidebarCollapsed && <span>Create</span>}
+            </button>
+            <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition-colors">
+              <BookOpen className="w-5 h-5" />
+              {!sidebarCollapsed && <span>My Notes</span>}
+            </button>
           </div>
 
-          {/* Topics List */}
-          <div className="flex-1 overflow-y-auto">
-            {filteredTopics.length === 0 ? (
-              <div className="p-8 text-center text-slate-400">
-                <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-sm">No topics yet</p>
-                <p className="text-xs mt-1">Add your first topic to get started</p>
-              </div>
-            ) : (
-              <div className="p-4 space-y-3">
-                {filteredTopics.map(topic => (
-                  <div
-                    key={topic.id}
-                    className={`p-4 rounded-lg cursor-pointer transition-all hover:bg-slate-700/30 ${
-                      selectedTopic?.id === topic.id ? 'bg-slate-700/50 ring-1 ring-blue-500/50' : 'bg-slate-700/20'
-                    }`}
-                    onClick={() => setSelectedTopic(topic)}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-medium text-sm flex-1">{topic.title}</h3>
-                      <div className="flex space-x-1 ml-2">
-                        <button
-                          onClick={(e) => {e.stopPropagation(); toggleStar(topic.id);}}
-                          className={`p-1 rounded hover:bg-slate-600/50 ${topic.starred ? 'text-yellow-400' : 'text-slate-400'}`}
-                        >
-                          <Star className="w-3 h-3" fill={topic.starred ? 'currentColor' : 'none'} />
+          {/* Recent Notes */}
+          {!sidebarCollapsed && (
+            <div className="mt-8">
+              <h3 className="text-sm font-medium text-slate-400 mb-3">Recent Notes</h3>
+              <div className="space-y-2">
+                {notes.map((note) => (
+                  <div key={note.id} className="p-3 rounded-lg hover:bg-slate-700 cursor-pointer transition-colors group">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${note.color}`}></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{note.title}</p>
+                        <p className="text-xs text-slate-400">{note.lastModified}</p>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                        <button className="p-1 hover:bg-slate-600 rounded">
+                          <Edit3 className="w-3 h-3" />
                         </button>
-                        <button
-                          onClick={(e) => {e.stopPropagation(); deleteTopic(topic.id);}}
-                          className="p-1 rounded hover:bg-red-500/20 text-slate-400 hover:text-red-400"
-                        >
+                        <button className="p-1 hover:bg-slate-600 rounded">
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4 text-xs text-slate-400">
-                      <div className="flex items-center space-x-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>{topic.createdAt}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3" />
-                        <span>{topic.lastModified}</span>
-                      </div>
-                    </div>
-                    {topic.content && (
-                      <p className="text-xs text-slate-400 mt-2 line-clamp-2">
-                        {topic.content.substring(0, 100)}...
-                      </p>
-                    )}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+        </nav>
+
+        {/* Settings */}
+        <div className="p-4 border-t border-slate-700">
+          <div className="flex items-center justify-between">
+            {!sidebarCollapsed && (
+              <div className="flex gap-2">
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg hover:bg-slate-700 transition-colors"
+                >
+                  {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
+                <button className="p-2 rounded-lg hover:bg-slate-700 transition-colors">
+                  <Settings className="w-4 h-4" />
+                </button>
               </div>
             )}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
-        {selectedTopic ? (
-          <>
-            {/* Editor Header */}
-            <div className="p-6 border-b border-slate-700/50 bg-slate-800/30 backdrop-blur-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-3 h-3 ${selectedSubject.color} rounded-full`} />
-                  <div>
-                    <h1 className="text-xl font-bold">{currentTopic?.title}</h1>
-                    <p className="text-sm text-slate-400">
-                      Last modified: {currentTopic?.lastModified}
-                    </p>
+        {/* Enhanced Header */}
+        <header className={`${cardClasses} border-b px-6 py-4`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold">HTML</h1>
+                <p className="text-sm text-slate-400">The Foundation of the Web</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {/* View Toggle */}
+              <div className="flex bg-slate-700 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveView('edit')}
+                  className={`p-2 rounded-md transition-colors ${activeView === 'edit' ? 'bg-blue-600 text-white' : 'hover:bg-slate-600'}`}
+                >
+                  <Edit3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setActiveView('preview')}
+                  className={`p-2 rounded-md transition-colors ${activeView === 'preview' ? 'bg-blue-600 text-white' : 'hover:bg-slate-600'}`}
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setActiveView('split')}
+                  className={`p-2 rounded-md transition-colors ${activeView === 'split' ? 'bg-blue-600 text-white' : 'hover:bg-slate-600'}`}
+                >
+                  <Monitor className="w-4 h-4" />
+                </button>
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                <Save className="w-4 h-4" />
+                Save
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="flex-1 flex">
+          {/* Main Editor */}
+          <div className={`flex-1 ${activeView === 'split' ? 'w-1/2' : 'w-full'}`}>
+            <div className="h-full p-6 overflow-y-auto">
+              <div className="max-w-4xl mx-auto">
+                <div className="prose prose-invert max-w-none">
+                  <div className="mb-8">
+                    <h2 className="text-xl font-semibold mb-4 text-blue-400">What is HTML?</h2>
+                    <div className={`${cardClasses} p-6 rounded-xl border shadow-sm`}>
+                      <p className="text-slate-300 leading-relaxed mb-4">
+                        HTML (HyperText Markup Language) is the standard markup language for creating web pages. 
+                        It's the foundational language that tells web browsers how to display content. Instead of 
+                        directly displaying text and images, HTML uses <span className="text-yellow-400 font-mono">tags</span> enclosed 
+                        in angle brackets (<span className="text-pink-400">&lt; &gt;</span>) to structure the content.
+                      </p>
+                      <p className="text-slate-300 leading-relaxed">
+                        These tags define elements, which represent different parts of a web page, 
+                        like headings, paragraphs, images, links, and more.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mb-8">
+                    <h2 className="text-xl font-semibold mb-4 text-blue-400">Basic Structure of an HTML Document</h2>
+                    <div className={`${cardClasses} p-6 rounded-xl border shadow-sm`}>
+                      <p className="text-slate-300 leading-relaxed mb-4">
+                        Every HTML document follows a basic structure:
+                      </p>
+                      <div className="bg-slate-800 p-4 rounded-lg border-l-4 border-blue-500 font-mono text-sm">
+                        <div className="text-gray-400">&lt;!DOCTYPE html&gt;</div>
+                        <div className="text-pink-400">&lt;html&gt;</div>
+                        <div className="ml-4 text-pink-400">&lt;head&gt;</div>
+                        <div className="ml-8 text-yellow-400">&lt;title&gt;Page Title&lt;/title&gt;</div>
+                        <div className="ml-4 text-pink-400">&lt;/head&gt;</div>
+                        <div className="ml-4 text-pink-400">&lt;body&gt;</div>
+                        <div className="ml-8 text-green-400">&lt;h1&gt;Main Heading&lt;/h1&gt;</div>
+                        <div className="ml-8 text-green-400">&lt;p&gt;Paragraph content&lt;/p&gt;</div>
+                        <div className="ml-4 text-pink-400">&lt;/body&gt;</div>
+                        <div className="text-pink-400">&lt;/html&gt;</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => toggleStar(currentTopic.id)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      currentTopic?.starred 
-                        ? 'bg-yellow-500/20 text-yellow-400' 
-                        : 'hover:bg-slate-700/50 text-slate-400'
-                    }`}
-                  >
-                    <Star className="w-4 h-4" fill={currentTopic?.starred ? 'currentColor' : 'none'} />
-                  </button>
-                  <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
-                    <Save className="w-4 h-4" />
-                    <span>Save</span>
-                  </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar - Topic Management */}
+          <div className={`w-80 ${cardClasses} border-l p-6 ${activeView === 'split' ? 'block' : 'block'}`}>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-4">Subject: <span className="text-blue-400">HTML</span></h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Chapter name</label>
+                  <input
+                    type="text"
+                    value={chapterName}
+                    onChange={(e) => setChapterName(e.target.value)}
+                    placeholder="Enter chapter name"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Topic title</label>
+                  <input
+                    type="text"
+                    value={topicTitle}
+                    onChange={(e) => setTopicTitle(e.target.value)}
+                    placeholder="Enter topic title"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
+                
+                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                  Add Topic
+                </button>
+              </div>
+            </div>
+
+            {/* Current Topics */}
+            <div>
+              <h4 className="text-sm font-medium text-slate-400 mb-3">Current Topics</h4>
+              <div className="space-y-2">
+                <div className={`${cardClasses} p-3 rounded-lg border hover:border-blue-500 transition-colors group cursor-pointer`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">html</span>
+                    <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                      <button className="p-1 hover:bg-slate-600 rounded">
+                        <Edit3 className="w-3 h-3 text-blue-400" />
+                      </button>
+                      <button className="p-1 hover:bg-red-600 rounded">
+                        <Trash2 className="w-3 h-3 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Editor */}
-            <div className="flex-1 p-6">
-              <textarea
-                value={currentTopic?.content || ''}
-                onChange={(e) => updateTopicContent(e.target.value)}
-                placeholder="Start writing your notes here..."
-                className="w-full h-full resize-none bg-transparent border-none focus:outline-none text-slate-100 placeholder-slate-400 leading-relaxed"
-              />
+            {/* Quick Actions */}
+            <div className="mt-8">
+              <h4 className="text-sm font-medium text-slate-400 mb-3">Quick Actions</h4>
+              <div className="space-y-2">
+                <button className="w-full text-left p-3 rounded-lg hover:bg-slate-700 transition-colors flex items-center gap-2">
+                  <Code className="w-4 h-4 text-green-400" />
+                  <span className="text-sm">Insert Code Block</span>
+                </button>
+                <button className="w-full text-left p-3 rounded-lg hover:bg-slate-700 transition-colors flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm">Add Reference</span>
+                </button>
+              </div>
             </div>
-          </>
-        ) : selectedSubject ? (
-          <div className="flex-1 flex items-center justify-center text-center">
-            <div>
-              <Edit3 className="w-16 h-16 mx-auto mb-4 text-slate-400 opacity-50" />
-              <h2 className="text-xl font-semibold mb-2">Select a topic to start writing</h2>
-              <p className="text-slate-400">Choose a topic from the sidebar or create a new one</p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-center">
-            <div>
-              <Book className="w-20 h-20 mx-auto mb-6 text-slate-400 opacity-50" />
-              <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Welcome to StudyNote
-              </h2>
-              <p className="text-slate-400 mb-6 max-w-md mx-auto">
-                Organize your studies with smart note-taking. Create subjects, add topics, and keep your knowledge structured.
-              </p>
-              <button
-                onClick={() => setIsCreating(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-105"
-              >
-                Get Started
+
+            {/* Open Notebook Button */}
+            <div className="mt-8">
+              <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                Open Notebook
               </button>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Status Bar */}
+        <div className={`${cardClasses} border-t px-6 py-2`}>
+          <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center gap-4">
+              <span>Words: 156</span>
+              <span>Characters: 892</span>
+              <span>Last saved: 2 minutes ago</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Saved</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

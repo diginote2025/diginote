@@ -713,13 +713,13 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
         className={`max-w-sm border-l z-30 border-gray-600 h-[90vh] overflow-y-auto ${
           isSubjectbarOpen
             ? "max-lg:w-0 overflow-hidden lg:p-3"
-            : `transition-all w-1/2 max-lg:w-[60%] p-3 max-lg:absolute right-0 ${
+            : `transition-all w-1/2 max-lg:w-[60%] p-6 max-lg:absolute right-0 ${
                 isDark ? "bg-gray-900" : "bg-white"
               }`
         }`}
       >
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-base flex flex-col py-2">
+          <h2 className="text-lg font-semibold flex flex-col py-2">
             <p>
               Subject:{" "}
               <span className="text-blue-600 font-bold">
@@ -734,28 +734,30 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
         </div>
 
         <form onSubmit={handleAddTopic} className="space-y-3 mb-4">
+          <label className="block text-sm font-medium mb-2">Chapter name</label>
           <input
             value={chapter}
             onChange={(e) => setChapter(e.target.value)}
             placeholder="Chapter name"
-            className="w-full px-1 py-2 border-b outline-none text-gray-500"
+            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
           />
+          <label className="block text-sm font-medium mb-2">Topic title</label>
           <input
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="Topic title"
-            className="w-full px-1 py-2 border-b outline-none text-gray-500"
+            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
           />
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
           >
             Add Topic
           </button>
         </form>
 
         {/* Only Definition Toggle */}
-        <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+        {/* <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -779,10 +781,10 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
              />
            </button>
          </div>
-       </div>
+       </div> */}
 
        {/* Include Examples Toggle */}
-       {!onlyDefinition && (
+       {/* {!onlyDefinition && (
          <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
            <div className="flex items-center justify-between">
              <div>
@@ -808,7 +810,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
              </button>
            </div>
          </div>
-       )}
+       )} */}
 
        <div className="space-y-4">
          {Object.entries(chapterTopics).map(([chapterName, topics]) => (
@@ -829,7 +831,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                        <input
                          value={editing.value}
                          onChange={(e) => setEditing(prev => ({ ...prev, value: e.target.value }))}
-                         className="flex-1 px-1 py-1 border rounded text-sm"
+                         className="flex-1 px-1 py-1  rounded text-sm outline-none"
                          onKeyPress={(e) => e.key === "Enter" && saveEdit()}
                          autoFocus
                        />
@@ -880,11 +882,11 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
        <div className="mt-6 space-y-2">
          <button
            onClick={openNotebook}
-           className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm"
+           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
          >
-           📔 Open Notebook
+            Open Notebook
          </button>
-         <button
+         {/* <button
            onClick={clearAllSubjectData}
            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm"
          >
@@ -895,7 +897,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
            className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm"
          >
            🐛 Debug Storage
-         </button>
+         </button> */}
        </div>
      </div>
    </div>
