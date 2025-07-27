@@ -9,7 +9,7 @@ export const metadata = {
   description:
     "DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
   keywords:
-    "diginote, AI notes maker, student notes, MCQ tests, youtube video, unit tests, AI study tool, digital learning",
+    "diginote, ai notes taker, student notes, mcq tests, youtube video, unit tests, ai study tool, digital learning",
   metadataBase: new URL("https://diginote.in"),
 };
 
