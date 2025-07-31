@@ -6,7 +6,7 @@ import Script from "next/script";
 const geist = Geist({ subsets: ["latin"], weight: ["400"] });
 
 export const metadata = {
-  title: "DigiNote – AI Notes Maker With MCQ Practice, Unit Test",
+  title: "DigiNote – AI Notes Maker | MCQs, Chapter Videos & Tests",
   description:
     "DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
   keywords:
