@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoAdd } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedSubject } from "@/redux/subjectSlice";
 import SubjectDetailViewer from "./SubjectDetailViewer";
-import { MdOutlineDeleteForever } from "react-icons/md";
+import { MdOutlineDeleteForever, MdSchool, MdBook } from "react-icons/md";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AddSubjectName() {
   const dispatch = useDispatch();
@@ -13,6 +14,8 @@ export default function AddSubjectName() {
   const [openSubjectForm, setOpenSubjectForm] = useState(false);
   const [addtodo, setAddtodo] = useState([]);
   const [addtask, setAddtask] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const selectedSubject = useSelector((state) => state.subject.selectedSubject);
 
@@ -39,13 +42,27 @@ export default function AddSubjectName() {
     }
   }, [selectedSubject, isClient]);
 
-  const addSubjectName = (e) => {
+  const addSubjectName = async (e) => {
     e.preventDefault();
-    if (addtask.trim()) {
+    if (addtask.trim() && !isSubmitting) {
+      setIsSubmitting(true);
+      
+      // Check for duplicates
+      if (addtodo.some(subject => subject.toLowerCase() === addtask.toLowerCase())) {
+        alert("Subject already exists!");
+        setIsSubmitting(false);
+        return;
+      }
+
       const updated = [...addtodo, addtask];
       setAddtodo(updated);
       setAddtask("");
-      setOpenSubjectForm(false);
+      
+      // Smooth close with delay
+      setTimeout(() => {
+        setOpenSubjectForm(false);
+        setIsSubmitting(false);
+      }, 300);
 
       const allTopics = JSON.parse(
         localStorage.getItem("chapterTopics") || "{}"
@@ -61,20 +78,44 @@ export default function AddSubjectName() {
   };
 
   const removeSubjectName = (index) => {
-    const subjectToRemove = addtodo[index];
-    const updated = addtodo.filter((_, i) => i !== index);
-    setAddtodo(updated);
+    if (deleteConfirm === index) {
+      const subjectToRemove = addtodo[index];
+      const updated = addtodo.filter((_, i) => i !== index);
+      setAddtodo(updated);
 
-    if (selectedSubject === subjectToRemove) {
-      dispatch(setSelectedSubject(""));
-      localStorage.removeItem("selectedSubject");
+      if (selectedSubject === subjectToRemove) {
+        dispatch(setSelectedSubject(""));
+        localStorage.removeItem("selectedSubject");
+      }
+      setDeleteConfirm(null);
+    } else {
+      setDeleteConfirm(index);
+      // Auto-cancel delete confirmation after 3 seconds
+      setTimeout(() => setDeleteConfirm(null), 3000);
     }
   };
 
-  const subjecthandle = () => setOpenSubjectForm((prev) => !prev);
+  const subjecthandle = () => {
+    setOpenSubjectForm((prev) => !prev);
+    setAddtask("");
+  };
+
   const handleClickSubject = (subject) => {
     dispatch(setSelectedSubject(subject));
   };
+
+  // Color palette for subjects
+  const subjectColors = [
+    "from-blue-500 to-blue-700",
+    "from-purple-500 to-purple-700",
+    "from-green-500 to-green-700",
+    "from-red-500 to-red-700",
+    "from-yellow-500 to-orange-600",
+    "from-indigo-500 to-indigo-700",
+    "from-pink-500 to-pink-700",
+    "from-cyan-500 to-cyan-700",
+    "from-emerald-500 to-emerald-700",
+  ];
 
   if (!isClient) return null;
 
@@ -92,103 +133,251 @@ export default function AddSubjectName() {
 
   // ✅ Show subject UI by default (even if no subjects yet)
   return (
-    <div className="relative w-full h-[90vh] flex flex-col items-center custom-scrollbar">
+    <div className="relative w-full min-h-[90vh] flex flex-col items-center custom-scrollbar bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Header with gradient */}
+      {/* <div className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8 px-6 mb-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex items-center justify-center gap-3 mb-4"
+          >
+            <MdSchool className="text-4xl" />
+            <h1 className="text-3xl sm:text-4xl font-bold">Study Dashboard</h1>
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg opacity-90"
+          >
+            Organize your learning journey with digital notebooks
+          </motion.p>
+        </div>
+      </div> */}
+
       {/* Empty state if no subjects */}
       {addtodo.length === 0 && (
-        <div className=" w-full h-full flex justify-center items-center">
-          <div className="flex flex-col items-center ">
-            <div className="mb-4">
-              <Image
-                src="/images/workspace/create/box.png"
-                alt="no notes"
-                width={100}
-                height={100}
-              />
-            </div>
-            <p className="mb-4">Your digital notebook is empty</p>
-            <button
-              onClick={subjecthandle}
-              className="px-22 py-4 rounded-lg text-3xl border border-gray-600 hover:bg-gray-200 hover:text-gray-900 transition"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex-1 flex justify-center items-center px-6"
+        >
+          <div className="text-center max-w-md">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mb-8"
             >
-              +
-            </button>
+              <div className="relative mx-auto w-32 h-32 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
+                <Image
+                  src="/images/workspace/create/box.png"
+                  alt="no notes"
+                  width={128}
+                  height={128}
+                  className="relative z-10"
+                />
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-3">
+                Start Your Learning Journey
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                Create your first subject to begin organizing your study materials and notes
+              </p>
+            </motion.div>
+            
+            <motion.button
+              onClick={subjecthandle}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-3 mx-auto"
+            >
+              <IoAdd className="text-2xl group-hover:rotate-90 transition-transform duration-300" />
+              <span className="font-medium">Create Your First Subject</span>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Subject input form */}
-      {openSubjectForm && (
-        <form
-          onSubmit={addSubjectName}
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-            bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg w-80 space-y-4 z-50"
-        >
-          <div
-            onClick={subjecthandle}
-            className="absolute right-2 top-2 text-2xl cursor-pointer text-gray-600 hover:text-black"
-          >
-            <IoClose />
-          </div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white text-center">
-            Add Subject Name
-          </h1>
-          <input
-            type="text"
-            value={addtask}
-            onChange={(e) => setAddtask(e.target.value)}
-            placeholder="Enter subject name"
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 
-              text-gray-800 dark:text-white"
-          />
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium 
-              py-2 rounded-lg transition duration-300"
-          >
-            Add Subject
-          </button>
-        </form>
-      )}
+      <AnimatePresence>
+        {openSubjectForm && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={subjecthandle}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            />
+            
+            {/* Modal */}
+            <motion.form
+              onSubmit={addSubjectName}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 max-w-[90vw] z-50 border border-gray-200 dark:border-gray-700"
+            >
+              <button
+                type="button"
+                onClick={subjecthandle}
+                className="absolute right-4 top-4 text-2xl cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              >
+                <IoClose />
+              </button>
+              
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MdBook className="text-2xl text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                  Add New Subject
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  Give your subject a memorable name
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Subject Name
+                  </label>
+                  <input
+                    type="text"
+                    value={addtask}
+                    onChange={(e) => setAddtask(e.target.value)}
+                    placeholder="e.g., Mathematics, History, Physics"
+                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl 
+                      focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 
+                      bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white transition-all duration-200"
+                    autoFocus
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={!addtask.trim() || isSubmitting}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 
+                    disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
+                    text-white font-medium py-3 rounded-xl transition-all duration-300 
+                    transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Creating...
+                    </span>
+                  ) : (
+                    "Create Subject"
+                  )}
+                </button>
+              </div>
+            </motion.form>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Subject list UI */}
       {addtodo.length > 0 && (
-        <div className="py-10">
-          <h1 className="text-2xl sm:text-3xl font-semibold  mb-6 tracking-tight">
-            Select Your Subject
-          </h1>
+        <div className="w-full max-w-6xl px-6 pb-10 pt-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-10"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+              Your Subjects
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              Choose a subject to continue studying
+            </p>
+          </motion.div>
 
-          <div className="grid grid-cols-3 max-lg:grid-cols-1 justify-center items-center gap-6 ">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {addtodo.map((subject, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => handleClickSubject(subject)}
-                className="relative bg-blue-700 text-white px-8 py-6 rounded-lg shadow-sm min-w-[200px] text-center cursor-pointer hover:ring-2 ring-blue-400"
+                className={`relative bg-gradient-to-br ${subjectColors[index % subjectColors.length]} 
+                  text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl cursor-pointer 
+                  transition-all duration-300 group min-h-[140px] flex flex-col justify-between`}
               >
+                {/* Delete button */}
                 <button
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     removeSubjectName(index);
                   }}
-                  className="absolute top-1 right-1 text-xl text-red-500 hover:text-red-700"
+                  className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 z-10 ${
+                    deleteConfirm === index
+                      ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg scale-110'
+                      : 'bg-white/20 hover:bg-red-500 text-white/80 hover:text-white hover:scale-110'
+                  }`}
+                  title={deleteConfirm === index ? "Click again to confirm" : "Delete subject"}
                 >
-                  <MdOutlineDeleteForever />
+                  <MdOutlineDeleteForever className="text-lg" />
                 </button>
-                <span className="">
-                  {subject
-                    .toLowerCase()
-                    .split(" ")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" ")}
-                </span>
-              </div>
+
+                {/* Subject icon */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <MdBook className="text-xl" />
+                  </div>
+                  <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                  <div className="w-1 h-1 bg-white/30 rounded-full"></div>
+                </div>
+
+                {/* Subject name */}
+                <div>
+                  <h3 className="font-bold text-lg leading-tight group-hover:scale-105 transition-transform duration-200">
+                    {subject
+                      .toLowerCase()
+                      .split(" ")
+                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(" ")}
+                  </h3>
+                  <p className="text-white/80 text-sm mt-1">Click to open</p>
+                </div>
+
+                {/* Hover effect overlay */}
+                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+              </motion.div>
             ))}
-            <button
+            
+            {/* Add new subject button */}
+            <motion.button
               onClick={subjecthandle}
-              className="text-3xl border border-gray-600 px-22 py-4 rounded-lg hover:bg-gray-200 hover:text-gray-900 transition"
+              whileHover={{ y: -5, scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: addtodo.length * 0.1 }}
+              className="min-h-[140px] border-2 border-dashed border-gray-300 dark:border-gray-600 
+                rounded-2xl hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 
+                flex flex-col items-center justify-center gap-3 text-gray-600 dark:text-gray-400 
+                hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 group"
             >
-              +
-            </button>
+              <div className="w-12 h-12 border-2 border-current rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
+                <IoAdd className="text-2xl" />
+              </div>
+              <span className="font-medium">Add Subject</span>
+            </motion.button>
           </div>
         </div>
       )}
