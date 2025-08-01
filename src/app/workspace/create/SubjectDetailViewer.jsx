@@ -41,6 +41,11 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [video, setVideo] = useState(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [showChapterInput, setShowChapterInput] = useState(false);
+const [showTopicInput, setShowTopicInput] = useState('');
+const [expandedChapters, setExpandedChapters] = useState({});
+const [chapterInput, setChapterInput] = useState('');
+const [topicInput, setTopicInput] = useState('');
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -48,6 +53,49 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const { isDark } = useSelector((state) => state.theme);
   const savedResponses = useSelector((state) => state.studyTool.savedResponses);
   const showNotebook = useSelector((state) => state.studyTool.showNotebook);
+
+  const handleAddChapter = () => {
+  if (!chapterInput.trim()) return;
+  
+  setChapterTopics((prev) => {
+    const curr = { ...prev };
+    curr[chapterInput] = [];
+    return curr;
+  });
+  
+  setExpandedChapters(prev => ({
+    ...prev,
+    [chapterInput]: true
+  }));
+  
+  setChapterInput('');
+  setShowChapterInput(false);
+  setShowTopicInput(chapterInput);
+};
+
+// Add this function to handle adding topics
+const handleAddTopicToChapter = (chapterName) => {
+  if (!topicInput.trim()) return;
+  
+  setChapterTopics((prev) => {
+    const curr = { ...prev };
+    if (!curr[chapterName]) curr[chapterName] = [];
+    if (!curr[chapterName].includes(topicInput)) curr[chapterName].push(topicInput);
+    return curr;
+  });
+  
+  setTopicInput('');
+  setShowTopicInput('');
+};
+
+// Add this function to toggle chapter expansion
+const toggleChapter = (chapterName) => {
+  setExpandedChapters(prev => ({
+    ...prev,
+    [chapterName]: !prev[chapterName]
+  }));
+};
+
 
   const openSubjectbar = () => {
     dispatch(toggleSubjectbar());
@@ -733,151 +781,187 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
           </h2>
         </div>
 
-        <form onSubmit={handleAddTopic} className="space-y-3 mb-4">
-          <label className="block text-sm font-medium mb-2">Chapter name</label>
-          <input
-            value={chapter}
-            onChange={(e) => setChapter(e.target.value)}
-            placeholder="Chapter name"
-            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-          />
-          <label className="block text-sm font-medium mb-2">Topic title</label>
-          <input
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="Topic title"
-            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-          />
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Add Topic
-          </button>
-        </form>
+        <>
+  {/* Add Chapter Button - Only show if no chapters exist */}
+  {!showChapterInput && Object.keys(chapterTopics).length === 0 && (
+    <button
+      onClick={() => setShowChapterInput(true)}
+      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4"
+    >
+      <span className="text-lg">+</span>
+      Add Chapter
+    </button>
+  )}
 
-        {/* Only Definition Toggle */}
-        {/* <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                📖 Only Definition
-              </label>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Get concise definitions instead of detailed explanations
-              </p>
+
+
+  {/* Chapters and Topics Display */}
+  <div className="space-y-4">
+    {Object.entries(chapterTopics).map(([chapterName, topics]) => (
+      <div key={chapterName} className="border rounded-lg border-gray-600">
+        {/* Chapter Header */}
+        <div
+          onClick={() => toggleChapter(chapterName)}
+          className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg"
+        >
+          <h3 className="font-semibold text-blue-600">{chapterName}</h3>
+          <span className="text-gray-500">
+            {expandedChapters[chapterName] ? '▼' : '▶'}
+          </span>
+        </div>
+
+        {/* Expanded Chapter Content */}
+        {(expandedChapters[chapterName] !== false) && (
+          <div className="border-t border-gray-600 px-3 pb-3">
+            {/* Topics List */}
+            <div className="space-y-1 mt-2">
+              {topics.map((topicName) => (
+                <div
+                  key={topicName}
+                  className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                    selected.chapter === chapterName && selected.topic === topicName
+                      ? "bg-blue-100 dark:bg-blue-900/30"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  {editing.chapter === chapterName && editing.topic === topicName ? (
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        value={editing.value}
+                        onChange={(e) => setEditing(prev => ({ ...prev, value: e.target.value }))}
+                        className="flex-1 px-1 py-1 rounded text-sm outline-none bg-slate-700 border border-slate-600"
+                        onKeyPress={(e) => e.key === "Enter" && saveEdit()}
+                        autoFocus
+                      />
+                      <button
+                        onClick={saveEdit}
+                        className="text-green-600 hover:text-green-800 text-xs"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={() => setEditing({ chapter: "", topic: "", value: "" })}
+                        className="text-red-600 hover:text-red-800 text-xs"
+                      >
+                        ✗
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span
+                        onClick={() => setSelected({ chapter: chapterName, topic: topicName })}
+                        className="flex-1 text-sm text-gray-700 dark:text-gray-300"
+                      >
+                        {topicName}
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => startEdit(chapterName, topicName)}
+                          className="text-blue-600 hover:text-blue-800 text-xs"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTopic(chapterName, topicName)}
+                          className="text-red-600 hover:text-red-800 text-xs"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
-            <button
-              onClick={() => setOnlyDefinition(!onlyDefinition)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                onlyDefinition 
-                  ? "bg-blue-600" : "bg-gray-300"
-             }`}
-           >
-             <span
-               className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                 onlyDefinition ? "translate-x-5" : "translate-x-1"
-               }`}
-             />
-           </button>
-         </div>
-       </div> */}
 
-       {/* Include Examples Toggle */}
-       {/* {!onlyDefinition && (
-         <div className="mb-4 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
-           <div className="flex items-center justify-between">
-             <div>
-               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                 💡 Include Examples
-               </label>
-               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                 Add practical examples to explanations
-               </p>
-             </div>
-             <button
-               onClick={() => setIncludeExamples(!includeExamples)}
-               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                 includeExamples 
-                   ? "bg-blue-600" : "bg-gray-300"
-               }`}
-             >
-               <span
-                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                   includeExamples ? "translate-x-5" : "translate-x-1"
-                 }`}
-               />
-             </button>
-           </div>
-         </div>
-       )} */}
+            {/* Topic Input */}
+            {showTopicInput === chapterName ? (
+              <div className="mt-3">
+                <label className="block text-sm font-medium mb-2">Topic Name</label>
+                <div className="flex gap-2">
+                  <input
+                    value={topicInput}
+                    onChange={(e) => setTopicInput(e.target.value)}
+                    placeholder="Enter topic name"
+                    className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddTopicToChapter(chapterName)}
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => handleAddTopicToChapter(chapterName)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTopicInput('');
+                      setShowTopicInput('');
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
+                  >
+                    ✗
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowTopicInput(chapterName)}
+                className="w-full mt-3 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+              >
+                <span>+</span>
+                Add Topic
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
 
-       <div className="space-y-4">
-         {Object.entries(chapterTopics).map(([chapterName, topics]) => (
-           <div key={chapterName} className="border-b pb-3">
-             <h3 className="font-semibold text-blue-600 mb-2">{chapterName}</h3>
-             <div className="space-y-1">
-               {topics.map((topicName) => (
-                 <div
-                   key={topicName}
-                   className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-                     selected.chapter === chapterName && selected.topic === topicName
-                       ? "bg-blue-100 dark:bg-blue-900/30"
-                       : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                   }`}
-                 >
-                   {editing.chapter === chapterName && editing.topic === topicName ? (
-                     <div className="flex-1 flex gap-2">
-                       <input
-                         value={editing.value}
-                         onChange={(e) => setEditing(prev => ({ ...prev, value: e.target.value }))}
-                         className="flex-1 px-1 py-1  rounded text-sm outline-none"
-                         onKeyPress={(e) => e.key === "Enter" && saveEdit()}
-                         autoFocus
-                       />
-                       <button
-                         onClick={saveEdit}
-                         className="text-green-600 hover:text-green-800 text-xs"
-                       >
-                         ✓
-                       </button>
-                       <button
-                         onClick={() => setEditing({ chapter: "", topic: "", value: "" })}
-                         className="text-red-600 hover:text-red-800 text-xs"
-                       >
-                         ✗
-                       </button>
-                     </div>
-                   ) : (
-                     <>
-                       <span
-                         onClick={() => setSelected({ chapter: chapterName, topic: topicName })}
-                         className="flex-1 text-sm text-gray-700 dark:text-gray-300"
-                       >
-                         {topicName}
-                       </span>
-                       <div className=" flex gap-1">
-                         <button
-                           onClick={() => startEdit(chapterName, topicName)}
-                           className="text-blue-600 hover:text-blue-800 text-xs"
-                         >
-                           ✏️
-                         </button>
-                         <button
-                           onClick={() => handleDeleteTopic(chapterName, topicName)}
-                           className="text-red-600 hover:text-red-800 text-xs"
-                         >
-                           🗑️
-                         </button>
-                       </div>
-                     </>
-                   )}
-                 </div>
-               ))}
-             </div>
-           </div>
-         ))}
-       </div>
+    {/* Chapter Input */}
+  {showChapterInput && (
+    <div className="border my-6 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 mb-4">
+      <label className="block text-sm font-medium mb-2">Chapter Name</label>
+      <div className="flex gap-2">
+        <input
+          value={chapterInput}
+          onChange={(e) => setChapterInput(e.target.value)}
+          placeholder="Enter chapter name"
+          className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+          onKeyPress={(e) => e.key === 'Enter' && handleAddChapter()}
+          autoFocus
+        />
+        <button
+          onClick={handleAddChapter}
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg"
+        >
+          ✓
+        </button>
+        <button
+          onClick={() => {
+            setChapterInput('');
+            setShowChapterInput(false);
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
+        >
+          ✗
+        </button>
+      </div>
+    </div>
+  )}
+
+  {/* Add Another Chapter Button (only show if chapters exist and no input is open) */}
+  {Object.keys(chapterTopics).length > 0 && !showChapterInput && !showTopicInput && (
+    <button
+      onClick={() => setShowChapterInput(true)}
+      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mt-4"
+    >
+      <span className="text-lg">+</span>
+      Add Another Chapter
+    </button>
+  )}
+</>
 
        <div className="mt-6 space-y-2">
          <button
