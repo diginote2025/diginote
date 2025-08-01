@@ -331,7 +331,7 @@ export default function AddSubjectName() {
                   }`}
                   title={deleteConfirm === index ? "Click again to confirm" : "Delete subject"}
                 >
-                  <MdOutlineDeleteForever className="text-lg" />
+                  <MdOutlineDeleteForever className="text-lg"  />
                 </button>
 
                 {/* Subject icon */}

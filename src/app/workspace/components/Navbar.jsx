@@ -23,10 +23,10 @@ export default function Navbar() {
   return (
     <div className={`px-4 border-b border-gray-600 duration-300 py-4 ${isDark?"bg-gray-900 ":""} 
     flex justify-end max-lg:justify-between items-center`}>
-      <button className="text-3xl lg:hidden" onClick={openSidebar}>
+      {/* <button className="text-3xl lg:hidden" onClick={openSidebar}>
       
         <FiMenu/>
-      </button>
+      </button> */}
 
       <button
         onClick={() => dispatch(toggleTheme())}

@@ -57,12 +57,12 @@ function LayoutWrapper({ children }) {
       <div
         onClick={openSidebar}
         className={`w-full z-40 h-[100vh] bg-gray-900/90 absolute ${
-          isAsideOpen ? "hidden" : ""
+          isAsideOpen ? "hidden" : "hidden"
         }`}
       ></div>
       {/* Main Content */}
       <div className="flex flex-col w-full h-[100vh]">
-        <Navbar />
+        {/* <Navbar /> */}
         <main>{children}</main>
       </div>
     </div>
