@@ -505,7 +505,7 @@ const NotesPage = () => {
 
   return (
     <div
-      className={`custom-scrollbar h-[90vh] ${
+      className={`custom-scrollbar h-[100vh] ${
         isDark ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"
       }`}
     >

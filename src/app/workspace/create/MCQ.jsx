@@ -173,7 +173,7 @@ Do not include explanations, numbering, or extra formatting.`
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-2 max-w-4xl mx-auto  ">
         <AnimatePresence mode="wait">
           {!quizStarted ? (
             <motion.div
@@ -181,15 +181,18 @@ Do not include explanations, numbering, or extra formatting.`
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center mt-20"
+              className="text-center mt-20  "
             >
               <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto">
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <BookOpen className="w-10 h-10 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Practice MCQs</h2>
-                <p className="text-gray-600 mb-2">Topic:</p>
-                <p className="text-lg font-semibold text-blue-600 mb-6">{selected?.topic || "General Knowledge"}</p>
+                <h2 className="text-3xl font-bold text-gray-800"  onClick={takeAMCQ}>Practice MCQs</h2>
+               <div className="flex justify-center items-center py-4 gap-2 mb-4">
+                 <p className="text-gray-600">Topic:</p>
+                <p className="text-lg font-semibold text-blue-600">{selected?.topic || "General Knowledge"}</p>
+               
+               </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -207,7 +210,7 @@ Do not include explanations, numbering, or extra formatting.`
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center mt-32"
+              className="flex flex-col items-center justify-center mt-32 "
             >
               <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
                 <Loader className="animate-spin mb-6 w-12 h-12 text-blue-500 mx-auto" />
@@ -223,7 +226,7 @@ Do not include explanations, numbering, or extra formatting.`
               exit={{ opacity: 0, scale: 0.9 }}
               className="max-w-4xl mx-auto"
             >
-              <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+              <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 ">
                 <div className="text-center mb-8">
                   <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
                   <h2 className="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h2>
@@ -250,7 +253,7 @@ Do not include explanations, numbering, or extra formatting.`
               </div>
 
               {userAnswers.filter(item => !item.isCorrect).length > 0 && (
-                <div className="bg-white rounded-2xl shadow-xl p-8">
+                <div className="bg-white rounded-2xl shadow-xl p-8 ">
                   <h3 className="text-2xl font-bold text-red-600 mb-6 flex items-center gap-2">
                     <XCircle className="w-6 h-6" />
                     Review Incorrect Answers
@@ -337,7 +340,7 @@ Do not include explanations, numbering, or extra formatting.`
               exit={{ opacity: 0, x: -20 }}
               className="max-w-3xl mx-auto"
             >
-              <div className="bg-white rounded-2xl shadow-xl p-8">
+              <div className=" rounded-2xl shadow-xl p-4 max-lg:mt-18 bg-white">
                 {/* Progress Bar */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-2">

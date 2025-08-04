@@ -602,17 +602,17 @@ const toggleChapter = (chapterName) => {
   if (!hasMounted) return null;
 
   return (
-    <div className="flex flex-row h-[90vh]">
-      <div className="w-full px-4 overflow-y-auto custom-scrollbar">
-        <div className="w-full flex justify-between py-2">
-          <button
+    <div className="flex flex-row h-[100vh]">
+      <div className="w-full  overflow-y-auto custom-scrollbar">
+        <div className="w-full flex justify-between max-lg:py-0">
+          {/* <button
             onClick={() => setSelectedSubject("")}
             className="hover:bg-gray-500/20 rounded-full"
           >
             <ArrowLeft size={20} />
-          </button>
+          </button> */}
           <button
-            className="text-2xl hidden max-lg:block"
+            className="text-2xl p-[11px] z-50 rounded-xl absolute right-5 top-4 bg-gray-900 border border-gray-600  hidden max-lg:block"
             onClick={openSubjectbar}
           >
             {isSubjectbarOpen ? (
@@ -627,7 +627,7 @@ const toggleChapter = (chapterName) => {
           <NotebookView downloadPDF={downloadPDF} />
         ) : showMCQ ? (
           <>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <h2 className="text-xl font-bold text-green-700 mb-4">
                 📝 Quiz: {selected.topic}
               </h2>
@@ -637,7 +637,7 @@ const toggleChapter = (chapterName) => {
               >
                 🔙 Back to Chat
               </button>
-            </div>
+            </div> */}
             {!quizFinished ? (
               <MCQ selected={selected} takeAMCQ={takeAMCQ} />
             ) : (
@@ -658,7 +658,7 @@ const toggleChapter = (chapterName) => {
           <TakeTest selected={selected} takeATest={takeATest} />
         ) : selected.topic ? (
           <>
-            <div className="mb-6 border-b pb-3">
+            <div className="mb-6 border-b pb-3 px-4 py-20">
               <h2 className="text-3xl max-lg:text-2xl font-bold tracking-wide">
                 <span className="block uppercase text-primary font-semibold">
                   {selected.chapter}
@@ -669,7 +669,7 @@ const toggleChapter = (chapterName) => {
               </h2>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 px-4">
               {loading ? (
                 <div className="flex items-center gap-2 text-blue-500">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
@@ -684,7 +684,7 @@ const toggleChapter = (chapterName) => {
               )}
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 px-4">
               {videoLoading ? (
                 <div className="flex items-center gap-2 text-blue-500">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
@@ -722,7 +722,7 @@ const toggleChapter = (chapterName) => {
               ) : null}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 px-4">
               <button
                 onClick={startQuiz}
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl transition-colors"
@@ -744,7 +744,7 @@ const toggleChapter = (chapterName) => {
             </div>
           </>
         ) : (
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-lg p-4  h-[100vh] flex justify-center items-center">
             Please select a chapter and topic from the sidebar to view its
             AI-generated explanation. 👉
           </p>
@@ -753,15 +753,15 @@ const toggleChapter = (chapterName) => {
 
       <div
         onClick={openSubjectbar}
-        className={`w-full max-lg:h-[92vh] z-20 max-lg:bg-gray-900/80 absolute ${
+        className={`w-full max-lg:h-[100vh] z-20 max-lg:bg-black/50 backdrop-blur-sm absolute ${
           isSubjectbarOpen ? "hidden" : "max-lg:block"
         }`}
       ></div>
       <div
-        className={`max-w-sm border-l z-30 border-gray-600 h-[90vh] overflow-y-auto ${
+        className={`max-w-sm border-l z-30 border-gray-600 h-[100vh] overflow-y-auto ${
           isSubjectbarOpen
             ? "max-lg:w-0 overflow-hidden lg:p-3"
-            : `transition-all w-1/2 max-lg:w-[60%] p-6 max-lg:absolute right-0 ${
+            : `transition-all w-1/2 max-lg:w-[75%] p-3 max-lg:absolute right-0 ${
                 isDark ? "bg-gray-900" : "bg-white"
               }`
         }`}
@@ -796,7 +796,7 @@ const toggleChapter = (chapterName) => {
 
 
   {/* Chapters and Topics Display */}
-  <div className="space-y-4">
+  <div className="space-y-4 ">
     {Object.entries(chapterTopics).map(([chapterName, topics]) => (
       <div key={chapterName} className="border rounded-lg border-gray-600">
         {/* Chapter Header */}
@@ -820,7 +820,7 @@ const toggleChapter = (chapterName) => {
                   key={topicName}
                   className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
                     selected.chapter === chapterName && selected.topic === topicName
-                      ? "bg-blue-100 dark:bg-blue-900/30"
+                      ? "bg-blue-100 dark:bg-blue-900/30 "
                       : "hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -829,19 +829,19 @@ const toggleChapter = (chapterName) => {
                       <input
                         value={editing.value}
                         onChange={(e) => setEditing(prev => ({ ...prev, value: e.target.value }))}
-                        className="flex-1 px-1 py-1 rounded text-sm outline-none bg-slate-700 border border-slate-600"
+                        className="flex-1 px-1 py-1 w-10 rounded text-sm outline-none bg-slate-700 border border-slate-600"
                         onKeyPress={(e) => e.key === "Enter" && saveEdit()}
                         autoFocus
                       />
                       <button
                         onClick={saveEdit}
-                        className="text-green-600 hover:text-green-800 text-xs"
+                        className="text-green-600 hover:text-green-800 text-lg"
                       >
                         ✓
                       </button>
                       <button
                         onClick={() => setEditing({ chapter: "", topic: "", value: "" })}
-                        className="text-red-600 hover:text-red-800 text-xs"
+                        className="text-red-600 hover:text-red-800 text-lg"
                       >
                         ✗
                       </button>
@@ -883,7 +883,7 @@ const toggleChapter = (chapterName) => {
                     value={topicInput}
                     onChange={(e) => setTopicInput(e.target.value)}
                     placeholder="Enter topic name"
-                    className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+                    className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
                     onKeyPress={(e) => e.key === 'Enter' && handleAddTopicToChapter(chapterName)}
                     autoFocus
                   />
@@ -928,7 +928,7 @@ const toggleChapter = (chapterName) => {
           value={chapterInput}
           onChange={(e) => setChapterInput(e.target.value)}
           placeholder="Enter chapter name"
-          className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+          className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
           onKeyPress={(e) => e.key === 'Enter' && handleAddChapter()}
           autoFocus
         />

@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
- isAsideOpen: true, // default open
-  isAsideLoaded: false,
+ isAsideOpen: false, // default open
+  isAsideLoaded: true,
 };
 
 const asidebarSlice = createSlice({

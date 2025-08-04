@@ -4,6 +4,15 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import { FaPencil } from "react-icons/fa6";
+import { Merriweather } from 'next/font/google';
+
+const MerriweatherFont = Merriweather({
+  subsets: ['latin'],
+  weight: ['400', '700'], // Add more weights if needed
+  style: ['normal', 'italic'],
+  variable: '--font-noto-serif',
+  display: 'swap',
+});
 
 export default function Hero() {
   const fadeInUp = {
@@ -39,7 +48,8 @@ export default function Hero() {
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
-          className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-snug"
+          className={`text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-snug
+            ${MerriweatherFont.className}`}
         >
           Study Smarter with <span className="text-blue-600">DigiNote</span>{" "}
           Your <span className="text-green-500">AI-Powered Notes</span> & Test

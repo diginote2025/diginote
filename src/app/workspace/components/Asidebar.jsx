@@ -159,7 +159,7 @@ export default function Asidebar({ setActive, active }) {
       >
         {/* Header - Enhanced for mobile */}
         <div className="flex items-center justify-between p-4 lg:p-4 border-b border-gray-200 dark:border-gray-700 min-h-[64px]">
-          {(!isCollapsed || isMobile) && (
+          {(!isCollapsed || !isMobile) && (
             <div className="flex items-center space-x-2 flex-1">
               <div className="w-8 h-8 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Image 
@@ -170,9 +170,13 @@ export default function Asidebar({ setActive, active }) {
                   className="rounded w-full h-full object-cover"
                 />
               </div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-white bg-clip-text ">
+              {
+                (!isCollapsed || isMobile) && (
+                  <h1 className="text-2xl lg:text-3xl font-bold text-white bg-clip-text ">
                 DigiNote
               </h1>
+                )
+              }
             </div>
           )}
           

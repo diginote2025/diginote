@@ -18,6 +18,7 @@ export default function AddSubjectName() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const selectedSubject = useSelector((state) => state.subject.selectedSubject);
+    const { isDark, isThemeLoaded } = useSelector((state) => state.theme);
 
   useEffect(() => {
     setIsClient(true);
@@ -130,32 +131,20 @@ export default function AddSubjectName() {
       </div>
     );
   }
+ 
 
   // ✅ Show subject UI by default (even if no subjects yet)
   return (
-    <div className="relative w-full min-h-[90vh] flex flex-col items-center custom-scrollbar bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header with gradient */}
-      {/* <div className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8 px-6 mb-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center justify-center gap-3 mb-4"
-          >
-            <MdSchool className="text-4xl" />
-            <h1 className="text-3xl sm:text-4xl font-bold">Study Dashboard</h1>
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg opacity-90"
-          >
-            Organize your learning journey with digital notebooks
-          </motion.p>
-        </div>
-      </div> */}
+    <div className="relative w-full min-h-[100vh] flex flex-col items-center custom-scrollbar bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 ${
+          isDark ? 'bg-blue-500' : 'bg-blue-400'
+        } blur-3xl animate-pulse`}></div>
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-20 ${
+          isDark ? 'bg-purple-500' : 'bg-purple-400'
+        } blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
+      </div>
 
       {/* Empty state if no subjects */}
       {addtodo.length === 0 && (
@@ -173,8 +162,7 @@ export default function AddSubjectName() {
               className="mb-8"
             >
               <div className="relative mx-auto w-32 h-32 mb-6">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
-                <Image
+               <Image
                   src="/images/workspace/create/box.png"
                   alt="no notes"
                   width={128}
@@ -213,7 +201,7 @@ export default function AddSubjectName() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={subjecthandle}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-60"
             />
             
             {/* Modal */}
@@ -224,7 +212,7 @@ export default function AddSubjectName() {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
               className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 max-w-[90vw] z-50 border border-gray-200 dark:border-gray-700"
+                bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 max-w-[90vw] z-80 border border-gray-200 dark:border-gray-700"
             >
               <button
                 type="button"
