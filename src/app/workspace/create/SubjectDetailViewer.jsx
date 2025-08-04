@@ -20,6 +20,7 @@ import {
   updateSavedResponses,
   setShowNotebook,
 } from "@/redux/studyToolSlice";
+import Image from "next/image";
 
 export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [hasMounted, setHasMounted] = useState(false);
@@ -42,60 +43,62 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [videoLoading, setVideoLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [showChapterInput, setShowChapterInput] = useState(false);
-const [showTopicInput, setShowTopicInput] = useState('');
-const [expandedChapters, setExpandedChapters] = useState({});
-const [chapterInput, setChapterInput] = useState('');
-const [topicInput, setTopicInput] = useState('');
+  const [showTopicInput, setShowTopicInput] = useState("");
+  const [expandedChapters, setExpandedChapters] = useState({});
+  const [chapterInput, setChapterInput] = useState("");
+  const [topicInput, setTopicInput] = useState("");
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const isSubjectbarOpen = useSelector((state) => state.subjectbar.isSubjectbarOpen);
+  const isSubjectbarOpen = useSelector(
+    (state) => state.subjectbar.isSubjectbarOpen
+  );
   const { isDark } = useSelector((state) => state.theme);
   const savedResponses = useSelector((state) => state.studyTool.savedResponses);
   const showNotebook = useSelector((state) => state.studyTool.showNotebook);
 
   const handleAddChapter = () => {
-  if (!chapterInput.trim()) return;
-  
-  setChapterTopics((prev) => {
-    const curr = { ...prev };
-    curr[chapterInput] = [];
-    return curr;
-  });
-  
-  setExpandedChapters(prev => ({
-    ...prev,
-    [chapterInput]: true
-  }));
-  
-  setChapterInput('');
-  setShowChapterInput(false);
-  setShowTopicInput(chapterInput);
-};
+    if (!chapterInput.trim()) return;
 
-// Add this function to handle adding topics
-const handleAddTopicToChapter = (chapterName) => {
-  if (!topicInput.trim()) return;
-  
-  setChapterTopics((prev) => {
-    const curr = { ...prev };
-    if (!curr[chapterName]) curr[chapterName] = [];
-    if (!curr[chapterName].includes(topicInput)) curr[chapterName].push(topicInput);
-    return curr;
-  });
-  
-  setTopicInput('');
-  setShowTopicInput('');
-};
+    setChapterTopics((prev) => {
+      const curr = { ...prev };
+      curr[chapterInput] = [];
+      return curr;
+    });
 
-// Add this function to toggle chapter expansion
-const toggleChapter = (chapterName) => {
-  setExpandedChapters(prev => ({
-    ...prev,
-    [chapterName]: !prev[chapterName]
-  }));
-};
+    setExpandedChapters((prev) => ({
+      ...prev,
+      [chapterInput]: true,
+    }));
 
+    setChapterInput("");
+    setShowChapterInput(false);
+    setShowTopicInput(chapterInput);
+  };
+
+  // Add this function to handle adding topics
+  const handleAddTopicToChapter = (chapterName) => {
+    if (!topicInput.trim()) return;
+
+    setChapterTopics((prev) => {
+      const curr = { ...prev };
+      if (!curr[chapterName]) curr[chapterName] = [];
+      if (!curr[chapterName].includes(topicInput))
+        curr[chapterName].push(topicInput);
+      return curr;
+    });
+
+    setTopicInput("");
+    setShowTopicInput("");
+  };
+
+  // Add this function to toggle chapter expansion
+  const toggleChapter = (chapterName) => {
+    setExpandedChapters((prev) => ({
+      ...prev,
+      [chapterName]: !prev[chapterName],
+    }));
+  };
 
   const openSubjectbar = () => {
     dispatch(toggleSubjectbar());
@@ -107,7 +110,10 @@ const toggleChapter = (chapterName) => {
 
     if (!apiKey) {
       console.error("YouTube API key is not configured.");
-      setVideo({ error: "YouTube API key is missing. Please add NEXT_PUBLIC_YOUTUBE_API_KEY to your environment variables." });
+      setVideo({
+        error:
+          "YouTube API key is missing. Please add NEXT_PUBLIC_YOUTUBE_API_KEY to your environment variables.",
+      });
       return;
     }
 
@@ -116,7 +122,7 @@ const toggleChapter = (chapterName) => {
       "Traversy Media": "UC29ju8bIPH5as8OGnQzwJyA",
       "freeCodeCamp.org": "UC8butISFwT-Wl7EV0hUK0BQ",
       "The Net Ninja": "UCW5YeuERMmlnqo4oq8vwUpg",
-      "Academind": "UCSJbGtTlrDami-tDGPUV9-w",
+      Academind: "UCSJbGtTlrDami-tDGPUV9-w",
     };
 
     try {
@@ -141,7 +147,9 @@ const toggleChapter = (chapterName) => {
 
       if (videos.length === 0) {
         console.warn(`No videos found for topic: ${topic}`);
-        setVideo({ error: `No educational videos found for "${topic}". Try a different search term.` });
+        setVideo({
+          error: `No educational videos found for "${topic}". Try a different search term.`,
+        });
         return;
       }
 
@@ -162,17 +170,20 @@ const toggleChapter = (chapterName) => {
         );
       });
 
-      const bestVideo = reputableVideos.length > 0
-        ? reputableVideos[0]
-        : qualityVideos.length > 0
-        ? qualityVideos[0]
-        : videos[0];
+      const bestVideo =
+        reputableVideos.length > 0
+          ? reputableVideos[0]
+          : qualityVideos.length > 0
+          ? qualityVideos[0]
+          : videos[0];
 
       setVideo({
         title: bestVideo.snippet.title,
         url: `https://www.youtube.com/watch?v=${bestVideo.id.videoId}`,
         channel: bestVideo.snippet.channelTitle,
-        thumbnail: bestVideo.snippet.thumbnails?.medium?.url || bestVideo.snippet.thumbnails?.default?.url,
+        thumbnail:
+          bestVideo.snippet.thumbnails?.medium?.url ||
+          bestVideo.snippet.thumbnails?.default?.url,
         description: bestVideo.snippet.description?.slice(0, 100) + "..." || "",
       });
 
@@ -181,11 +192,19 @@ const toggleChapter = (chapterName) => {
       console.error("Error fetching YouTube video:", error);
 
       if (error.response?.status === 403) {
-        setVideo({ error: "YouTube API quota exceeded or invalid API key. Please check your API key and quota limits." });
+        setVideo({
+          error:
+            "YouTube API quota exceeded or invalid API key. Please check your API key and quota limits.",
+        });
       } else if (error.response?.status === 400) {
-        setVideo({ error: "Invalid search parameters. Please try a different topic." });
+        setVideo({
+          error: "Invalid search parameters. Please try a different topic.",
+        });
       } else if (error.code === "ECONNABORTED") {
-        setVideo({ error: "Request timed out. Please check your internet connection and try again." });
+        setVideo({
+          error:
+            "Request timed out. Please check your internet connection and try again.",
+        });
       } else {
         setVideo({ error: `Failed to fetch video: ${error.message}` });
       }
@@ -226,7 +245,9 @@ const toggleChapter = (chapterName) => {
     localStorage.setItem("currentSubject", selectedSubject);
 
     const allTopics = JSON.parse(localStorage.getItem("chapterTopics") || "{}");
-    const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+    const allResponses = JSON.parse(
+      localStorage.getItem("savedResponses") || "{}"
+    );
 
     if (!allTopics[selectedSubject]) allTopics[selectedSubject] = {};
     if (!allResponses[selectedSubject]) allResponses[selectedSubject] = {};
@@ -234,7 +255,10 @@ const toggleChapter = (chapterName) => {
     setChapterTopics(allTopics[selectedSubject] || {});
     dispatch(setSavedResponses(allResponses[selectedSubject] || {}));
 
-    localStorage.setItem("study_tool_responses", JSON.stringify(allResponses[selectedSubject] || {}));
+    localStorage.setItem(
+      "study_tool_responses",
+      JSON.stringify(allResponses[selectedSubject] || {})
+    );
 
     setSelected({ chapter: "", topic: "" });
     setAiResponse("");
@@ -259,146 +283,165 @@ const toggleChapter = (chapterName) => {
   }, [chapterTopics, hasMounted, selectedSubject]);
 
   // Fixed fetchAIResponse function with better object handling
-  const fetchAIResponse = useCallback(async (chapter, topic, forceRefresh = false) => {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  const fetchAIResponse = useCallback(
+    async (chapter, topic, forceRefresh = false) => {
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-    if (!apiKey) {
-      setAiResponse("❌ Gemini API key is not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your environment variables.");
-      setApiError("Missing API key");
-      return;
-    }
-
-    // Check if we already have a cached response and don't need to force refresh
-    if (!forceRefresh && savedResponses[chapter]?.[topic]) {
-      console.log("Using cached response for:", chapter, topic);
-      setAiResponse(savedResponses[chapter][topic]);
-      return;
-    }
-
-    setLoading(true);
-    setApiError("");
-    setAiResponse(""); // Clear previous response
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-    try {
-      // Modified prompt based on onlyDefinition and includeExamples toggles
-      let prompt = "";
-      if (onlyDefinition) {
-        prompt = `Please provide a concise definition of the topic "${topic}" from the chapter "${chapter}". Keep it brief and to the point, focusing only on what it is and its key characteristics.`;
-      } else {
-        prompt = `Please provide a comprehensive explanation of the topic "${topic}" from the chapter "${chapter}".`;
-        if (includeExamples) {
-          prompt += ` Include practical examples to illustrate the concept, ensuring the examples are relevant to the topic and chapter.`;
-        }
+      if (!apiKey) {
+        setAiResponse(
+          "❌ Gemini API key is not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your environment variables."
+        );
+        setApiError("Missing API key");
+        return;
       }
 
-      const requestBody = {
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: onlyDefinition ? 256 : 1024,
-        },
-      };
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal,
-        }
-      );
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        let errorData = {};
-        try {
-          errorData = await response.json();
-        } catch (e) {
-          console.warn("Could not parse error response as JSON");
-        }
-        throw new Error(`HTTP ${response.status}: ${errorData.error?.message || response.statusText}`);
+      // Check if we already have a cached response and don't need to force refresh
+      if (!forceRefresh && savedResponses[chapter]?.[topic]) {
+        console.log("Using cached response for:", chapter, topic);
+        setAiResponse(savedResponses[chapter][topic]);
+        return;
       }
 
-      let data = {};
+      setLoading(true);
+      setApiError("");
+      setAiResponse(""); // Clear previous response
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error("Invalid JSON response from API");
+        // Modified prompt based on onlyDefinition and includeExamples toggles
+        let prompt = "";
+        if (onlyDefinition) {
+          prompt = `Please provide a concise definition of the topic "${topic}" from the chapter "${chapter}". Keep it brief and to the point, focusing only on what it is and its key characteristics.`;
+        } else {
+          prompt = `Please provide a comprehensive explanation of the topic "${topic}" from the chapter "${chapter}".`;
+          if (includeExamples) {
+            prompt += ` Include practical examples to illustrate the concept, ensuring the examples are relevant to the topic and chapter.`;
+          }
+        }
+
+        const requestBody = {
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: onlyDefinition ? 256 : 1024,
+          },
+        };
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal,
+          }
+        );
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          let errorData = {};
+          try {
+            errorData = await response.json();
+          } catch (e) {
+            console.warn("Could not parse error response as JSON");
+          }
+          throw new Error(
+            `HTTP ${response.status}: ${
+              errorData.error?.message || response.statusText
+            }`
+          );
+        }
+
+        let data = {};
+        try {
+          data = await response.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from API");
+        }
+
+        if (
+          !data.candidates ||
+          !data.candidates[0] ||
+          !data.candidates[0].content
+        ) {
+          throw new Error("Invalid response format from Gemini API");
+        }
+
+        const text =
+          data.candidates[0].content.parts[0].text || "No response generated.";
+
+        if (text.includes("I can't") || text.includes("I cannot")) {
+          throw new Error("AI declined to provide information");
+        }
+
+        setAiResponse(text);
+
+        // Create a completely new object to avoid extensibility issues
+        const currentResponses = JSON.parse(JSON.stringify(savedResponses));
+        if (!currentResponses[chapter]) {
+          currentResponses[chapter] = {};
+        }
+        currentResponses[chapter][topic] = text;
+
+        dispatch(setSavedResponses(currentResponses));
+
+        // Update localStorage with fresh object
+        const allResponses = JSON.parse(
+          localStorage.getItem("savedResponses") || "{}"
+        );
+        if (!allResponses[selectedSubject]) {
+          allResponses[selectedSubject] = {};
+        }
+        allResponses[selectedSubject] = currentResponses;
+
+        localStorage.setItem("savedResponses", JSON.stringify(allResponses));
+        localStorage.setItem(
+          "study_tool_responses",
+          JSON.stringify(currentResponses)
+        );
+
+        console.log("AI response fetched successfully for:", chapter, topic);
+      } catch (error) {
+        console.error("Error fetching AI response:", error);
+
+        let errorMessage = "❌ Failed to get AI response. ";
+
+        if (error.name === "AbortError") {
+          errorMessage += "Request timed out. Please try again.";
+        } else if (error.message.includes("403")) {
+          errorMessage += "API key is invalid or quota exceeded.";
+        } else if (error.message.includes("429")) {
+          errorMessage += "Too many requests. Please wait and try again.";
+        } else if (error.message.includes("400")) {
+          errorMessage += "Invalid request format.";
+        } else {
+          errorMessage += error.message || "Unknown error occurred.";
+        }
+
+        setAiResponse(errorMessage);
+        setApiError(error.message);
+      } finally {
+        setLoading(false);
       }
-
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        throw new Error("Invalid response format from Gemini API");
-      }
-
-      const text = data.candidates[0].content.parts[0].text || "No response generated.";
-
-      if (text.includes("I can't") || text.includes("I cannot")) {
-        throw new Error("AI declined to provide information");
-      }
-
-      setAiResponse(text);
-
-      // Create a completely new object to avoid extensibility issues
-      const currentResponses = JSON.parse(JSON.stringify(savedResponses));
-      if (!currentResponses[chapter]) {
-        currentResponses[chapter] = {};
-      }
-      currentResponses[chapter][topic] = text;
-
-      dispatch(setSavedResponses(currentResponses));
-
-      // Update localStorage with fresh object
-      const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
-      if (!allResponses[selectedSubject]) {
-        allResponses[selectedSubject] = {};
-      }
-      allResponses[selectedSubject] = currentResponses;
-      
-      localStorage.setItem("savedResponses", JSON.stringify(allResponses));
-      localStorage.setItem("study_tool_responses", JSON.stringify(currentResponses));
-
-      console.log("AI response fetched successfully for:", chapter, topic);
-    } catch (error) {
-      console.error("Error fetching AI response:", error);
-
-      let errorMessage = "❌ Failed to get AI response. ";
-
-      if (error.name === "AbortError") {
-        errorMessage += "Request timed out. Please try again.";
-      } else if (error.message.includes("403")) {
-        errorMessage += "API key is invalid or quota exceeded.";
-      } else if (error.message.includes("429")) {
-        errorMessage += "Too many requests. Please wait and try again.";
-      } else if (error.message.includes("400")) {
-        errorMessage += "Invalid request format.";
-      } else {
-        errorMessage += error.message || "Unknown error occurred.";
-      }
-
-      setAiResponse(errorMessage);
-      setApiError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [savedResponses, dispatch, selectedSubject, onlyDefinition, includeExamples]);
+    },
+    [savedResponses, dispatch, selectedSubject, onlyDefinition, includeExamples]
+  );
 
   // Effect for fetching AI response when selected topic changes
   useEffect(() => {
@@ -408,10 +451,10 @@ const toggleChapter = (chapterName) => {
     }
 
     console.log("Selected changed:", selected.chapter, selected.topic);
-    
+
     // Check if we have a cached response
     const existingResponse = savedResponses[selected.chapter]?.[selected.topic];
-    
+
     if (existingResponse) {
       console.log("Found cached response");
       setAiResponse(existingResponse);
@@ -427,7 +470,7 @@ const toggleChapter = (chapterName) => {
       setVideo(null);
       return;
     }
-    
+
     fetchYouTubeVideo(selected.topic);
   }, [selected.topic, fetchYouTubeVideo]);
 
@@ -442,20 +485,25 @@ const toggleChapter = (chapterName) => {
   const handleAddTopic = (e) => {
     e.preventDefault();
     if (!chapter.trim() || !topic.trim()) return;
-    
+
     setChapterTopics((prev) => {
       const curr = { ...prev };
       if (!curr[chapter]) curr[chapter] = [];
       if (!curr[chapter].includes(topic)) curr[chapter].push(topic);
       return curr;
     });
-    
+
     setChapter("");
     setTopic("");
   };
 
   const handleDeleteTopic = (chapName, topicName) => {
-    if (!confirm(`Are you sure you want to delete topic "${topicName}" from chapter "${chapName}"?`)) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete topic "${topicName}" from chapter "${chapName}"?`
+      )
+    )
+      return;
 
     setChapterTopics((prev) => {
       const curr = { ...prev };
@@ -473,7 +521,9 @@ const toggleChapter = (chapterName) => {
 
     dispatch(setSavedResponses(updated));
 
-    const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+    const allResponses = JSON.parse(
+      localStorage.getItem("savedResponses") || "{}"
+    );
     allResponses[selectedSubject] = updated;
     localStorage.setItem("savedResponses", JSON.stringify(allResponses));
     localStorage.setItem("study_tool_responses", JSON.stringify(updated));
@@ -506,7 +556,9 @@ const toggleChapter = (chapterName) => {
       delete updated[chap][oldT];
       dispatch(setSavedResponses(updated));
 
-      const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+      const allResponses = JSON.parse(
+        localStorage.getItem("savedResponses") || "{}"
+      );
       allResponses[selectedSubject] = updated;
       localStorage.setItem("savedResponses", JSON.stringify(allResponses));
       localStorage.setItem("study_tool_responses", JSON.stringify(updated));
@@ -554,13 +606,16 @@ const toggleChapter = (chapterName) => {
   };
 
   const clearAllSubjectData = () => {
-    if (!confirm("Are you sure you want to clear all data for this subject?")) return;
+    if (!confirm("Are you sure you want to clear all data for this subject?"))
+      return;
 
     setChapterTopics({});
     dispatch(setSavedResponses({}));
 
     const allTopics = JSON.parse(localStorage.getItem("chapterTopics") || "{}");
-    const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+    const allResponses = JSON.parse(
+      localStorage.getItem("savedResponses") || "{}"
+    );
 
     delete allTopics[selectedSubject];
     delete allResponses[selectedSubject];
@@ -578,7 +633,10 @@ const toggleChapter = (chapterName) => {
 
   const debugLocalStorage = () => {
     console.log("=== DEBUG localStorage ===");
-    console.log("study_tool_responses:", localStorage.getItem("study_tool_responses"));
+    console.log(
+      "study_tool_responses:",
+      localStorage.getItem("study_tool_responses")
+    );
     console.log("savedResponses:", localStorage.getItem("savedResponses"));
     console.log("currentSubject:", localStorage.getItem("currentSubject"));
     console.log("Redux savedResponses:", savedResponses);
@@ -676,11 +734,16 @@ const toggleChapter = (chapterName) => {
                   <p>Generating AI explanation...</p>
                 </div>
               ) : aiResponse ? (
-                <div id="notebook-content" className="prose max-w-none whitespace-pre-wrap">
+                <div
+                  id="notebook-content"
+                  className="prose max-w-none whitespace-pre-wrap"
+                >
                   <ReactMarkdown>{aiResponse}</ReactMarkdown>
                 </div>
               ) : (
-                <p className="text-gray-500">Click on a topic to get AI explanation...</p>
+                <p className="text-gray-500">
+                  Click on a topic to get AI explanation...
+                </p>
               )}
             </div>
 
@@ -712,9 +775,13 @@ const toggleChapter = (chapterName) => {
                       >
                         {video.title}
                       </a>
-                      <p className="text-gray-600 text-sm">by {video.channel}</p>
+                      <p className="text-gray-600 text-sm">
+                        by {video.channel}
+                      </p>
                       {video.description && (
-                        <p className="text-gray-500 text-xs">{video.description}</p>
+                        <p className="text-gray-500 text-xs">
+                          {video.description}
+                        </p>
                       )}
                     </div>
                   )}
@@ -744,9 +811,23 @@ const toggleChapter = (chapterName) => {
             </div>
           </>
         ) : (
-          <p className="text-gray-600 text-lg p-4  h-[100vh] flex justify-center items-center">
-            Please select a chapter and topic from the sidebar to view its
-            AI-generated explanation. 👉
+          <p className="text-gray-600 relative text-lg p-4  h-[100vh] flex justify-center items-center">
+            <Image
+              src={"/images/homepage/navbar/DN.png"}
+              alt=""
+              className="opacity-10 rounded-2xl"
+              height={200}
+              width={200}
+            />
+               {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 ${
+          isDark ? 'bg-blue-500' : 'bg-blue-400'
+        } blur-3xl animate-pulse`}></div>
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-20 ${
+          isDark ? 'bg-purple-500' : 'bg-purple-400'
+        } blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
+      </div>
           </p>
         )}
       </div>
@@ -782,195 +863,229 @@ const toggleChapter = (chapterName) => {
         </div>
 
         <>
-  {/* Add Chapter Button - Only show if no chapters exist */}
-  {!showChapterInput && Object.keys(chapterTopics).length === 0 && (
-    <button
-      onClick={() => setShowChapterInput(true)}
-      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4"
-    >
-      <span className="text-lg">+</span>
-      Add Chapter
-    </button>
-  )}
+          {/* Add Chapter Button - Only show if no chapters exist */}
+          {!showChapterInput && Object.keys(chapterTopics).length === 0 && (
+            <button
+              onClick={() => setShowChapterInput(true)}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4"
+            >
+              <span className="text-lg">+</span>
+              Add Chapter
+            </button>
+          )}
 
-
-
-  {/* Chapters and Topics Display */}
-  <div className="space-y-4 ">
-    {Object.entries(chapterTopics).map(([chapterName, topics]) => (
-      <div key={chapterName} className="border rounded-lg border-gray-600">
-        {/* Chapter Header */}
-        <div
-          onClick={() => toggleChapter(chapterName)}
-          className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg"
-        >
-          <h3 className="font-semibold text-blue-600">{chapterName}</h3>
-          <span className="text-gray-500">
-            {expandedChapters[chapterName] ? '▼' : '▶'}
-          </span>
-        </div>
-
-        {/* Expanded Chapter Content */}
-        {(expandedChapters[chapterName] !== false) && (
-          <div className="border-t border-gray-600 px-3 pb-3">
-            {/* Topics List */}
-            <div className="space-y-1 mt-2">
-              {topics.map((topicName) => (
-                <div
-                  key={topicName}
-                  className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
-                    selected.chapter === chapterName && selected.topic === topicName
-                      ? "bg-blue-100 dark:bg-blue-900/30 "
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  {editing.chapter === chapterName && editing.topic === topicName ? (
-                    <div className="flex-1 flex gap-2">
-                      <input
-                        value={editing.value}
-                        onChange={(e) => setEditing(prev => ({ ...prev, value: e.target.value }))}
-                        className="flex-1 px-1 py-1 w-10 rounded text-sm outline-none bg-slate-700 border border-slate-600"
-                        onKeyPress={(e) => e.key === "Enter" && saveEdit()}
-                        autoFocus
-                      />
-                      <button
-                        onClick={saveEdit}
-                        className="text-green-600 hover:text-green-800 text-lg"
-                      >
-                        ✓
-                      </button>
-                      <button
-                        onClick={() => setEditing({ chapter: "", topic: "", value: "" })}
-                        className="text-red-600 hover:text-red-800 text-lg"
-                      >
-                        ✗
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <span
-                        onClick={() => setSelected({ chapter: chapterName, topic: topicName })}
-                        className="flex-1 text-sm text-gray-700 dark:text-gray-300"
-                      >
-                        {topicName}
-                      </span>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => startEdit(chapterName, topicName)}
-                          className="text-blue-600 hover:text-blue-800 text-xs"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDeleteTopic(chapterName, topicName)}
-                          className="text-red-600 hover:text-red-800 text-xs"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Topic Input */}
-            {showTopicInput === chapterName ? (
-              <div className="mt-3">
-                <label className="block text-sm font-medium mb-2">Topic Name</label>
-                <div className="flex gap-2">
-                  <input
-                    value={topicInput}
-                    onChange={(e) => setTopicInput(e.target.value)}
-                    placeholder="Enter topic name"
-                    className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddTopicToChapter(chapterName)}
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => handleAddTopicToChapter(chapterName)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg"
-                  >
-                    ✓
-                  </button>
-                  <button
-                    onClick={() => {
-                      setTopicInput('');
-                      setShowTopicInput('');
-                    }}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
-                  >
-                    ✗
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowTopicInput(chapterName)}
-                className="w-full mt-3 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+          {/* Chapters and Topics Display */}
+          <div className="space-y-4 ">
+            {Object.entries(chapterTopics).map(([chapterName, topics]) => (
+              <div
+                key={chapterName}
+                className="border rounded-lg border-gray-600"
               >
-                <span>+</span>
-                Add Topic
+                {/* Chapter Header */}
+                <div
+                  onClick={() => toggleChapter(chapterName)}
+                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg"
+                >
+                  <h3 className="font-semibold text-blue-600">{chapterName}</h3>
+                  <span className="text-gray-500">
+                    {expandedChapters[chapterName] ? "▼" : "▶"}
+                  </span>
+                </div>
+
+                {/* Expanded Chapter Content */}
+                {expandedChapters[chapterName] !== true && (
+                  <div className="border-t border-gray-600 px-3 pb-3">
+                    {/* Topics List */}
+                    <div className="space-y-1 mt-2">
+                      {topics.map((topicName) => (
+                        <div
+                          key={topicName}
+                          className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
+                            selected.chapter === chapterName &&
+                            selected.topic === topicName
+                              ? "bg-blue-100 dark:bg-blue-900/30 "
+                              : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                          }`}
+                        >
+                          {editing.chapter === chapterName &&
+                          editing.topic === topicName ? (
+                            <div className="flex-1 flex gap-2">
+                              <input
+                                value={editing.value}
+                                onChange={(e) =>
+                                  setEditing((prev) => ({
+                                    ...prev,
+                                    value: e.target.value,
+                                  }))
+                                }
+                                className="flex-1 px-1 py-1 w-10 rounded text-sm outline-none bg-slate-700 border border-slate-600"
+                                onKeyPress={(e) =>
+                                  e.key === "Enter" && saveEdit()
+                                }
+                                autoFocus
+                              />
+                              <button
+                                onClick={saveEdit}
+                                className="text-green-600 hover:text-green-800 text-lg"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                onClick={() =>
+                                  setEditing({
+                                    chapter: "",
+                                    topic: "",
+                                    value: "",
+                                  })
+                                }
+                                className="text-red-600 hover:text-red-800 text-lg"
+                              >
+                                ✗
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <span
+                                onClick={() =>
+                                  setSelected({
+                                    chapter: chapterName,
+                                    topic: topicName,
+                                  })
+                                }
+                                className="flex-1 text-sm text-gray-700 dark:text-gray-300"
+                              >
+                                {topicName}
+                              </span>
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={() =>
+                                    startEdit(chapterName, topicName)
+                                  }
+                                  className="text-blue-600 hover:text-blue-800 text-xs"
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteTopic(chapterName, topicName)
+                                  }
+                                  className="text-red-600 hover:text-red-800 text-xs"
+                                >
+                                  🗑️
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Topic Input */}
+                    {showTopicInput === chapterName ? (
+                      <div className="mt-3">
+                        <label className="block text-sm font-medium mb-2">
+                          Topic Name
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            value={topicInput}
+                            onChange={(e) => setTopicInput(e.target.value)}
+                            placeholder="Enter topic name"
+                            className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+                            onKeyPress={(e) =>
+                              e.key === "Enter" &&
+                              handleAddTopicToChapter(chapterName)
+                            }
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => handleAddTopicToChapter(chapterName)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => {
+                              setTopicInput("");
+                              setShowTopicInput("");
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
+                          >
+                            ✗
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowTopicInput(chapterName)}
+                        className="w-full mt-3 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+                      >
+                        <span>+</span>
+                        Add Topic
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Chapter Input */}
+          {showChapterInput && (
+            <div className="border my-6 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 mb-4">
+              <label className="block text-sm font-medium mb-2">
+                Chapter Name
+              </label>
+              <div className="flex gap-2">
+                <input
+                  value={chapterInput}
+                  onChange={(e) => setChapterInput(e.target.value)}
+                  placeholder="Enter chapter name"
+                  className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  onKeyPress={(e) => e.key === "Enter" && handleAddChapter()}
+                  autoFocus
+                />
+                <button
+                  onClick={handleAddChapter}
+                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg"
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={() => {
+                    setChapterInput("");
+                    setShowChapterInput(false);
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
+                >
+                  ✗
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Add Another Chapter Button (only show if chapters exist and no input is open) */}
+          {Object.keys(chapterTopics).length > 0 &&
+            !showChapterInput &&
+            !showTopicInput && (
+              <button
+                onClick={() => setShowChapterInput(true)}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mt-4"
+              >
+                <span className="text-lg">+</span>
+                Add Another Chapter
               </button>
             )}
-          </div>
-        )}
-      </div>
-    ))}
-  </div>
+        </>
 
-    {/* Chapter Input */}
-  {showChapterInput && (
-    <div className="border my-6 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 mb-4">
-      <label className="block text-sm font-medium mb-2">Chapter Name</label>
-      <div className="flex gap-2">
-        <input
-          value={chapterInput}
-          onChange={(e) => setChapterInput(e.target.value)}
-          placeholder="Enter chapter name"
-          className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-          onKeyPress={(e) => e.key === 'Enter' && handleAddChapter()}
-          autoFocus
-        />
-        <button
-          onClick={handleAddChapter}
-          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg"
-        >
-          ✓
-        </button>
-        <button
-          onClick={() => {
-            setChapterInput('');
-            setShowChapterInput(false);
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg"
-        >
-          ✗
-        </button>
-      </div>
-    </div>
-  )}
-
-  {/* Add Another Chapter Button (only show if chapters exist and no input is open) */}
-  {Object.keys(chapterTopics).length > 0 && !showChapterInput && !showTopicInput && (
-    <button
-      onClick={() => setShowChapterInput(true)}
-      className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mt-4"
-    >
-      <span className="text-lg">+</span>
-      Add Another Chapter
-    </button>
-  )}
-</>
-
-       <div className="mt-6 space-y-2">
-         <button
-           onClick={openNotebook}
-           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-         >
+        <div className="mt-6 space-y-2">
+          <button
+            onClick={openNotebook}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+          >
             Open Notebook
-         </button>
-         {/* <button
+          </button>
+          {/* <button
            onClick={clearAllSubjectData}
            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm"
          >
@@ -982,8 +1097,8 @@ const toggleChapter = (chapterName) => {
          >
            🐛 Debug Storage
          </button> */}
-       </div>
-     </div>
-   </div>
- );
+        </div>
+      </div>
+    </div>
+  );
 }

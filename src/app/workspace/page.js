@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setTheme, setThemeLoaded } from "@/redux/themeSlice";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { motion } from "framer-motion";
+import { FaPencil } from "react-icons/fa6";
 
 
 
@@ -12,6 +13,19 @@ export default function Page() {
   const dispatch = useDispatch();
   const { isDark, isThemeLoaded } = useSelector((state) => state.theme);
   const [isVisible, setIsVisible] = useState(false);
+
+    const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.2,
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    }),
+  };
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
@@ -64,13 +78,36 @@ export default function Page() {
         workflows and maximize outcomes.
       </p>
 
-         <Link
-        href="/workspace/create"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg text-base font-medium shadow hover:bg-blue-700 transition"
-      >
-        <Plus size={18} />
-        Make Digital Notebook
-      </Link>
+         <motion.div
+                  custom={2}
+                  initial="hidden"
+                  animate="visible"
+                  variants={fadeInUp}
+                  className=" flex justify-center  "
+                >
+                  <Link href="/workspace/create" passHref>
+                    <button
+                      className="group flex items-center relative justify-center gap-2 p-1 pl-4 text-white 
+            bg-gradient-to-r from-green-500 to-blue-500 
+            hover:from-green-500 hover:to-blue-500 
+             text-base rounded-full border border-blue-500
+            shadow-md hover:shadow-xl hover:scale-105 hover:border-blue-800 
+            transition-all duration-300 
+            focus:outline-none focus:ring-4 focus:ring-blue-300/50 active:scale-95"
+                      role="button"
+                      aria-label="Create a new digital notebook"
+                    >
+                      Create Digital Notebook
+                      {/* Pencil Icon with group-hover animation */}
+                      <div
+                        className="bg-purple-500 rounded-full text-gray-200 p-2 transform transition-transform duration-300 
+              group-hover:rotate-45 "
+                      >
+                        <FaPencil size={28} />
+                      </div>
+                    </button>
+                  </Link>
+                </motion.div>
     </div>
 
      
