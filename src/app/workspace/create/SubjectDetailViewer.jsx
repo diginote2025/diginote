@@ -815,9 +815,9 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
             <Image
               src={"/images/homepage/navbar/DN.png"}
               alt=""
-              className="opacity-10 rounded-2xl"
-              height={200}
-              width={200}
+              className="opacity-10 rounded-2xl max-lg:w-30 max-lg:h-30"
+              height={150}
+              width={150}
             />
                {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
