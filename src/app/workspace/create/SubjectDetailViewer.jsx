@@ -847,7 +847,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
               }`
         }`}
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold flex flex-col py-2">
             <p>
               Subject:{" "}
@@ -867,7 +867,9 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
           {!showChapterInput && Object.keys(chapterTopics).length === 0 && (
             <button
               onClick={() => setShowChapterInput(true)}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600
+               to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4
+                rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4"
             >
               <span className="text-lg">+</span>
               Add Chapter
