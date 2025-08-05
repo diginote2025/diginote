@@ -806,7 +806,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                 onClick={downloadPDF}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
               >
-                📄 Download PDF
+                📄 Download PDF 
               </button>
             </div>
           </>
@@ -819,15 +819,20 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
               height={150}
               width={150}
             />
-               {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 ${
-          isDark ? 'bg-blue-500' : 'bg-blue-400'
-        } blur-3xl animate-pulse`}></div>
-        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-20 ${
-          isDark ? 'bg-purple-500' : 'bg-purple-400'
-        } blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
-      </div>
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div
+                className={`absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 ${
+                  isDark ? "bg-blue-500" : "bg-blue-400"
+                } blur-3xl animate-pulse`}
+              ></div>
+              <div
+                className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-20 ${
+                  isDark ? "bg-purple-500" : "bg-purple-400"
+                } blur-3xl animate-pulse`}
+                style={{ animationDelay: "1s" }}
+              ></div>
+            </div>
           </p>
         )}
       </div>
