@@ -795,19 +795,19 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                 onClick={startQuiz}
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl transition-colors"
               >
-                🧪 Practice MCQs
+                Practice MCQs
               </button>
               <button
                 onClick={takeATest}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
               >
-                📝 Take a Test
+                Take a Test
               </button>
               <button
                 onClick={downloadPDF}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
               >
-                📄 Download PDF 
+                Download PDF 
               </button>
             </div>
           </>
