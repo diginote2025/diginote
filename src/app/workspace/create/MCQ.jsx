@@ -155,9 +155,9 @@ Do not include explanations, numbering, or extra formatting.`,
 
   const optionBg = (key) =>
     selectedOption === key
-      ? "border-blue-500 bg-blue-100 dark:bg-blue-900"
+      ? "border-blue-500 bg-blue-100 dark:bg-blue-100 "
       : isDark
-      ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600"
+      ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600 "
       : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100";
 
   const baseBg = isDark
@@ -274,13 +274,13 @@ Do not include explanations, numbering, or extra formatting.`,
                 </h3>
 
                 {/* Options */}
-                <div className="space-y-3 mb-8">
+                <div className="space-y-3 mb-8 ">
                   {Object.entries(mcqs[currentIndex]?.options || {}).map(([key, value]) => (
                     <motion.label
                       key={key}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${optionBg(key)}`}
+                      className={`flex items-center gap-4 p-4  rounded-xl border-2 cursor-pointer transition-all duration-200 ${optionBg(key)}`}
                     >
                       <input
                         type="radio"
