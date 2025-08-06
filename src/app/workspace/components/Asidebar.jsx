@@ -232,7 +232,7 @@ export default function Asidebar({ setActive, active }) {
                   }
               
                   ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"}
-                  min-h-[44px] lg:min-h-[48px]
+                  min-h-[44px] lg:min-h-[44px]
                 `}
               >
                 {/* Active indicator */}
