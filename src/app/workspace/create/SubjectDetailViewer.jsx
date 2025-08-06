@@ -697,7 +697,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
               </button>
             </div> */}
             {!quizFinished ? (
-              <MCQ selected={selected} takeAMCQ={takeAMCQ} />
+              <MCQ selected={selected} takeAMCQ={takeAMCQ} aiResponse={aiResponse} isDark={isDark} />
             ) : (
               <>
                 <p className="text-xl font-semibold text-blue-600">
@@ -713,7 +713,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
             )}
           </>
         ) : takeTest ? (
-          <TakeTest selected={selected} takeATest={takeATest} />
+          <TakeTest selected={selected} takeATest={takeATest} aiResponse={aiResponse} isDark={isDark} />
         ) : selected.topic ? (
           <>
             <div className="mb-6 border-b pb-3 px-4 py-20">

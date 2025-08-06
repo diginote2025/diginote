@@ -15,7 +15,7 @@ import rehypeRaw from "rehype-raw";
 
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyA31o-dTbqh99GFesdP1ePILTiV4TvXVSE`;
 
-export default function TakeTest({ topic, onBack, selected, takeATest }) {
+export default function TakeTest({ topic, onBack, selected, takeATest, aiResponse, isDark }) {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
@@ -55,7 +55,7 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
 
   useEffect(() => {
     const fetchQuestions = async () => {
-      const prompt = `You are a test maker. Create 10 numbered basic test questions on the topic "${selected.topic}". Format clearly like:\n1. What is ...?\n2. Explain ...\n3. How does ...`;
+      const prompt = `You are a test maker. Create 10 numbered basic test questions according to this "${aiResponse}". Format clearly like:\n1. What is ...?\n2. Explain ...\n3. How does ...`;
       const responseText = await callGemini(prompt);
       const list = responseText
         .split("\n")
@@ -69,7 +69,7 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
     };
 
     fetchQuestions();
-  }, [topic]);
+  }, [aiResponse]);
 
   const resizeTextarea = (index) => {
     const textarea = textareaRefs.current[index];
@@ -85,7 +85,7 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    const evalPrompt = `Evaluate the following test answers on the topic "${topic}". Give total marks out of 10 with detailed feedback for each answer.\n\n${questions
+    const evalPrompt = `Evaluate the following test answers on the topic "${aiResponse}". Give total marks out of 10 with detailed feedback for each answer.\n\n${questions
       .map(
         (q, i) =>
           `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`
@@ -109,64 +109,63 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
     return (answeredQuestions / questions.length) * 100;
   };
 
+  const baseBg = isDark
+    ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
+    : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50";
+
+  const cardBg = isDark ? "bg-gray-800 text-white" : "bg-white text-gray-800";
+  const borderColor = isDark ? "border-gray-700" : "border-gray-200";
+  const inputBg = isDark ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-800";
+  const progressBg = isDark ? "bg-gray-700" : "bg-gray-200";
+  const mutedText = isDark ? "text-gray-400" : "text-gray-600";
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+      <div className={`min-h-screen ${baseBg} flex items-center justify-center`}>
+        <div className={`rounded-2xl shadow-xl p-8 text-center ${cardBg}`}>
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Loader2 className="animate-spin text-blue-600" size={32} />
           </div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">
-            Preparing Your Test
-          </h3>
-          <p className="text-gray-600">
-            Generating questions on {selected.topic}...
-          </p>
+          <h3 className="text-xl font-semibold mb-2">Preparing Your Test</h3>
+          <p className={`${mutedText}`}>Generating questions on {selected.topic}...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className={`min-h-screen ${baseBg}`}>
       {/* Header */}
-      <div className=" shadow-sm border-b sticky top-0  bg-gradient-to-br from-blue-50 to-indigo-100 max-lg:pt-18 z-10">
-        <div className="max-w-4xl mx-auto px-6 py-4 bg-white ">
-          <div className="flex justify-between flex-col gap-5">
-            <div className="flex  items-center space-x-4">
+      <div className={`border-b sticky top-0 z-10 ${progressBg}`}>
+        <div className={`max-w-4xl mx-auto px-6 py-4 ${cardBg}`}>
+          <div className="flex flex-col gap-5">
+            <div className="flex items-center space-x-4">
               <button
                 onClick={takeATest}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className={`flex items-center space-x-2 ${mutedText} hover:text-white transition-colors`}
               >
                 <ArrowLeft size={20} />
               </button>
-              <div className="h-6 w-px bg-gray-300"></div>
-
-            
-              <h1 className="text-xl font-bold text-gray-800">
-                {selected.topic}
-              </h1>
+              <div className={`h-6 w-px ${borderColor}`}></div>
+              <h1 className="text-xl font-bold">{selected.topic}</h1>
             </div>
 
             <div className="flex items-center space-x-6 justify-between">
-              
-              <div className="text-sm text-gray-600">
+              <div className={`text-sm ${mutedText}`}>
                 {
                   Object.keys(answers).filter((key) => answers[key]?.trim())
                     .length
                 }{" "}
                 / {questions.length} answered
               </div>
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className={`flex items-center space-x-2 text-sm ${mutedText}`}>
                 <Clock size={16} />
                 <span>{formatTime(timeSpent)}</span>
               </div>
             </div>
-          </div>
 
-          {/* Progress Bar */}
-          <div className="mt-3">
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            {/* Progress Bar */}
+            <div className="w-full rounded-full h-2">
               <div
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${getProgressPercentage()}%` }}
@@ -182,34 +181,30 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
           {questions.map((q, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+              className={`rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow ${cardBg} ${borderColor}`}
             >
               <div className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-1 space-y-4">
-                    <p className="text-gray-800 font-bold leading-relaxed">
-                      {q}
-                    </p>
+                <p className="font-bold leading-relaxed flex gap-2">
+                  {i + 1}. <ReactMarkdown>{q}</ReactMarkdown>
+                </p>
 
-                    <div className="relative">
-                      <textarea
-                        ref={(el) => (textareaRefs.current[i] = el)}
-                        className="w-full p-4 border text-gray-600 border-gray-200 rounded-lg outline-none transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-gray-50 focus:bg-white"
-                        style={{ minHeight: "80px", maxHeight: "200px" }}
-                        placeholder="Type your answer here..."
-                        value={answers[i] || ""}
-                        onChange={(e) => {
-                          setAnswers((prev) => ({
-                            ...prev,
-                            [i]: e.target.value,
-                          }));
-                          resizeTextarea(i);
-                        }}
-                      />
-                      <div className="absolute bottom-2 right-2 text-xs text-gray-400">
-                        {answers[i]?.length || 0} characters
-                      </div>
-                    </div>
+                <div className="relative mt-4">
+                  <textarea
+                    ref={(el) => (textareaRefs.current[i] = el)}
+                    className={`w-full p-4 rounded-lg outline-none transition-all duration-200 resize-none border focus:ring-2 focus:ring-blue-500 focus:border-transparent ${inputBg} ${borderColor}`}
+                    style={{ minHeight: "80px", maxHeight: "200px" }}
+                    placeholder="Type your answer here..."
+                    value={answers[i] || ""}
+                    onChange={(e) => {
+                      setAnswers((prev) => ({
+                        ...prev,
+                        [i]: e.target.value,
+                      }));
+                      resizeTextarea(i);
+                    }}
+                  />
+                  <div className={`absolute bottom-2 right-2 text-xs ${mutedText}`}>
+                    {answers[i]?.length || 0} characters
                   </div>
                 </div>
               </div>
@@ -218,11 +213,11 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className={`rounded-xl shadow-sm border p-6 ${cardBg} ${borderColor}`}>
           <div className="flex items-center justify-between">
             <button
               onClick={onBack}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${mutedText} hover:bg-gray-100`}
             >
               <ArrowLeft size={16} />
               <span>Back</span>
@@ -232,13 +227,11 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
               onClick={handleSubmit}
               disabled={
                 submitting ||
-                Object.keys(answers).filter((key) => answers[key]?.trim())
-                  .length === 0
+                Object.keys(answers).filter((key) => answers[key]?.trim()).length === 0
               }
               className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
                 submitting ||
-                Object.keys(answers).filter((key) => answers[key]?.trim())
-                  .length === 0
+                Object.keys(answers).filter((key) => answers[key]?.trim()).length === 0
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               }`}
@@ -258,38 +251,32 @@ export default function TakeTest({ topic, onBack, selected, takeATest }) {
           </div>
         </div>
 
-        {/* Results */}
+        {/* Result */}
         {result && (
-          <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className={`mt-8 rounded-xl shadow-sm border overflow-hidden ${cardBg} ${borderColor}`}>
             <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
               <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
                 <CheckCircle size={20} />
                 <span>Test Results</span>
               </h3>
             </div>
-            <div className="">
-              <div className="prose max-w-none">
-                <div className="whitespace-pre-wrap text-gray-700 leading-relaxed p-4">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw]}
-                  >
-                    {result}
-                  </ReactMarkdown>
-                </div>
+            <div className="prose max-w-none">
+              <div className="whitespace-pre-wrap leading-relaxed p-4">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                  className={`${isDark ? "text-white" : "text-gray-700"}`}
+                >
+                  {result}
+                </ReactMarkdown>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between text-sm text-gray-600">
-                  <span>Test completed in {formatTime(timeSpent)}</span>
-                  <span>
-                    {
-                      Object.keys(answers).filter((key) => answers[key]?.trim())
-                        .length
-                    }{" "}
-                    questions answered
-                  </span>
-                </div>
+              <div className="mt-6 pt-4 border-t px-4 pb-4 flex items-center justify-between text-sm">
+                <span className={mutedText}>Test completed in {formatTime(timeSpent)}</span>
+                <span className={mutedText}>
+                  {Object.keys(answers).filter((key) => answers[key]?.trim()).length} questions
+                  answered
+                </span>
               </div>
             </div>
           </div>
