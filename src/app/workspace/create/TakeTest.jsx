@@ -85,7 +85,8 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    const evalPrompt = `Evaluate the following test answers on the topic "${aiResponse}". Give total marks out of 10 with detailed feedback for each answer.\n\n${questions
+    const evalPrompt = `Evaluate the following test answers on the topic "${aiResponse}". 
+    Give total marks out of 10 with detailed feedback for each answer.\n\n${questions
       .map(
         (q, i) =>
           `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`

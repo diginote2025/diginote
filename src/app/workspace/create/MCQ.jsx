@@ -27,6 +27,7 @@ const MCQ = ({ onBack, selected, takeAMCQ, aiResponse, isDark }) => {
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
   const [timerActive, setTimerActive] = useState(false);
+  const [currentResult, setCurrentResult] = useState(null);
 
   const generateMCQs = useCallback(async () => {
     setIsLoading(true);
@@ -97,7 +98,7 @@ Do not include explanations, numbering, or extra formatting.`,
     } finally {
       setIsLoading(false);
     }
-  }, [selected.topic]);
+  }, [aiResponse]);
 
   useEffect(() => {
     let interval;
@@ -124,17 +125,16 @@ Do not include explanations, numbering, or extra formatting.`,
       setScore((s) => s + 1);
     }
 
-    setUserAnswers((prev) => [
-      ...prev,
-      {
-        question: current.question,
-        correct: current.correctAnswer,
-        selected: selectedOption || "No answer",
-        options: current.options,
-        isCorrect,
-      },
-    ]);
+    const answerResult = {
+      question: current.question,
+      correct: current.correctAnswer,
+      selected: selectedOption || "No answer",
+      options: current.options,
+      isCorrect,
+    };
 
+    setUserAnswers((prev) => [...prev, answerResult]);
+    setCurrentResult(answerResult);
     setShowResult(true);
     setTimerActive(false);
 
@@ -142,6 +142,7 @@ Do not include explanations, numbering, or extra formatting.`,
       setShowResult(false);
       setSelectedOption("");
       setTimeLeft(30);
+      setCurrentResult(null);
 
       const next = currentIndex + 1;
       if (next < mcqs.length) {
@@ -153,18 +154,41 @@ Do not include explanations, numbering, or extra formatting.`,
     }, 2000);
   };
 
-  const optionBg = (key) =>
-    selectedOption === key
-      ? "border-blue-500 bg-blue-100 dark:bg-blue-100 "
+  const optionBg = (key) => {
+    if (showResult && currentResult) {
+      if (key === currentResult.correct) {
+        return "border-green-500 bg-green-100 dark:bg-green-900 dark:border-green-400";
+      } else if (key === currentResult.selected && !currentResult.isCorrect) {
+        return "border-red-500 bg-red-100 dark:bg-red-900 dark:border-red-400";
+      }
+    }
+    
+    return selectedOption === key
+      ? "border-blue-100 bg-blue-100 dark:bg-blue-500 "
       : isDark
       ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600 "
       : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100";
+  };
 
   const baseBg = isDark
     ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
     : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50";
 
   const cardBg = isDark ? "bg-gray-800 text-white" : "bg-white text-gray-800";
+
+  const resetQuiz = () => {
+    setQuizStarted(false);
+    setCurrentIndex(0);
+    setSelectedOption("");
+    setScore(0);
+    setFinished(false);
+    setUserAnswers([]);
+    setShowResult(false);
+    setTimeLeft(30);
+    setTimerActive(false);
+    setCurrentResult(null);
+    setMcqs([]);
+  };
 
   return (
     <div className={`min-h-screen ${baseBg}`}>
@@ -198,6 +222,51 @@ Do not include explanations, numbering, or extra formatting.`,
                   <Play className="w-5 h-5" />
                   Start Quiz
                 </motion.button>
+              </div>
+            </motion.div>
+          ) : finished ? (
+            <motion.div
+              key="results"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="text-center mt-20"
+            >
+              <div className={`rounded-2xl shadow-xl p-8 max-w-2xl mx-auto ${cardBg}`}>
+                <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Trophy className="w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold mb-4">Quiz Complete!</h2>
+                <div className="text-6xl font-bold text-blue-500 mb-4">
+                  {score}/{mcqs.length}
+                </div>
+                <p className="text-xl mb-8">
+                  {score === mcqs.length
+                    ? "Perfect Score! 🎉"
+                    : score >= mcqs.length * 0.7
+                    ? "Great Job! 👏"
+                    : "Keep Practicing! 📚"}
+                </p>
+                <div className="flex gap-4 justify-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={resetQuiz}
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 shadow-lg"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                    Try Again
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={takeAMCQ}
+                    className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-full hover:from-gray-600 hover:to-gray-700 transition-all duration-300 flex items-center gap-2 shadow-lg"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                    Back to Topics
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           ) : isLoading ? (
@@ -273,44 +342,92 @@ Do not include explanations, numbering, or extra formatting.`,
                   {mcqs[currentIndex]?.question}
                 </h3>
 
+                {/* Result Display */}
+                {showResult && currentResult && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`mb-6 p-4 rounded-xl flex items-center gap-3 ${
+                      currentResult.isCorrect
+                        ? "bg-green-100 border border-green-300 dark:bg-green-900 dark:border-green-600"
+                        : "bg-red-100 border border-red-300 dark:bg-red-900 dark:border-red-600"
+                    }`}
+                  >
+                    {currentResult.isCorrect ? (
+                      <CheckCircle className="w-6 h-6 text-green-600" />
+                    ) : (
+                      <XCircle className="w-6 h-6 text-red-600" />
+                    )}
+                    <div>
+                      <p className={`font-semibold ${currentResult.isCorrect ? "text-green-800 dark:text-green-200" : "text-red-800 dark:text-red-200"}`}>
+                        {currentResult.isCorrect ? "Correct!" : "Incorrect!"}
+                      </p>
+                      {!currentResult.isCorrect && (
+                        <p className={`text-sm ${isDark ? "text-red-300" : "text-red-600"}`}>
+                          Correct answer: {currentResult.correct}) {currentResult.options[currentResult.correct]}
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Options */}
-                <div className="space-y-3 mb-8 ">
+                <div className="space-y-3 mb-8">
                   {Object.entries(mcqs[currentIndex]?.options || {}).map(([key, value]) => (
                     <motion.label
                       key={key}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`flex items-center gap-4 p-4  rounded-xl border-2 cursor-pointer transition-all duration-200 ${optionBg(key)}`}
+                      whileHover={!showResult ? { scale: 1.02 } : {}}
+                      whileTap={!showResult ? { scale: 0.98 } : {}}
+                      className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 ${
+                        showResult ? "cursor-default" : "cursor-pointer"
+                      } ${optionBg(key)}`}
                     >
                       <input
                         type="radio"
                         name="mcq"
                         value={key}
                         checked={selectedOption === key}
-                        onChange={() => setSelectedOption(key)}
+                        onChange={() => !showResult && setSelectedOption(key)}
+                        disabled={showResult}
                         className="w-5 h-5 text-blue-600"
                       />
-                      <span className={`text-lg ${isDark ? "text-white" : "text-gray-700"}`}>
+                      <span className={`text-lg ${
+                        showResult && currentResult
+                          ? key === currentResult.correct
+                            ? "text-green-800 dark:text-green-200 font-semibold"
+                            : key === currentResult.selected && !currentResult.isCorrect
+                            ? "text-red-800 dark:text-red-200 font-semibold"
+                            : isDark ? "text-white" : "text-gray-700"
+                          : isDark ? "text-white" : "text-gray-700"
+                      }`}>
                         <span className="font-semibold">{key})</span> {value}
+                        {showResult && currentResult && key === currentResult.correct && (
+                          <CheckCircle className="w-4 h-4 text-green-600 inline ml-2" />
+                        )}
+                        {showResult && currentResult && key === currentResult.selected && !currentResult.isCorrect && (
+                          <XCircle className="w-4 h-4 text-red-600 inline ml-2" />
+                        )}
                       </span>
                     </motion.label>
                   ))}
                 </div>
 
                 {/* Submit Button */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleSubmit}
-                  disabled={!selectedOption}
-                  className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300 ${
-                    selectedOption
-                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  Submit Answer
-                </motion.button>
+                {!showResult && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSubmit}
+                    disabled={!selectedOption}
+                    className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300 ${
+                      selectedOption
+                        ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Submit Answer
+                  </motion.button>
+                )}
 
                 {/* Error */}
                 {error && (
