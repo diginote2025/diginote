@@ -295,12 +295,12 @@ Do not include explanations, numbering, or extra formatting.`,
             >
               <div className={`rounded-2xl shadow-xl p-4 ${cardBg}`}>
                 {/* Progress Info */}
-                <div className="mb-6 pt-14">
+                <div className="mb-6 pt-0 max-lg:pt-14">
                   <div className="flex flex-col gap-5 mb-2">
                     <div className="flex items-center space-x-4">
                       <button
                         onClick={takeAMCQ}
-                        className="flex items-center space-x-2 hover:text-gray-800 transition-colors"
+                        className="flex items-center space-x-2 transition-colors"
                       >
                         <ArrowLeft size={20} />
                       </button>

@@ -137,9 +137,9 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
   return (
     <div className={`min-h-screen ${baseBg}`}>
       {/* Header */}
-      <div className={`border-b sticky top-0 z-10  ${progressBg}`}>
-        <div className={`max-w-4xl mx-auto px-6 pt-18 py-4 ${cardBg}`}>
-          <div className="flex flex-col gap-5">
+      <div className={`border-b sticky top-0 z-10  ${cardBg}`}>
+        <div className={`max-w-4xl mx-auto px-6 pt-4 max-lg:pt-18 ${cardBg}`}>
+          <div className="flex flex-col gap-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={takeATest}
