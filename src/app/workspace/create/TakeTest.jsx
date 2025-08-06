@@ -214,14 +214,14 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
 
         {/* Action Buttons */}
         <div className={`rounded-xl shadow-sm border p-6 ${cardBg} ${borderColor}`}>
-          <div className="flex items-center justify-between">
-            <button
+          <div className="flex items-center justify-center">
+            {/* <button
               onClick={onBack}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${mutedText} hover:bg-gray-100`}
             >
               <ArrowLeft size={16} />
               <span>Back</span>
-            </button>
+            </button> */}
 
             <button
               onClick={handleSubmit}
