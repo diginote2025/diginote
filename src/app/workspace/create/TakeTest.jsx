@@ -143,7 +143,7 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
             <div className="flex items-center space-x-4">
               <button
                 onClick={takeATest}
-                className={`flex items-center space-x-2 ${mutedText} hover:text-white transition-colors`}
+                className={`flex items-center space-x-2 ${mutedText}  transition-colors`}
               >
                 <ArrowLeft size={20} />
               </button>
