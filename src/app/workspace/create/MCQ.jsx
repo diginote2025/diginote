@@ -226,7 +226,7 @@ Do not include explanations, numbering, or extra formatting.`,
             >
               <div className={`rounded-2xl shadow-xl p-4 ${cardBg}`}>
                 {/* Progress Info */}
-                <div className="mb-6">
+                <div className="mb-6 pt-14">
                   <div className="flex flex-col gap-5 mb-2">
                     <div className="flex items-center space-x-4">
                       <button
@@ -235,7 +235,7 @@ Do not include explanations, numbering, or extra formatting.`,
                       >
                         <ArrowLeft size={20} />
                       </button>
-                      <div className="h-6 w-px" />
+                      <div className="h-6 w-px bg-gray-400" />
                       <h1 className="text-xl font-bold">{selected.topic}</h1>
                     </div>
                     <div className="flex justify-between">
