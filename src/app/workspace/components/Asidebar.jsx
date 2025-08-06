@@ -333,22 +333,29 @@ export default function Asidebar({ setActive, active }) {
           )}
 
           {/* User section */}
-          {(!isMobile) && (
+          {!isMobile && (
             <div className="pt-2 border-t  border-gray-200 dark:border-gray-700">
-              <div className={`flex items-center px-1 gap-2
+              <div
+                className={`flex items-center px-1
               py-2 rounded-xl active:bg-gray-100 dark:active:bg-gray-800 transition-colors cursor-pointer 
-              touch-manipulation min-h-[44px] lg:min-h-[48px]`}>
-                <div className="w-8 h-8 lg:w-8 lg:h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full 
-                flex items-center justify-center flex-shrink-0 mr-3">
+              touch-manipulation min-h-[44px] lg:min-h-[48px]`}
+              >
+                <div
+                  className="w-8 h-8 lg:w-8 lg:h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full 
+                flex items-center justify-center flex-shrink-0 mr-3"
+                >
                   <User className="w-4 h-4 " />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm lg:text-sm font-medium  truncate">
-                    User
-                  </p>
 
-                  <p className="text-xs ">Free Plan</p>
-                </div>
+                {!isCollapsed && (
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm lg:text-sm font-medium  truncate">
+                      User
+                    </p>
+
+                    <p className="text-xs ">Free Plan</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -359,7 +366,9 @@ export default function Asidebar({ setActive, active }) {
       {!isAsideOpen && (
         <button
           onClick={toggleSidebar}
-          className={`mobile-menu-btn fixed top-4 left-4 z-30 p-3  ${isDark?"bg-gray-900 text-white":"bg-white"}
+          className={`mobile-menu-btn fixed top-4 left-4 z-30 p-3  ${
+            isDark ? "bg-gray-900 text-white" : "bg-white"
+          }
            rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 lg:hidden transition-all
             duration-200 hover:shadow-xl active:scale-95`}
           aria-label="Open sidebar"
