@@ -227,7 +227,7 @@ export default function Asidebar({ setActive, active }) {
                   group relative flex items-center rounded-xl transition-all duration-200 touch-manipulation
                   ${
                     isCollapsed && !isMobile
-                      ? "justify-center p-3"
+                      ? "justify-start p-[10px]"
                       : "px-3 py-3 lg:py-3"
                   }
               
@@ -288,7 +288,7 @@ export default function Asidebar({ setActive, active }) {
             }}
             className={`
     w-full flex items-center rounded-xl transition-all duration-200  active:bg-gray-200 dark:active:bg-gray-700
-    ${isCollapsed && !isMobile ? "justify-center p-3" : "px-3 py-2 lg:py-2"}
+    ${isCollapsed && !isMobile ? "justify-start p-[10px]" : "px-3 py-2 lg:py-2"}
     min-h-[44px] lg:min-h-[40px]
    ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
             aria-label="Toggle theme"
@@ -316,15 +316,15 @@ export default function Asidebar({ setActive, active }) {
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className={`
-                w-full flex items-center rounded-xl transition-all duration-200                 ${
-                  isCollapsed ? "justify-center p-3" : "px-3 py-2"
+                w-full flex items-center  rounded-xl transition-all duration-200                 ${
+                  isCollapsed ? "justify-start p-[10px]" : "px-3 py-2 "
                 }
                 min-h-[40px]
                ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              <div className={`flex-shrink-0 ${isCollapsed ? "" : "mr-3"}`}>
-                <Menu className="w-5 h-5" />
+              <div className={`flex-shrink-0  ${isCollapsed ? "" : "mr-3"}`}>
+                <Menu className="w-5 h-5 " />
               </div>
               {!isCollapsed && (
                 <span className="font-medium text-base">Collapse</span>
@@ -333,7 +333,7 @@ export default function Asidebar({ setActive, active }) {
           )}
 
           {/* User section */}
-          {!isMobile && (
+          {(!isCollapsed || !isMobile)  && (
             <div className="pt-2 border-t  border-gray-200 dark:border-gray-700">
               <div
                 className={`flex items-center px-1
@@ -347,7 +347,7 @@ export default function Asidebar({ setActive, active }) {
                   <User className="w-4 h-4 " />
                 </div>
 
-                {!isCollapsed && (
+                {(!isCollapsed || isMobile)  && (
                   <div className="flex-1 min-w-0">
                     <p className="text-sm lg:text-sm font-medium  truncate">
                       User
