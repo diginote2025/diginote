@@ -716,7 +716,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
           <TakeTest selected={selected} takeATest={takeATest} aiResponse={aiResponse} isDark={isDark} />
         ) : selected.topic ? (
           <>
-            <div className="mb-6 border-b pb-3 px-4 max-lg:py-20 py-4">
+            <div className="mb-6 border-b pb-3 px-4 max-lg:pt-20 py-4">
               <h2 className="text-3xl max-lg:text-2xl font-bold tracking-wide">
                 <span className="block uppercase text-primary font-semibold">
                   {selected.chapter}
