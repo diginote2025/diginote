@@ -758,7 +758,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800"
+                  className={`border rounded-lg p-4 ${isDark?"bg-gray-800":"bg-gray-200"}`}
                 >
                   <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                     📺 Recommended Video
