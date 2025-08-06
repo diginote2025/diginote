@@ -22,7 +22,7 @@ import {
 } from "@/redux/studyToolSlice";
 import Image from "next/image";
 
-export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
+export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDark }) {
   const [hasMounted, setHasMounted] = useState(false);
   const [chapter, setChapter] = useState("");
   const [topic, setTopic] = useState("");
@@ -49,11 +49,11 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
   const [topicInput, setTopicInput] = useState("");
 
   const dispatch = useDispatch();
+  
   const router = useRouter();
   const isSubjectbarOpen = useSelector(
     (state) => state.subjectbar.isSubjectbarOpen
   );
-  const { isDark } = useSelector((state) => state.theme);
   const savedResponses = useSelector((state) => state.studyTool.savedResponses);
   const showNotebook = useSelector((state) => state.studyTool.showNotebook);
 
@@ -891,7 +891,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                 {/* Chapter Header */}
                 <div
                   onClick={() => toggleChapter(chapterName)}
-                  className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg"
+                  className={`flex items-center justify-between p-3 cursor-pointer rounded-t-lg `}
                 >
                   <h3 className="font-semibold text-blue-600">{chapterName}</h3>
                   <span className="text-gray-500">
@@ -910,9 +910,11 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                           className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
                             selected.chapter === chapterName &&
                             selected.topic === topicName
-                              ? "bg-blue-100 dark:bg-blue-900/30 "
-                              : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                          }`}
+                              ? " "
+                              : ""
+                          }
+                          
+                          ${isDark?"hover:bg-gray-800":"hover:bg-gray-200"}`}
                         >
                           {editing.chapter === chapterName &&
                           editing.topic === topicName ? (
@@ -959,7 +961,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                                     topic: topicName,
                                   })
                                 }
-                                className="flex-1 text-sm text-gray-700 dark:text-gray-300"
+                                className="flex-1 text-sm "
                               >
                                 {topicName}
                               </span>
@@ -998,7 +1000,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                             value={topicInput}
                             onChange={(e) => setTopicInput(e.target.value)}
                             placeholder="Enter topic name"
-                            className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
+                            className="flex-1 px-3 py-2 w-10 bg-slate-500 text-white border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
                             onKeyPress={(e) =>
                               e.key === "Enter" &&
                               handleAddTopicToChapter(chapterName)
@@ -1039,7 +1041,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
 
           {/* Chapter Input */}
           {showChapterInput && (
-            <div className="border my-6 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 mb-4">
+            <div className="border my-6 rounded-lg p-3  mb-4">
               <label className="block text-sm font-medium mb-2">
                 Chapter Name
               </label>
@@ -1048,7 +1050,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject }) {
                   value={chapterInput}
                   onChange={(e) => setChapterInput(e.target.value)}
                   placeholder="Enter chapter name"
-                  className="flex-1 px-3 py-2 w-10 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="flex-1 px-3 py-2 w-10 bg-slate-500 text-white  border border-slate-600 rounded-lg focus:ring-2
+                   focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   onKeyPress={(e) => e.key === "Enter" && handleAddChapter()}
                   autoFocus
                 />

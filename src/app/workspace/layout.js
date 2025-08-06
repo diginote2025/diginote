@@ -1,8 +1,7 @@
 import { Geist } from "next/font/google";
 import Head from "next/head"; // Import Head for meta tags
-
 import Script from "next/script";
-
+import ThemeProvider from '../workspace/components/ThemeProvider';
 import Providers from "./App";
 
 const geist = Geist({ subsets: ["latin"], weight: "400" });
@@ -26,7 +25,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={geist.className} suppressHydrationWarning={true}>
-        <Providers>{children}</Providers>
+        <Providers><ThemeProvider>{children}</ThemeProvider></Providers>
       </body>
     </html>
   );

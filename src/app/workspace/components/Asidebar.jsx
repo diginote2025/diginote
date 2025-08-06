@@ -1,12 +1,23 @@
 "use client";
 
-import { Home, Notebook, PlusCircle, Menu, X, Settings, User, Moon, Sun } from "lucide-react";
+import {
+  Home,
+  Notebook,
+  PlusCircle,
+  Menu,
+  X,
+  Settings,
+  User,
+  Moon,
+  Sun,
+} from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleTheme } from "@/redux/themeSlice";
 import { toggleAsidebar } from "@/redux/asidebarSlice";
 import Link from "next/link";
 import Image from "next/image";
+import { useTheme } from "../hooks/useTheme";
 
 export default function Asidebar({ setActive, active }) {
   const dispatch = useDispatch();
@@ -17,26 +28,28 @@ export default function Asidebar({ setActive, active }) {
   const [isMobile, setIsMobile] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const { setTheme } = useTheme();
+
   // Check if device is mobile and initialize properly
   useEffect(() => {
     const checkIsMobile = () => {
       const mobile = window.innerWidth < 1024;
       setIsMobile(mobile);
-      
+
       // If switching to mobile and sidebar is open, close it
       if (mobile && isAsideOpen && isInitialized) {
         dispatch(toggleAsidebar());
       }
     };
-    
+
     // Initial check
     checkIsMobile();
     setIsInitialized(true);
-    
+
     // Add resize listener
-    window.addEventListener('resize', checkIsMobile);
-    
-    return () => window.removeEventListener('resize', checkIsMobile);
+    window.addEventListener("resize", checkIsMobile);
+
+    return () => window.removeEventListener("resize", checkIsMobile);
   }, [dispatch, isAsideOpen, isInitialized]);
 
   // Ensure sidebar is closed on mobile when component mounts
@@ -49,38 +62,43 @@ export default function Asidebar({ setActive, active }) {
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMobile && isAsideOpen && !event.target.closest('aside') && !event.target.closest('.mobile-menu-btn')) {
+      if (
+        isMobile &&
+        isAsideOpen &&
+        !event.target.closest("aside") &&
+        !event.target.closest(".mobile-menu-btn")
+      ) {
         dispatch(toggleAsidebar());
       }
     };
 
     if (isMobile && isAsideOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [isMobile, isAsideOpen, dispatch]);
 
   // Prevent body scroll when mobile sidebar is open
   useEffect(() => {
     if (isMobile && isAsideOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
     } else {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.width = "";
     };
   }, [isMobile, isAsideOpen]);
 
@@ -106,22 +124,22 @@ export default function Asidebar({ setActive, active }) {
       label: "Home",
       icon: Home,
       href: "/workspace",
-      description: "Dashboard and overview"
+      description: "Dashboard and overview",
     },
     {
       id: "create",
       label: "Create",
       icon: PlusCircle,
       href: "/workspace/create",
-      description: "Create new notes"
+      description: "Create new notes",
     },
     {
       id: "notes",
       label: "My Notes",
       icon: Notebook,
       href: "/workspace/notes",
-      description: "View all your notes"
-    }
+      description: "View all your notes",
+    },
   ];
 
   // Don't render until initialized to prevent flash
@@ -133,12 +151,12 @@ export default function Asidebar({ setActive, active }) {
     <div className="relative">
       {/* Mobile overlay with enhanced backdrop */}
       {isAsideOpen && isMobile && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300 ease-in-out"
           onClick={toggleSidebar}
-          style={{ 
+          style={{
             opacity: isAsideOpen ? 1 : 0,
-            visibility: isAsideOpen ? 'visible' : 'hidden'
+            visibility: isAsideOpen ? "visible" : "hidden",
           }}
         />
       )}
@@ -147,39 +165,40 @@ export default function Asidebar({ setActive, active }) {
       <aside
         className={`
           fixed lg:relative top-0 left-0 h-full lg:h-screen z-50
-          ${isAsideOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          ${
+            isAsideOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }
           ${isCollapsed && !isMobile ? "w-16" : "w-72 sm:w-80 lg:w-64"}
           transition-all duration-300 ease-in-out
-          bg-white dark:bg-gray-900
+        
           border-r border-gray-200 dark:border-gray-700
           shadow-2xl lg:shadow-none
           flex flex-col
           max-h-screen overflow-hidden
+          ${isDark ? "bg-gray-900" : ""}
         `}
       >
         {/* Header - Enhanced for mobile */}
         <div className="flex items-center justify-between p-4 lg:p-4 border-b border-gray-200 dark:border-gray-700 min-h-[64px]">
           {(!isCollapsed || !isMobile) && (
             <div className="flex items-center space-x-2 flex-1">
-              <div className="w-8 h-8 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Image 
-                  src={"/images/homepage/navbar/DN.png"} 
-                  width={32} 
-                  height={32} 
-                  alt="DigiNote Logo" 
-                  className="rounded w-full h-full object-cover"
+              <div className="w-8 h-8 lg:w-8 lg:h-8 rounded-lg shadow-sm flex items-center justify-center flex-shrink-0">
+                <Image
+                  src={"/images/homepage/navbar/DN.png"}
+                  width={32}
+                  height={32}
+                  alt="DigiNote Logo"
+                  className="rounded w-full h-full object-cover "
                 />
               </div>
-              {
-                (!isCollapsed || isMobile) && (
-                  <h1 className="text-2xl lg:text-3xl font-bold text-white bg-clip-text ">
-                DigiNote
-              </h1>
-                )
-              }
+              {(!isCollapsed || isMobile) && (
+                <h1 className="text-2xl lg:text-3xl font-bold  bg-clip-text ">
+                  DigiNote
+                </h1>
+              )}
             </div>
           )}
-          
+
           {/* Close button - Only visible on mobile */}
           <button
             onClick={toggleSidebar}
@@ -191,12 +210,12 @@ export default function Asidebar({ setActive, active }) {
         </div>
 
         {/* Navigation - Enhanced scrolling */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+        <nav className="flex-1 px-3 py-4 space-y-1  scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = active === item.id;
             const isHovered = hoveredItem === item.id;
-            
+
             return (
               <Link
                 key={item.id}
@@ -206,11 +225,13 @@ export default function Asidebar({ setActive, active }) {
                 onMouseLeave={() => setHoveredItem(null)}
                 className={`
                   group relative flex items-center rounded-xl transition-all duration-200 touch-manipulation
-                  ${isCollapsed && !isMobile ? "justify-center p-3" : "px-3 py-3 lg:py-3"}
-                  ${isActive 
-                    ? "bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-600 dark:text-blue-400 shadow-sm" 
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 active:bg-gray-100 dark:active:bg-gray-800"
+                  ${
+                    isCollapsed && !isMobile
+                      ? "justify-center p-3"
+                      : "px-3 py-3 lg:py-3"
                   }
+              
+                  ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"}
                   min-h-[44px] lg:min-h-[48px]
                 `}
               >
@@ -218,12 +239,20 @@ export default function Asidebar({ setActive, active }) {
                 {isActive && (
                   <div className="absolute left-0 w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-r-full" />
                 )}
-                
+
                 {/* Icon */}
-                <div className={`flex-shrink-0 ${isCollapsed && !isMobile ? "" : "mr-3"}`}>
-                  <Icon className={`w-5 h-5 lg:w-5 lg:h-5 transition-transform duration-200 ${isHovered ? "scale-110" : ""}`} />
+                <div
+                  className={`flex-shrink-0 ${
+                    isCollapsed && !isMobile ? "" : "mr-3"
+                  }`}
+                >
+                  <Icon
+                    className={`w-5 h-5 lg:w-5 lg:h-5 transition-transform duration-200 ${
+                      isHovered ? "scale-110" : ""
+                    }`}
+                  />
                 </div>
-                
+
                 {/* Label */}
                 {(!isCollapsed || isMobile) && (
                   <div className="flex-1 min-w-0">
@@ -237,10 +266,10 @@ export default function Asidebar({ setActive, active }) {
                     )}
                   </div>
                 )}
-                
+
                 {/* Tooltip for collapsed state - Desktop only */}
                 {isCollapsed && !isMobile && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700  text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
                     {item.label}
                   </div>
                 )}
@@ -253,16 +282,27 @@ export default function Asidebar({ setActive, active }) {
         <div className="border-t border-gray-200 dark:border-gray-700 p-3 space-y-2 flex-shrink-0">
           {/* Theme toggle */}
           <button
-            onClick={handleThemeToggle}
+            onClick={(e) => {
+              e.preventDefault();
+              setTheme(!isDark); // Toggle theme
+            }}
             className={`
-              w-full flex items-center rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation
-              ${isCollapsed && !isMobile ? "justify-center p-3" : "px-3 py-2 lg:py-2"}
-              min-h-[44px] lg:min-h-[40px]
-            `}
+    w-full flex items-center rounded-xl transition-all duration-200  active:bg-gray-200 dark:active:bg-gray-700
+    ${isCollapsed && !isMobile ? "justify-center p-3" : "px-3 py-2 lg:py-2"}
+    min-h-[44px] lg:min-h-[40px]
+   ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
             aria-label="Toggle theme"
           >
-            <div className={`flex-shrink-0 ${isCollapsed && !isMobile ? "" : "mr-3"}`}>
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            <div
+              className={`flex-shrink-0 ${
+                isCollapsed && !isMobile ? "" : "mr-3"
+              }`}
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
             </div>
             {(!isCollapsed || isMobile) && (
               <span className="font-medium text-sm lg:text-base">
@@ -276,10 +316,11 @@ export default function Asidebar({ setActive, active }) {
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className={`
-                w-full flex items-center rounded-xl transition-all duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50
-                ${isCollapsed ? "justify-center p-3" : "px-3 py-2"}
+                w-full flex items-center rounded-xl transition-all duration-200                 ${
+                  isCollapsed ? "justify-center p-3" : "px-3 py-2"
+                }
                 min-h-[40px]
-              `}
+               ${isDark ? "hover:bg-gray-700" : "hover:bg-gray-200"}`}
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               <div className={`flex-shrink-0 ${isCollapsed ? "" : "mr-3"}`}>
@@ -294,17 +335,16 @@ export default function Asidebar({ setActive, active }) {
           {/* User section */}
           {(!isCollapsed || isMobile) && (
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center px-3 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 active:bg-gray-100 dark:active:bg-gray-800 transition-colors cursor-pointer touch-manipulation min-h-[44px] lg:min-h-[48px]">
+              <div className="flex items-center px-3 py-2 rounded-xl active:bg-gray-100 dark:active:bg-gray-800 transition-colors cursor-pointer touch-manipulation min-h-[44px] lg:min-h-[48px]">
                 <div className="w-8 h-8 lg:w-8 lg:h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mr-3">
-                  <User className="w-4 h-4 text-white" />
+                  <User className="w-4 h-4 " />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm lg:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                  <p className="text-sm lg:text-sm font-medium  truncate">
                     User
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Free Plan
-                  </p>
+
+                  <p className="text-xs ">Free Plan</p>
                 </div>
               </div>
             </div>

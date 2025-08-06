@@ -8,6 +8,7 @@ import SubjectDetailViewer from "./SubjectDetailViewer";
 import { MdOutlineDeleteForever, MdSchool, MdBook } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 
+
 export default function AddSubjectName() {
   const dispatch = useDispatch();
   const [isClient, setIsClient] = useState(false);
@@ -18,7 +19,7 @@ export default function AddSubjectName() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const selectedSubject = useSelector((state) => state.subject.selectedSubject);
-    const { isDark, isThemeLoaded } = useSelector((state) => state.theme);
+      const { isDark, isThemeLoaded } = useSelector((state) => state.theme);
 
   useEffect(() => {
     setIsClient(true);
@@ -127,6 +128,7 @@ export default function AddSubjectName() {
         <SubjectDetailViewer
           selectedSubject={selectedSubject}
           setSelectedSubject={(value) => dispatch(setSelectedSubject(value))}
+          isDark={isDark}
         />
       </div>
     );
@@ -135,7 +137,8 @@ export default function AddSubjectName() {
 
   // ✅ Show subject UI by default (even if no subjects yet)
   return (
-    <div className="relative w-full min-h-[100vh] flex flex-col items-center custom-scrollbar bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className={`relative w-full min-h-[100vh] flex flex-col items-center custom-scrollbar bg-gradient-to-br
+     from-gray-50 to-gray-100 ${isDark?"dark:from-gray-900 dark:to-gray-800":""}`}>
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 ${
@@ -170,10 +173,10 @@ export default function AddSubjectName() {
                   className="relative z-10"
                 />
               </div>
-              <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-3">
+              <h2 className="text-2xl font-semibold  mb-3">
                 Start Your Learning Journey
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+              <p className=" mb-8 leading-relaxed">
                 Create your first subject to begin organizing your study materials and notes
               </p>
             </motion.div>
@@ -283,7 +286,7 @@ export default function AddSubjectName() {
             transition={{ duration: 0.6 }}
             className="text-center mb-10"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold  mb-4">
               Your Subjects
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
