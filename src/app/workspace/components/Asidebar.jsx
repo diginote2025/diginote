@@ -152,7 +152,7 @@ export default function Asidebar({ setActive, active }) {
       {/* Mobile overlay with enhanced backdrop */}
       {isAsideOpen && isMobile && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300 ease-in-out"
+          className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300 ease-in-out`}
           onClick={toggleSidebar}
           style={{
             opacity: isAsideOpen ? 1 : 0,
@@ -175,7 +175,7 @@ export default function Asidebar({ setActive, active }) {
           shadow-2xl lg:shadow-none
           flex flex-col
           max-h-screen overflow-hidden
-          ${isDark ? "bg-gray-900" : ""}
+          ${isDark ? "bg-gray-900" : "bg-white"}
         `}
       >
         {/* Header - Enhanced for mobile */}
@@ -356,7 +356,9 @@ export default function Asidebar({ setActive, active }) {
       {!isAsideOpen && (
         <button
           onClick={toggleSidebar}
-          className="mobile-menu-btn fixed top-4 left-4 z-30 p-3 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 lg:hidden transition-all duration-200 hover:shadow-xl active:scale-95"
+          className={`mobile-menu-btn fixed top-4 left-4 z-30 p-3  ${isDark?"bg-gray-900 text-white":"bg-white"}
+           rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 lg:hidden transition-all
+            duration-200 hover:shadow-xl active:scale-95`}
           aria-label="Open sidebar"
         >
           <Menu className="w-5 h-5" />

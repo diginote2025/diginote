@@ -670,7 +670,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
             <ArrowLeft size={20} />
           </button> */}
           <button
-            className="text-2xl p-[11px] z-40 rounded-xl absolute right-5 top-4 bg-gray-900 border border-gray-600  hidden max-lg:block"
+            className={`text-2xl p-[11px] ${isDark?"bg-gray-900 text-white":"bg-white"} z-40 rounded-xl absolute 
+            right-5 top-4  border border-gray-600  hidden max-lg:block`}
             onClick={openSubjectbar}
           >
             {isSubjectbarOpen ? (
