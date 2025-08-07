@@ -1,22 +1,21 @@
-
 "use client";
 import React, { useEffect, useState, useRef, useMemo, Component } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { 
-  ArrowLeft, 
-  Download, 
-  BookOpen, 
-  FileText, 
-  Edit3, 
-  Save, 
-  X, 
-  Trash2, 
+import {
+  ArrowLeft,
+  Download,
+  BookOpen,
+  FileText,
+  Edit3,
+  Save,
+  X,
+  Trash2,
   AlertCircle,
   CheckCircle,
   Loader2,
   BookOpenCheck,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import HTMLFlipBook from "react-pageflip";
@@ -38,7 +37,8 @@ class FlipBookErrorBoundary extends Component {
             Error Rendering Notebook
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-500 mb-6">
-            Something went wrong while displaying the notebook. Please try refreshing the page.
+            Something went wrong while displaying the notebook. Please try
+            refreshing the page.
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -89,7 +89,11 @@ const NotesPageFlip = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { width: PAGE_WIDTH, height: PAGE_HEIGHT, padding: PAGE_PADDING } = dimensions;
+  const {
+    width: PAGE_WIDTH,
+    height: PAGE_HEIGHT,
+    padding: PAGE_PADDING,
+  } = dimensions;
 
   // Validate savedResponses to prevent duplicate keys
   const validatedResponses = useMemo(() => {
@@ -116,7 +120,8 @@ const NotesPageFlip = () => {
       visibility: "hidden",
       whiteSpace: "normal",
       overflowWrap: "break-word",
-      fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+      fontFamily:
+        "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
     });
 
     Object.entries(validatedResponses).forEach(([chapter, topics]) => {
@@ -152,7 +157,9 @@ const NotesPageFlip = () => {
   useEffect(() => {
     try {
       const currentSubject = localStorage.getItem("currentSubject");
-      const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+      const allResponses = JSON.parse(
+        localStorage.getItem("savedResponses") || "{}"
+      );
       let savedData;
       if (currentSubject && allResponses[currentSubject]) {
         savedData = allResponses[currentSubject];
@@ -172,10 +179,15 @@ const NotesPageFlip = () => {
   useEffect(() => {
     if (Object.keys(savedResponses).length > 0) {
       try {
-        localStorage.setItem("study_tool_responses", JSON.stringify(savedResponses));
+        localStorage.setItem(
+          "study_tool_responses",
+          JSON.stringify(savedResponses)
+        );
         const currentSubject = localStorage.getItem("currentSubject");
         if (currentSubject) {
-          const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+          const allResponses = JSON.parse(
+            localStorage.getItem("savedResponses") || "{}"
+          );
           allResponses[currentSubject] = savedResponses;
           localStorage.setItem("savedResponses", JSON.stringify(allResponses));
         }
@@ -200,13 +212,19 @@ const NotesPageFlip = () => {
       alert("No content available to export to PDF.");
       return;
     }
-    dispatch(setDownloadPDF({
-      status: "loading", filename: null, timestamp: new Date().toISOString(),
-    }));
+    dispatch(
+      setDownloadPDF({
+        status: "loading",
+        filename: null,
+        timestamp: new Date().toISOString(),
+      })
+    );
     try {
       const { jsPDF } = await import("jspdf");
       const doc = new jsPDF();
-      const filename = `Study_Notes_${new Date().toISOString().split("T")[0]}.pdf`;
+      const filename = `Study_Notes_${
+        new Date().toISOString().split("T")[0]
+      }.pdf`;
       let yPosition = 30;
       const pageHeight = doc.internal.pageSize.height;
       const margin = window.innerWidth < 640 ? 15 : 25;
@@ -215,12 +233,12 @@ const NotesPageFlip = () => {
       // Enhanced header
       doc.setFillColor(59, 130, 246);
       doc.rect(0, 0, doc.internal.pageSize.width, 50, "F");
-      
+
       doc.setFontSize(window.innerWidth < 640 ? 20 : 24);
       doc.setFont(undefined, "bold");
       doc.setTextColor(255, 255, 255);
       doc.text("📓 Study Notebook", margin, 25);
-      
+
       doc.setFontSize(window.innerWidth < 640 ? 10 : 12);
       doc.setFont(undefined, "normal");
       doc.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, 35);
@@ -230,114 +248,144 @@ const NotesPageFlip = () => {
 
       const totalChapters = Object.keys(savedResponses).length;
       const totalTopics = Object.values(savedResponses).reduce(
-        (total, topics) => total + Object.keys(topics).length, 0
+        (total, topics) => total + Object.keys(topics).length,
+        0
       );
-      
+
       doc.setFontSize(window.innerWidth < 640 ? 12 : 14);
       doc.setFont(undefined, "bold");
-      doc.text(`📊 Summary: ${totalChapters} Chapters • ${totalTopics} Topics`, margin, yPosition);
+      doc.text(
+        `📊 Summary: ${totalChapters} Chapters • ${totalTopics} Topics`,
+        margin,
+        yPosition
+      );
       yPosition += 25;
 
-      Object.entries(savedResponses).forEach(([chapter, topics], chapterIndex) => {
-        if (yPosition > pageHeight - 80) {
-          doc.addPage();
-          yPosition = 30;
-        }
-        
-        // Chapter header with background
-        doc.setFillColor(239, 246, 255);
-        doc.rect(margin - 5, yPosition - 15, maxWidth + 10, 25, "F");
-        
-        doc.setFontSize(window.innerWidth < 640 ? 16 : 18);
-        doc.setFont(undefined, "bold");
-        doc.setTextColor(29, 78, 216);
-        doc.text(`Chapter ${chapterIndex + 1}: ${chapter}`, margin, yPosition);
-        
-        doc.setDrawColor(59, 130, 246);
-        doc.setLineWidth(0.8);
-        doc.line(margin, yPosition + 3, margin + 120, yPosition + 3);
-        
-        yPosition += 25;
-        doc.setTextColor(0, 0, 0);
-
-        Object.entries(topics).forEach(([topic, content], topicIndex) => {
-          if (yPosition > pageHeight - 50) {
+      Object.entries(savedResponses).forEach(
+        ([chapter, topics], chapterIndex) => {
+          if (yPosition > pageHeight - 80) {
             doc.addPage();
             yPosition = 30;
           }
-          
-          doc.setFontSize(window.innerWidth < 640 ? 13 : 15);
+
+          // Chapter header with background
+          doc.setFillColor(239, 246, 255);
+          doc.rect(margin - 5, yPosition - 15, maxWidth + 10, 25, "F");
+
+          doc.setFontSize(window.innerWidth < 640 ? 16 : 18);
           doc.setFont(undefined, "bold");
-          doc.setTextColor(16, 185, 129);
-          doc.text(`${topicIndex + 1}. ${topic}`, margin, yPosition);
-          yPosition += 15;
-          
+          doc.setTextColor(29, 78, 216);
+          doc.text(
+            `Chapter ${chapterIndex + 1}: ${chapter}`,
+            margin,
+            yPosition
+          );
+
+          doc.setDrawColor(59, 130, 246);
+          doc.setLineWidth(0.8);
+          doc.line(margin, yPosition + 3, margin + 120, yPosition + 3);
+
+          yPosition += 25;
           doc.setTextColor(0, 0, 0);
-          doc.setFontSize(window.innerWidth < 640 ? 10 : 11);
-          doc.setFont(undefined, "normal");
 
-          let cleanContent = content
-            .replace(/#{1,6}\s*/g, "")
-            .replace(/\*\*(.*?)\*\*/g, "$1")
-            .replace(/\*(.*?)\*/g, "$1")
-            .replace(/`([^`]*)`/g, "$1")
-            .replace(/``````/g, "[Code Block]")
-            .replace(/^\s*[-*+]\s+/gm, "• ")
-            .replace(/^\s*(\d+)\.\s+/gm, "$1. ")
-            .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-            .replace(/\n\s*\n/g, "\n")
-            .trim();
+          Object.entries(topics).forEach(([topic, content], topicIndex) => {
+            if (yPosition > pageHeight - 50) {
+              doc.addPage();
+              yPosition = 30;
+            }
 
-          const paragraphs = cleanContent.split("\n").filter((p) => p.trim());
-          paragraphs.forEach((paragraph) => {
-            if (!paragraph.trim()) return;
-            const lines = doc.splitTextToSize(paragraph.trim(), maxWidth - 15);
-            lines.forEach((line) => {
-              if (yPosition > pageHeight - 20) {
-                doc.addPage();
-                yPosition = 30;
-              }
-              doc.text(line, margin + 15, yPosition);
-              yPosition += window.innerWidth < 640 ? 5 : 6;
+            doc.setFontSize(window.innerWidth < 640 ? 13 : 15);
+            doc.setFont(undefined, "bold");
+            doc.setTextColor(16, 185, 129);
+            doc.text(`${topicIndex + 1}. ${topic}`, margin, yPosition);
+            yPosition += 15;
+
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(window.innerWidth < 640 ? 10 : 11);
+            doc.setFont(undefined, "normal");
+
+            let cleanContent = content
+              .replace(/#{1,6}\s*/g, "")
+              .replace(/\*\*(.*?)\*\*/g, "$1")
+              .replace(/\*(.*?)\*/g, "$1")
+              .replace(/`([^`]*)`/g, "$1")
+              .replace(/``````/g, "[Code Block]")
+              .replace(/^\s*[-*+]\s+/gm, "• ")
+              .replace(/^\s*(\d+)\.\s+/gm, "$1. ")
+              .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+              .replace(/\n\s*\n/g, "\n")
+              .trim();
+
+            const paragraphs = cleanContent.split("\n").filter((p) => p.trim());
+            paragraphs.forEach((paragraph) => {
+              if (!paragraph.trim()) return;
+              const lines = doc.splitTextToSize(
+                paragraph.trim(),
+                maxWidth - 15
+              );
+              lines.forEach((line) => {
+                if (yPosition > pageHeight - 20) {
+                  doc.addPage();
+                  yPosition = 30;
+                }
+                doc.text(line, margin + 15, yPosition);
+                yPosition += window.innerWidth < 640 ? 5 : 6;
+              });
+              yPosition += 4;
             });
-            yPosition += 4;
+            yPosition += 12;
           });
-          yPosition += 12;
-        });
-        yPosition += 15;
-      });
+          yPosition += 15;
+        }
+      );
 
       // Enhanced footer
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFillColor(248, 250, 252);
-        doc.rect(0, doc.internal.pageSize.height - 20, doc.internal.pageSize.width, 20, "F");
-        
+        doc.rect(
+          0,
+          doc.internal.pageSize.height - 20,
+          doc.internal.pageSize.width,
+          20,
+          "F"
+        );
+
         doc.setFontSize(window.innerWidth < 640 ? 8 : 9);
         doc.setFont(undefined, "normal");
         doc.setTextColor(100, 116, 139);
-        doc.text(`Page ${i} of ${pageCount}`,
-          doc.internal.pageSize.width - (window.innerWidth < 640 ? 30 : 40), doc.internal.pageSize.height - 8
+        doc.text(
+          `Page ${i} of ${pageCount}`,
+          doc.internal.pageSize.width - (window.innerWidth < 640 ? 30 : 40),
+          doc.internal.pageSize.height - 8
         );
-        doc.text("Study Notebook - AI Generated",
-          window.innerWidth < 640 ? 15 : 25, doc.internal.pageSize.height - 8
+        doc.text(
+          "Study Notebook - AI Generated",
+          window.innerWidth < 640 ? 15 : 25,
+          doc.internal.pageSize.height - 8
         );
       }
-      
+
       doc.save(filename);
-      dispatch(setDownloadPDF({
-        status: "success", filename, timestamp: new Date().toISOString(),
-      }));
+      dispatch(
+        setDownloadPDF({
+          status: "success",
+          filename,
+          timestamp: new Date().toISOString(),
+        })
+      );
       setTimeout(() => dispatch(setDownloadPDF(null)), 3000);
     } catch (error) {
       console.error("PDF generation error:", error);
-      dispatch(setDownloadPDF({
-        status: "error",
-        filename: null,
-        timestamp: new Date().toISOString(),
-        error: error.message,
-      }));
+      dispatch(
+        setDownloadPDF({
+          status: "error",
+          filename: null,
+          timestamp: new Date().toISOString(),
+          error: error.message,
+        })
+      );
       setTimeout(() => dispatch(setDownloadPDF(null)), 3000);
     }
   };
@@ -348,7 +396,9 @@ const NotesPageFlip = () => {
       localStorage.removeItem("study_tool_responses");
       const currentSubject = localStorage.getItem("currentSubject");
       if (currentSubject) {
-        const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+        const allResponses = JSON.parse(
+          localStorage.getItem("savedResponses") || "{}"
+        );
         delete allResponses[currentSubject];
         localStorage.setItem("savedResponses", JSON.stringify(allResponses));
       }
@@ -363,12 +413,17 @@ const NotesPageFlip = () => {
       const updatedResponses = { ...savedResponses };
       delete updatedResponses[chapterToDelete];
       dispatch(setSavedResponses(updatedResponses));
-      
+
       if (Object.keys(updatedResponses).length > 0) {
-        localStorage.setItem("study_tool_responses", JSON.stringify(updatedResponses));
+        localStorage.setItem(
+          "study_tool_responses",
+          JSON.stringify(updatedResponses)
+        );
         const currentSubject = localStorage.getItem("currentSubject");
         if (currentSubject) {
-          const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+          const allResponses = JSON.parse(
+            localStorage.getItem("savedResponses") || "{}"
+          );
           allResponses[currentSubject] = updatedResponses;
           localStorage.setItem("savedResponses", JSON.stringify(allResponses));
         }
@@ -376,7 +431,9 @@ const NotesPageFlip = () => {
         localStorage.removeItem("study_tool_responses");
         const currentSubject = localStorage.getItem("currentSubject");
         if (currentSubject) {
-          const allResponses = JSON.parse(localStorage.getItem("savedResponses") || "{}");
+          const allResponses = JSON.parse(
+            localStorage.getItem("savedResponses") || "{}"
+          );
           delete allResponses[currentSubject];
           localStorage.setItem("savedResponses", JSON.stringify(allResponses));
         }
@@ -400,13 +457,14 @@ const NotesPageFlip = () => {
         disabled: Object.keys(savedResponses).length === 0,
       };
     }
-    
+
     switch (downloadPDF.status) {
       case "loading":
         return {
           text: "Generating PDF...",
           icon: Loader2,
-          className: "flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium cursor-not-allowed w-full sm:w-auto",
+          className:
+            "flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium cursor-not-allowed w-full sm:w-auto",
           disabled: true,
           spinning: true,
         };
@@ -414,14 +472,16 @@ const NotesPageFlip = () => {
         return {
           text: "PDF Downloaded!",
           icon: CheckCircle,
-          className: "flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium cursor-not-allowed w-full sm:w-auto",
+          className:
+            "flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium cursor-not-allowed w-full sm:w-auto",
           disabled: true,
         };
       case "error":
         return {
           text: "Download Failed",
           icon: AlertCircle,
-          className: "flex items-center gap-2 bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium cursor-not-allowed w-full sm:w-auto",
+          className:
+            "flex items-center gap-2 bg-gradient-to-r from-red-500 to-rose-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium cursor-not-allowed w-full sm:w-auto",
           disabled: true,
         };
       default:
@@ -442,11 +502,13 @@ const NotesPageFlip = () => {
   const IconComponent = buttonProps.icon;
 
   return (
-    <div className={` transition-all duration-500 h-screen overflow-y-scroll ${
-      isDark 
-        ? "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900" 
-        : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
-    }`}>
+    <div
+      className={` transition-all duration-500 h-screen overflow-y-scroll ${
+        isDark
+          ? "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900"
+          : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
+      }`}
+    >
       {/* Hidden div for measuring content height */}
       <div
         ref={measurerRef}
@@ -462,15 +524,22 @@ const NotesPageFlip = () => {
       {/* Confirmation Modals */}
       {showClearConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50  z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
-          <div className={`${isDark ? "bg-gray-800" : "bg-white"} rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-300`}>
+          <div
+            className={`${
+              isDark ? "bg-gray-800" : "bg-white"
+            } rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-300`}
+          >
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 rounded-full">
                 <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
               </div>
-              <h3 className="text-base sm:text-lg font-semibold">Clear All Notes</h3>
+              <h3 className="text-base sm:text-lg font-semibold">
+                Clear All Notes
+              </h3>
             </div>
             <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-              Are you sure you want to clear all saved study notes? This action cannot be undone.
+              Are you sure you want to clear all saved study notes? This action
+              cannot be undone.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
@@ -481,7 +550,11 @@ const NotesPageFlip = () => {
               </button>
               <button
                 onClick={() => setShowClearConfirm(false)}
-                className={`flex-1 ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"} py-2 sm:py-2.5 px-4 rounded-xl font-medium text-sm sm:text-base transition-colors`}
+                className={`flex-1 ${
+                  isDark
+                    ? "bg-gray-700 hover:bg-gray-600"
+                    : "bg-gray-200 hover:bg-gray-300"
+                } py-2 sm:py-2.5 px-4 rounded-xl font-medium text-sm sm:text-base transition-colors`}
               >
                 Cancel
               </button>
@@ -492,15 +565,22 @@ const NotesPageFlip = () => {
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
-          <div className={`${isDark ? "bg-gray-800" : "bg-white"} rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-300`}>
+          <div
+            className={`${
+              isDark ? "bg-gray-800" : "bg-white"
+            } rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-300`}
+          >
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 rounded-full">
                 <Trash2 className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
               </div>
-              <h3 className="text-base sm:text-lg font-semibold">Delete Chapter</h3>
+              <h3 className="text-base sm:text-lg font-semibold">
+                Delete Chapter
+              </h3>
             </div>
             <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
-              Are you sure you want to delete the "{showDeleteConfirm}" chapter? This action cannot be undone.
+              Are you sure you want to delete the "{showDeleteConfirm}" chapter?
+              This action cannot be undone.
             </p>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
@@ -511,7 +591,11 @@ const NotesPageFlip = () => {
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className={`flex-1 ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"} py-2 sm:py-2.5 px-4 rounded-xl font-medium text-sm sm:text-base transition-colors`}
+                className={`flex-1 ${
+                  isDark
+                    ? "bg-gray-700 hover:bg-gray-600"
+                    : "bg-gray-200 hover:bg-gray-300"
+                } py-2 sm:py-2.5 px-4 rounded-xl font-medium text-sm sm:text-base transition-colors`}
               >
                 Cancel
               </button>
@@ -520,51 +604,62 @@ const NotesPageFlip = () => {
         </div>
       )}
 
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
-        {/* Enhanced Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 md:mb-10 gap-3 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+      <div className="container mx-auto px-2 py-4 sm:px-4 sm:py-4 ">
+        {/* Enhanced Responsive Header */}
+        <div className="flex gap-4 sm:flex-row sm:items-center justify-between mb-6 max-lg:pt-16 max-lg:px-2">
+          {/* Left section: Back button and title */}
+          <div className="flex xs:flex-row xs:items-center gap-2 sm:gap-4 ">
+            {/* Back Button */}
             <button
               onClick={() => router.back()}
-              className={`group flex items-center gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-xl transition-all duration-300 transform hover:scale-105 ${
+              className={`group flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 transform hover:scale-105 ${
                 isDark
                   ? "bg-gray-800 hover:bg-gray-700 text-white shadow-lg hover:shadow-xl"
                   : "bg-white hover:bg-gray-50 text-gray-700 shadow-lg hover:shadow-xl"
               }`}
             >
-              <ArrowLeft size={16} className="sm:w-18 group-hover:-translate-x-1 transition-transform" />
-              <span className="hidden sm:inline font-medium text-sm sm:text-base">Back</span>
+              <ArrowLeft
+                size={16}
+                className="group-hover:-translate-x-1 transition-transform"
+              />
+              <span className="hidden xs:inline font-medium text-sm sm:text-base">
+                Back
+              </span>
             </button>
-            
+
+            {/* Title and Icons */}
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <BookOpenCheck className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-blue-600" />
-                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 animate-pulse" />
-              </div>
-              <h1 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                 Study Notebook
               </h1>
             </div>
           </div>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 self-end sm:self-auto">
+
+          {/* Right section: Actions */}
+          <div className="flex xs:flex-row items-stretch xs:items-center gap-2">
+            {/* Download PDF */}
             <button
               onClick={handleDownloadPDF}
-              className={buttonProps.className}
+              className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${buttonProps.className}`}
               disabled={buttonProps.disabled}
-              title={Object.keys(savedResponses).length === 0 ? "No content to export" : "Download PDF"}
+              title={
+                Object.keys(savedResponses).length === 0
+                  ? "No content to export"
+                  : "Download PDF"
+              }
             >
-              <IconComponent 
-                size={16} 
-                className={`${buttonProps.spinning ? "animate-spin" : ""}`} 
+              <IconComponent
+                size={16}
+                className={buttonProps.spinning ? "animate-spin" : ""}
               />
-              <span className="hidden sm:inline">{buttonProps.text}</span>
-              <span className="sm:hidden">PDF</span>
+              {/* <span className="hidden xs:inline">{buttonProps.text}</span>
+              <span className="xs:hidden"></span> */}
             </button>
-            
+
+            {/* Clear All */}
             <button
               onClick={() => setShowClearConfirm(true)}
-              className={`group flex items-center gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 w-full sm:w-auto ${
+              className={`group flex items-center justify-center gap-2 px-3 py-2 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 text-sm w-full xs:w-auto ${
                 Object.keys(savedResponses).length === 0
                   ? "bg-gray-400 cursor-not-allowed opacity-60"
                   : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg hover:shadow-xl"
@@ -572,20 +667,27 @@ const NotesPageFlip = () => {
               disabled={Object.keys(savedResponses).length === 0}
               title="Clear All Notes"
             >
-              <Trash2 size={14} className="group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline text-sm sm:text-base">Clear All</span>
+              <Trash2
+                size={14}
+                className="group-hover:scale-110 transition-transform"
+              />
+              {/* <span className="hidden xs:inline">Clear All</span>
+              <span className="xs:hidden"></span> */}
             </button>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className={`${
-          isDark ? "bg-gray-800/50" : "bg-white/70"
-        } backdrop-blur-sm rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl   flex justify-center items-center border border-white/20`}>
+        <div
+          className={` backdrop-blur-sm rounded-xl sm:rounded-2xl md:rounded-3xl   flex justify-center items-center `}
+        >
           {Object.keys(savedResponses).length === 0 ? (
             <div className="text-center py-8 sm:py-12 md:py-20 px-4 sm:px-6 md:px-12 w-full animate-in fade-in-50 duration-700">
-              <div className="mb-4 sm:mb-6 md:mb-8 relative">
-                <BookOpen size={48} className="mx-auto text-gray-400 animate-pulse" />
+              <div className="mb-4 sm:mb-6 md:mb-8 relative ">
+                <BookOpen
+                  size={48}
+                  className="mx-auto text-gray-400 animate-pulse"
+                />
                 <div className="absolute -top-2 -right-2 w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center">
                   <Sparkles size={12} className="text-white" />
                 </div>
@@ -600,13 +702,20 @@ const NotesPageFlip = () => {
                 onClick={() => router.back()}
                 className="group inline-flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-sm sm:text-base md:text-lg"
               >
-                <FileText size={16} className="group-hover:scale-110 transition-transform" />
+                <FileText
+                  size={16}
+                  className="group-hover:scale-110 transition-transform"
+                />
                 Start Creating Notes
               </button>
             </div>
           ) : (
             <FlipBookErrorBoundary>
-              <div className={`w-full flex justify-center transition-all duration-700 ${isFlipBookReady ? "animate-in zoom-in-95" : "opacity-0"}`}>
+              <div
+                className={`w-full flex justify-center transition-all  duration-700 ${
+                  isFlipBookReady ? "animate-in zoom-in-95" : "opacity-0"
+                }`}
+              >
                 <HTMLFlipBook
                   key={JSON.stringify(savedResponses)} // Force re-render on savedResponses change
                   ref={flipBookRef}
@@ -615,10 +724,10 @@ const NotesPageFlip = () => {
                   minWidth={280}
                   minHeight={400}
                   showCover
-                  className="my-4 sm:my-6 md:my-8 shadow-2xl rounded-xl sm:rounded-2xl outline-none touch-pan-y"
-                  style={{ 
+                  className="lg:shadow-2xl  rounded-2xl outline-none touch-pan-y"
+                  style={{
                     borderRadius: "0.75rem sm:1rem",
-                    filter: "drop-shadow(0 25px 50px rgba(0, 0, 0, 0.15))"
+                    filter: "drop-shadow(0 25px 50px rgba(0, 0, 0, 0.15))",
                   }}
                   uncutPages={false}
                   useMouseEvents
@@ -626,219 +735,290 @@ const NotesPageFlip = () => {
                   swipeDistance={20}
                 >
                   {/* Enhanced Front Cover */}
-                  <div className="flex flex-col items-center justify-center h-full text-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden">
+                  <div className="flex flex-col items-center rounded-r-2xl justify-center h-full text-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white relative overflow-hidden">
                     <div className="absolute inset-0 bg-black/10"></div>
                     <div className="relative z-10">
-                      <div className="mb-4 sm:mb-6">
-                        <BookOpenCheck size={36} className="mx-auto mb-3 sm:mb-4 animate-pulse" />
-                        <div className="flex items-center justify-center gap-2">
-                          <Sparkles size={16} className="animate-pulse" />
-                          <Sparkles size={12} className="animate-pulse delay-75" />
-                          <Sparkles size={16} className="animate-pulse delay-150" />
-                        </div>
-                      </div>
-                      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-wide mb-3 sm:mb-4">Study Notebook</h1>
+                      <h1 className="text-xl pt-20 sm:text-2xl md:text-3xl font-bold tracking-wide mb-3 sm:mb-4">
+                        Study Notebook
+                      </h1>
                       <p className="text-blue-100 text-sm sm:text-base md:text-lg opacity-90 px-2">
-                        {Object.keys(savedResponses).length} Chapters • {" "}
-                        {Object.values(savedResponses).reduce((total, topics) => total + Object.keys(topics).length, 0)} Topics
+                        {Object.keys(savedResponses).length} Chapters •{" "}
+                        {Object.values(savedResponses).reduce(
+                          (total, topics) => total + Object.keys(topics).length,
+                          0
+                        )}{" "}
+                        Topics
                       </p>
                     </div>
                   </div>
 
                   {/* Enhanced Chapters and Pages */}
-                  {Object.entries(validatedResponses).map(([chapter, topics], chapterIndex) => {
-                    const originalChapter = chapter.split('-').slice(0, -1).join('-'); // Remove index suffix
-                    const chapterCoverPage = (
-                      <div
-                        key={`${chapter}-cover`}
-                        className={`flex flex-col items-center justify-center h-full p-4 sm:p-6 md:p-8 bg-gradient-to-br from-indigo-50 to-blue-100 ${
-                          isDark ? "from-gray-700 to-gray-800 text-white" : "text-gray-800"
-                        } relative overflow-hidden`}
-                      >
-                        <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-blue-200/30 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
-                        <div className="absolute bottom-0 left-0 w-20 sm:w-24 h-20 sm:h-24 bg-purple-200/30 rounded-full translate-y-10 sm:translate-y-12 -translate-x-10 sm:-translate-x-12"></div>
-                        
-                        <div className="text-center z-10">
-                          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-600 text-white rounded-full mb-4 sm:mb-6 text-lg sm:text-xl md:text-2xl font-bold">
-                            {chapterIndex + 1}
-                          </div>
-                          <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-blue-800">Chapter {chapterIndex + 1}</h2>
-                          <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-4 sm:mb-6 text-gray-700 px-2 sm:px-4 line-clamp-2">{originalChapter}</h3>
-                          
-                          <div className="bg-white/50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm">
-                            <p className="text-gray-600 font-medium text-sm sm:text-base">
-                              📚 {Object.keys(topics).length} Topics
-                            </p>
-                          </div>
-                          
-                          <button
-                            onClick={() => setShowDeleteConfirm(originalChapter)}
-                            className="group flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 font-medium text-sm sm:text-base"
-                          >
-                            <Trash2 size={14} className="group-hover:scale-110 transition-transform" />
-                            Delete Chapter
-                          </button>
-                        </div>
-                      </div>
-                    );
-
-                    const topicPages = Object.entries(topics).flatMap(([topic, content], topicIndex) => {
-                      const pages = paginatedResponses[chapter]?.[topic] || [content];
-                      return pages.map((pageContent, pageIndex) => (
+                  {Object.entries(validatedResponses).map(
+                    ([chapter, topics], chapterIndex) => {
+                      const originalChapter = chapter
+                        .split("-")
+                        .slice(0, -1)
+                        .join("-"); // Remove index suffix
+                      const chapterCoverPage = (
                         <div
-                          key={`${chapter}--${topic}--page-${pageIndex}`}
-                          className={`flex flex-col h-full justify-between p-4 sm:p-5 md:p-6 ${
-                            isDark ? "bg-gray-800 text-white" : "bg-white text-gray-800"
+                          key={`${chapter}-cover`}
+                          className={`flex flex-col items-center rounded-l-2xl justify-center h-full p-4 sm:p-6 md:p-8 bg-gradient-to-br from-indigo-50 to-blue-100 ${
+                            isDark
+                              ? "from-gray-700 to-gray-800 text-white"
+                              : "text-gray-800"
                           } relative overflow-hidden`}
                         >
-                          {/* Decorative elements */}
-                          <div className="absolute top-0 right-0 w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-blue-100 to-transparent rounded-full -translate-y-8 sm:-translate-y-10 translate-x-8 sm:translate-x-10 opacity-50"></div>
-                          
-                          {/* Header */}
-                          <div className="flex justify-between items-start gap-2 sm:gap-3 mb-3 sm:mb-4 relative z-10">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                                  {topicIndex + 1}
-                                </div>
-                                <h3 className="text-base sm:text-lg font-bold text-blue-600 line-clamp-2">{topic}</h3>
-                              </div>
-                              {pages.length > 1 && (
-                                <p className="text-xs text-gray-500 bg-gray-100 px-1.5 sm:px-2 py-1 rounded-full inline-block">
-                                  Page {pageIndex + 1} of {pages.length}
-                                </p>
-                              )}
+                          <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-blue-200/30 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
+                          <div className="absolute bottom-0 left-0 w-20 sm:w-24 h-20 sm:h-24 bg-purple-200/30 rounded-full translate-y-10 sm:translate-y-12 -translate-x-10 sm:-translate-x-12"></div>
+
+                          <div className="text-center z-10">
+                            <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-600 text-white rounded-full mb-4 sm:mb-6 text-lg sm:text-xl md:text-2xl font-bold">
+                              {chapterIndex + 1}
                             </div>
-                            
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 text-blue-800">
+                              Chapter {chapterIndex + 1}
+                            </h2>
+                            <h3 className="text-base sm:text-lg md:text-xl font-semibold mb-4 sm:mb-6 text-gray-700 px-2 sm:px-4 line-clamp-2">
+                              {originalChapter}
+                            </h3>
+
+                            <div className="bg-white/50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 backdrop-blur-sm">
+                              <p className="text-gray-600 font-medium text-sm sm:text-base">
+                                📚 {Object.keys(topics).length} Topics
+                              </p>
+                            </div>
+
                             <button
-                              onClick={() => {
-                                setEditChapter(originalChapter);
-                                setEditTopic(topic);
-                                setEditValue(content);
-                              }}
-                              className={`group flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105 ${
-                                isDark 
-                                  ? "bg-yellow-500 hover:bg-yellow-600 text-yellow-900" 
-                                  : "bg-yellow-100 hover:bg-yellow-200 text-yellow-800"
-                              } shadow-sm hover:shadow-md`}
-                              title="Edit Note"
+                              onClick={() =>
+                                setShowDeleteConfirm(originalChapter)
+                              }
+                              className="group flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 font-medium text-sm sm:text-base"
                             >
-                              <Edit3 size={12} className="group-hover:rotate-12 transition-transform" />
-                              <span className="hidden sm:inline">Edit</span>
+                              <Trash2
+                                size={14}
+                                className="group-hover:scale-110 transition-transform"
+                              />
+                              Delete Chapter
                             </button>
                           </div>
-
-                          {/* Content Area */}
-                          {editChapter === originalChapter && editTopic === topic ? (
-                            <div className="flex flex-col flex-1 relative z-10">
-                              <div className="flex-1 mb-3 sm:mb-4">
-                                <textarea
-                                  value={editValue}
-                                  onChange={(e) => setEditValue(e.target.value)}
-                                  className={`w-full h-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all duration-300 ${
-                                    isDark 
-                                      ? "bg-gray-700 border-gray-600 text-white focus:border-blue-400" 
-                                      : "bg-gray-50 border-gray-200 text-gray-800 focus:border-blue-400"
-                                  } font-mono text-xs sm:text-sm leading-relaxed touch-manipulation`}
-                                  placeholder="Enter your notes here..."
-                                  style={{ minHeight: '200px sm:280px' }}
-                                />
-                              </div>
-                              
-                              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-                                <button
-                                  onClick={() => {
-                                    const updated = {
-                                      ...savedResponses,
-                                      [originalChapter]: {
-                                        ...savedResponses[originalChapter],
-                                        [topic]: editValue,
-                                      },
-                                    };
-                                    dispatch(setSavedResponses(updated));
-                                    setEditChapter(null);
-                                    setEditTopic(null);
-                                    setEditValue("");
-                                  }}
-                                  className="group flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-xs sm:text-sm"
-                                >
-                                  <Save size={12} className="group-hover:scale-110 transition-transform" />
-                                  Save
-                                </button>
-                                
-                                <button
-                                  onClick={() => {
-                                    setEditChapter(null);
-                                    setEditTopic(null);
-                                    setEditValue("");
-                                  }}
-                                  className={`group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg sm:rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-xs sm:text-sm ${
-                                    isDark 
-                                      ? "bg-gray-600 hover:bg-gray-500 text-white" 
-                                      : "bg-gray-300 hover:bg-gray-400 text-gray-700"
-                                  }`}
-                                >
-                                  <X size={12} className="group-hover:rotate-90 transition-transform" />
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className={`flex-1 relative z-10 overflow-y-auto custom-scrollbar ${
-                              isDark ? "prose-invert" : ""
-                            } touch-manipulation`}>
-                              <div className={`prose prose-xs sm:prose-sm max-w-none ${
-                                isDark 
-                                  ? "prose-headings:text-blue-300 prose-strong:text-white prose-code:text-green-300 prose-code:bg-gray-700" 
-                                  : "prose-headings:text-blue-700 prose-strong:text-gray-800 prose-code:text-green-700 prose-code:bg-green-50"
-                              } prose-p:leading-relaxed prose-li:leading-relaxed`}>
-                                <ReactMarkdown
-                                  components={{
-                                    h1: ({children}) => <h1 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-blue-600">{children}</h1>,
-                                    h2: ({children}) => <h2 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 text-blue-600">{children}</h2>,
-                                    h3: ({children}) => <h3 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-blue-600">{children}</h3>,
-                                    p: ({children}) => <p className="mb-2 sm:mb-3 text-xs sm:text-sm leading-relaxed">{children}</p>,
-                                    ul: ({children}) => <ul className="list-disc pl-4 sm:pl-4 mb-2 sm:mb-3 space-y-0.5 sm:space-y-1">{children}</ul>,
-                                    ol: ({children}) => <ol className="list-decimal pl-4 sm:pl-4 mb-2 sm:mb-3 space-y-0.5 sm:space-y-1">{children}</ol>,
-                                    li: ({children}) => <li className="text-xs sm:text-sm">{children}</li>,
-                                    code: ({children}) => <code className="text-xs px-1 sm:px-1.5 py-0.5 rounded bg-opacity-50">{children}</code>,
-                                    pre: ({children}) => <pre className="text-xs p-2 sm:p-3 rounded-lg sm:rounded-lg overflow-x-auto mb-2 sm:mb-3">{children}</pre>,
-                                  }}
-                                >
-                                  {pageContent}
-                                </ReactMarkdown>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Page decoration */}
-                          <div className="absolute bottom-1 sm:bottom-2 right-2 sm:right-4 text-xs text-gray-400 font-medium">
-                            📄
-                          </div>
                         </div>
-                      ));
-                    });
+                      );
 
-                    return [chapterCoverPage, ...topicPages];
-                  })}
+                      const topicPages = Object.entries(topics).flatMap(
+                        ([topic, content], topicIndex) => {
+                          const pages = paginatedResponses[chapter]?.[
+                            topic
+                          ] || [content];
+                          return pages.map((pageContent, pageIndex) => (
+                            <div
+                              key={`${chapter}--${topic}--page-${pageIndex}`}
+                              className={`flex flex-col h-full rounded-2xl justify-between p-4 sm:p-5 md:p-6 ${
+                                isDark
+                                  ? "bg-gray-800 text-white"
+                                  : "bg-white text-gray-800"
+                              } relative overflow-hidden`}
+                            >
+                              {/* Decorative elements */}
+                              <div className="absolute top-0 right-0 w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-blue-100 to-transparent rounded-full -translate-y-8 sm:-translate-y-10 translate-x-8 sm:translate-x-10 opacity-50"></div>
+
+                              {/* Header */}
+                              <div className="flex justify-between items-start gap-2 sm:gap-3 mb-3 sm:mb-4 relative z-10">
+                                <div className="flex justify-between w-full">
+                                  <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                      {topicIndex + 1}
+                                    </div>
+                                    <h3 className="text-base sm:text-lg font-bold text-blue-600 line-clamp-2">
+                                      {topic}
+                                    </h3>
+                                  </div>
+                                  <div className="">
+                                    {pages.length > 1 && (
+                                    <p className="text-xs text-gray-500 bg-gray-100 px-1.5 sm:px-2 py-1 rounded-full inline-block">
+                                      Page {pageIndex + 1} of {pages.length}
+                                    </p>
+                                  )}
+                                  </div>
+                                </div>
+
+                                {/* <button
+                                  onClick={() => {
+                                    setEditChapter(originalChapter);
+                                    setEditTopic(topic);
+                                    setEditValue(content);
+                                  }}
+                                  className={`group flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs font-medium transition-all duration-300 transform hover:scale-105 ${
+                                    isDark
+                                      ? "bg-yellow-500 hover:bg-yellow-600 text-yellow-900"
+                                      : "bg-yellow-100 hover:bg-yellow-200 text-yellow-800"
+                                  } shadow-sm hover:shadow-md`}
+                                  title="Edit Note"
+                                >
+                                  <Edit3
+                                    size={12}
+                                    className="group-hover:rotate-12 transition-transform"
+                                  />
+                                  <span className="hidden sm:inline">Edit</span>
+                                </button> */}
+                              </div>
+
+                              {/* Content Area */}
+                              {editChapter === originalChapter &&
+                              editTopic === topic ? (
+                                <div className="flex flex-col flex-1 relative z-10">
+                                  <div className="flex-1 mb-3 sm:mb-4">
+                                    <textarea
+                                      value={editValue}
+                                      onChange={(e) =>
+                                        setEditValue(e.target.value)
+                                      }
+                                      className={`w-full h-full p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all duration-300 ${
+                                        isDark
+                                          ? "bg-gray-700 border-gray-600 text-white focus:border-blue-400"
+                                          : "bg-gray-50 border-gray-200 text-gray-800 focus:border-blue-400"
+                                      } font-mono text-xs sm:text-sm leading-relaxed touch-manipulation`}
+                                      placeholder="Enter your notes here..."
+                                      style={{ minHeight: "200px sm:280px" }}
+                                    />
+                                  </div>
+
+                                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                                    <button
+                                      onClick={() => {
+                                        const updated = {
+                                          ...savedResponses,
+                                          [originalChapter]: {
+                                            ...savedResponses[originalChapter],
+                                            [topic]: editValue,
+                                          },
+                                        };
+                                        dispatch(setSavedResponses(updated));
+                                        setEditChapter(null);
+                                        setEditTopic(null);
+                                        setEditValue("");
+                                      }}
+                                      className="group flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-3 sm:px-4 py-2 rounded-lg sm:rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-xs sm:text-sm"
+                                    >
+                                      <Save
+                                        size={12}
+                                        className="group-hover:scale-110 transition-transform"
+                                      />
+                                      Save
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        setEditChapter(null);
+                                        setEditTopic(null);
+                                        setEditValue("");
+                                      }}
+                                      className={`group flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg sm:rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium text-xs sm:text-sm ${
+                                        isDark
+                                          ? "bg-gray-600 hover:bg-gray-500 text-white"
+                                          : "bg-gray-300 hover:bg-gray-400 text-gray-700"
+                                      }`}
+                                    >
+                                      <X
+                                        size={12}
+                                        className="group-hover:rotate-90 transition-transform"
+                                      />
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  className={`flex-1 relative z-10  overflow-y-auto custom-scrollbar ${
+                                    isDark ? "prose-invert" : ""
+                                  } touch-manipulation`}
+                                >
+                                  <div
+                                    className={`prose prose-xs sm:prose-sm max-w-none ${
+                                      isDark
+                                        ? "prose-headings:text-blue-300 prose-strong:text-white prose-code:text-green-300 prose-code:bg-gray-700"
+                                        : "prose-headings:text-blue-700 prose-strong:text-gray-800 prose-code:text-green-700 prose-code:bg-green-50"
+                                    } prose-p:leading-relaxed prose-li:leading-relaxed`}
+                                  >
+                                    <ReactMarkdown
+                                      components={{
+                                        h1: ({ children }) => (
+                                          <h1 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-blue-600">
+                                            {children}
+                                          </h1>
+                                        ),
+                                        h2: ({ children }) => (
+                                          <h2 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 text-blue-600">
+                                            {children}
+                                          </h2>
+                                        ),
+                                        h3: ({ children }) => (
+                                          <h3 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2 text-blue-600">
+                                            {children}
+                                          </h3>
+                                        ),
+                                        p: ({ children }) => (
+                                          <p className="mb-2 sm:mb-3 text-xs sm:text-sm leading-relaxed">
+                                            {children}
+                                          </p>
+                                        ),
+                                        ul: ({ children }) => (
+                                          <ul className="list-disc pl-4 sm:pl-4 mb-2 sm:mb-3 space-y-0.5 sm:space-y-1">
+                                            {children}
+                                          </ul>
+                                        ),
+                                        ol: ({ children }) => (
+                                          <ol className="list-decimal pl-4 sm:pl-4 mb-2 sm:mb-3 space-y-0.5 sm:space-y-1">
+                                            {children}
+                                          </ol>
+                                        ),
+                                        li: ({ children }) => (
+                                          <li className="text-xs sm:text-sm">
+                                            {children}
+                                          </li>
+                                        ),
+                                        code: ({ children }) => (
+                                          <code className="text-xs px-1 sm:px-1.5 py-0.5 rounded bg-opacity-50">
+                                            {children}
+                                          </code>
+                                        ),
+                                        pre: ({ children }) => (
+                                          <pre className="text-xs p-2 sm:p-3 rounded-lg sm:rounded-lg overflow-x-auto mb-2 sm:mb-3">
+                                            {children}
+                                          </pre>
+                                        ),
+                                      }}
+                                    >
+                                      {pageContent}
+                                    </ReactMarkdown>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Page decoration */}
+                              {/* <div className="absolute bottom-1 sm:bottom-2 right-2 sm:right-4 text-xs text-gray-400 font-medium">
+                                📄
+                              </div> */}
+                            </div>
+                          ));
+                        }
+                      );
+
+                      return [chapterCoverPage, ...topicPages];
+                    }
+                  )}
 
                   {/* Enhanced Back Cover */}
-                  <div className="flex flex-col items-center justify-center h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 text-white relative overflow-hidden">
+                  <div className="flex rounded-l-2xl flex-col items-center justify-center h-full bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 text-white relative overflow-hidden">
                     <div className="absolute inset-0 bg-black/10"></div>
                     <div className="absolute top-0 left-0 w-32 sm:w-40 h-32 sm:h-40 bg-white/10 rounded-full -translate-y-16 sm:-translate-y-20 -translate-x-16 sm:-translate-x-20"></div>
                     <div className="absolute bottom-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-white/10 rounded-full translate-y-12 sm:translate-y-16 translate-x-12 sm:translate-x-16"></div>
-                    
-                    <div className="text-center z-10">
-                      <div className="mb-4 sm:mb-6">
-                        <CheckCircle size={36} className="mx-auto mb-3 sm:mb-4 text-green-300" />
-                        <div className="flex items-center justify-center gap-2">
-                          <Sparkles size={12} className="text-yellow-300 animate-pulse" />
-                          <Sparkles size={16} className="text-yellow-300 animate-pulse delay-75" />
-                          <Sparkles size={12} className="text-yellow-300 animate-pulse delay-150" />
-                        </div>
-                      </div>
-                      
-                      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">Well Done! 🎉</h2>
+
+                    <div className="text-center z-10 pt-20">
+                 
+
+                      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4">
+                        Well Done! 🎉
+                      </h2>
                       <p className="text-purple-100 text-sm sm:text-base md:text-lg mb-2 px-2">
                         You've completed your study notebook
                       </p>
