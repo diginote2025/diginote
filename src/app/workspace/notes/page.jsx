@@ -442,7 +442,7 @@ const NotesPageFlip = () => {
   const IconComponent = buttonProps.icon;
 
   return (
-    <div className={`min-h-screen transition-all duration-500 ${
+    <div className={` transition-all duration-500 h-screen overflow-y-scroll ${
       isDark 
         ? "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900" 
         : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
@@ -461,7 +461,7 @@ const NotesPageFlip = () => {
 
       {/* Confirmation Modals */}
       {showClearConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black bg-opacity-50  z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
           <div className={`${isDark ? "bg-gray-800" : "bg-white"} rounded-2xl p-4 sm:p-6 max-w-md w-full shadow-2xl transform animate-in zoom-in-95 duration-300`}>
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 rounded-full">
@@ -581,7 +581,7 @@ const NotesPageFlip = () => {
         {/* Main Content */}
         <div className={`${
           isDark ? "bg-gray-800/50" : "bg-white/70"
-        } backdrop-blur-sm rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl  min-h-[60vh] flex justify-center items-center border border-white/20`}>
+        } backdrop-blur-sm rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl   flex justify-center items-center border border-white/20`}>
           {Object.keys(savedResponses).length === 0 ? (
             <div className="text-center py-8 sm:py-12 md:py-20 px-4 sm:px-6 md:px-12 w-full animate-in fade-in-50 duration-700">
               <div className="mb-4 sm:mb-6 md:mb-8 relative">
