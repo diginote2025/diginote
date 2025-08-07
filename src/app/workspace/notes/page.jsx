@@ -824,7 +824,7 @@ const NotesPageFlip = () => {
                               {/* Header */}
                               <div className="flex justify-between items-start gap-2 sm:gap-3 mb-3 sm:mb-4 relative z-10">
                                 <div className="flex justify-between w-full">
-                                  <div className="flex items-center gap-1 sm:gap-2 mb-1">
+                                  <div className="flex items-center gap-2 mb-1">
                                     <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
                                       {topicIndex + 1}
                                     </div>
@@ -832,13 +832,13 @@ const NotesPageFlip = () => {
                                       {topic}
                                     </h3>
                                   </div>
-                                  <div className="">
+                                  {/* <div className="">
                                     {pages.length > 1 && (
-                                    <p className="text-xs text-gray-500 bg-gray-100 px-2 sm:px-2 py-1 rounded-full flex">
+                                    <p className="text-xs text-gray-500 bg-gray-100 px-2 sm:px-2 py-1 rounded-full inline-block">
                                       Page {pageIndex + 1} of {pages.length}
                                     </p>
                                   )}
-                                  </div>
+                                  </div> */}
                                 </div>
 
                                 {/* <button
