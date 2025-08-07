@@ -581,7 +581,7 @@ const NotesPageFlip = () => {
         {/* Main Content */}
         <div className={`${
           isDark ? "bg-gray-800/50" : "bg-white/70"
-        } backdrop-blur-sm rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden min-h-[60vh] flex justify-center items-center border border-white/20`}>
+        } backdrop-blur-sm rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl  min-h-[60vh] flex justify-center items-center border border-white/20`}>
           {Object.keys(savedResponses).length === 0 ? (
             <div className="text-center py-8 sm:py-12 md:py-20 px-4 sm:px-6 md:px-12 w-full animate-in fade-in-50 duration-700">
               <div className="mb-4 sm:mb-6 md:mb-8 relative">
@@ -615,7 +615,7 @@ const NotesPageFlip = () => {
                   minWidth={280}
                   minHeight={400}
                   showCover
-                  className="my-4 sm:my-6 md:my-8 shadow-2xl rounded-xl sm:rounded-2xl overflow-hidden outline-none touch-pan-y"
+                  className="my-4 sm:my-6 md:my-8 shadow-2xl rounded-xl sm:rounded-2xl outline-none touch-pan-y"
                   style={{ 
                     borderRadius: "0.75rem sm:1rem",
                     filter: "drop-shadow(0 25px 50px rgba(0, 0, 0, 0.15))"
