@@ -834,7 +834,7 @@ const NotesPageFlip = () => {
                                   </div>
                                   <div className="">
                                     {pages.length > 1 && (
-                                    <p className="text-xs text-gray-500 bg-gray-100 px-1.5 sm:px-2 py-1 rounded-full inline-block">
+                                    <p className="text-xs text-gray-500 bg-gray-100 px-2 sm:px-2 py-1 rounded-full flex">
                                       Page {pageIndex + 1} of {pages.length}
                                     </p>
                                   )}
