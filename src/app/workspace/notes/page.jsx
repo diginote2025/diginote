@@ -812,7 +812,7 @@ const NotesPageFlip = () => {
                           return pages.map((pageContent, pageIndex) => (
                             <div
                               key={`${chapter}--${topic}--page-${pageIndex}`}
-                              className={`flex flex-col h-full rounded-2xl justify-between p-4 sm:p-5 md:p-6 ${
+                              className={`flex flex-col h-full lg:rounded-2xl rounded-r-2xl justify-between p-4 sm:p-5 md:p-6 ${
                                 isDark
                                   ? "bg-gray-800 text-white"
                                   : "bg-white text-gray-800"
