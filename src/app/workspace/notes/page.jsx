@@ -523,7 +523,8 @@ const NotesPageFlip = () => {
 
       {/* Confirmation Modals */}
       {showClearConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50  z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50  z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
+          
           <div
             className={`${
               isDark ? "bg-gray-800" : "bg-white"
