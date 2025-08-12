@@ -1,6 +1,22 @@
 import React from 'react';
+import { motion } from "framer-motion";
+import { FileText, CheckCircle, Youtube, ClipboardList } from "lucide-react";
+import Link from 'next/link';
+import { FaPencil } from 'react-icons/fa6';
 
 export default function WhoIsFor() {
+     const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.2,
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    }),
+  };
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-24">
       {/* Background decorative elements */}
@@ -140,13 +156,37 @@ export default function WhoIsFor() {
           </div>
         </div>
 
-        {/* Bottom CTA section */}
-        <div className="text-center mt-16">
-          <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm px-6 py-3 rounded-full border border-gray-200/50">
-            <span className="text-gray-600">Ready to get started?</span>
-            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
-          </div>
-        </div>
+             {/* CTA Button */}
+        <motion.div
+          custom={2}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="mt-10 flex justify-center items-center  "
+        >
+          <Link href="/workspace/create" passHref>
+            <button
+              className="group flex items-center relative justify-center gap-2 p-1 pl-4 text-gray-900 hover:text-black 
+    bg-gradient-to-r from-green-500/30 to-blue-500/30 
+    hover:from-green-500/50 hover:to-blue-500/50 
+    font-semibold text-base rounded-full border border-blue-500/40
+    shadow-md hover:shadow-xl hover:scale-105 hover:border-blue-800 
+    transition-all duration-300 
+    focus:outline-none focus:ring-4 focus:ring-blue-300/50 active:scale-95"
+              role="button"
+              aria-label="Create a new digital notebook"
+            >
+            Create Digital Notebook
+              {/* Pencil Icon with group-hover animation */}
+              <div
+                className="bg-purple-500 rounded-full text-gray-200 p-2 transform transition-transform duration-300 
+      group-hover:rotate-45 "
+              >
+                <FaPencil size={28} />
+              </div>
+            </button>
+          </Link>
+        </motion.div>
       </div>
     </div>
   );

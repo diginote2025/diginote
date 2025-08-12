@@ -1,41 +1,107 @@
-import React from "react";
-import { BookOpen, FileText, Globe, Leaf, Phone } from "lucide-react";
-import { FaArrowRightLong } from "react-icons/fa6";
-import Image from "next/image";
-import { Source_Serif_4 } from 'next/font/google'
+"use client";
 
-const Source_Serif_4fFont = Source_Serif_4({
-  subsets: ['latin'],
-  weight: ['400'],
- 
-});
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { BookOpen, Globe } from "lucide-react";
+import { FaArrowRight, FaPencil } from "react-icons/fa6";
 
 export default function EducationAboutSection() {
   return (
-    <section className={`bg-white py-8 md:py-16 px-4 md:px-6 ${Source_Serif_4fFont.className}`} id="about">
+    <section className="bg-white py-8 md:py-16 px-4 md:px-6" id="about">
       <div className="max-w-[1200px] mx-auto">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start justify-center">
           {/* Left Side - Images */}
-          
-            <Image
-              src={"/images/homepage/about/about_diginote.jpg"}
-              alt=""
-              width={1000}
-              height={1000}
-              className="object-cover w-11/24 max-lg:w-full rounded-2xl"
-            />
-   
+          <div className="relative w-full h-full lg:w-auto flex justify-center lg:justify-start">
+            <div className="relative flex gap-3 md:gap-6 scale-85 sm:scale-90 lg:scale-100">
+              <div className="flex flex-col gap-6 md:gap-10 items-end">
+                <div className="w-48 md:w-60 h-72 md:h-96 rounded-t-[40px] md:rounded-t-[60px] rounded-bl-[40px] md:rounded-bl-[60px] overflow-hidden shadow-xl z-10 relative">
+                  <Image
+                    src={"/images/homepage/about/about_diginote.jpg"}
+                    alt="Woman studying"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="w-48 md:w-60 h-72 md:h-80 rounded-tl-[40px] md:rounded-tl-[60px] rounded-b-[40px] md:rounded-b-[60px] overflow-hidden shadow-xl z-10 relative">
+                  <Image
+                    src={"/images/homepage/about/serving_students.jpg"}
+                    alt="Woman studying"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-6 md:gap-12">
+                <div className="w-48 h-48 md:w-64 md:h-64 relative p-2 rounded-full overflow-hidden z-20">
+                  <Image
+                    src={"/images/homepage/about/2151977843.jpg"}
+                    alt="Students collaborating"
+                    fill
+                    className="object-cover rounded-full p-2"
+                  />
+                  <div
+                    style={{ animationDuration: "20s" }}
+                    className="w-50 max-lg:w-48 h-50 max-lg:h-48 absolute top-0 left-0 animate-spin md:w-64 md:h-64 p-2 rounded-full border-2 border-gray-500 border-dashed"
+                  ></div>
+                </div>
+
+                <div className="w-48 md:w-60 h-56 md:h-84 rounded-b-[40px] md:rounded-b-[60px] rounded-tr-[40px] md:rounded-tr-[60px] overflow-hidden shadow-xl z-10 relative">
+                  <Image
+                    src={"/images/homepage/about/save_paper.jpg"}
+                    alt="Students studying"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+
+                {/* CTA Button */}
+                <motion.div
+                  custom={2}
+                  initial="hidden"
+                  animate="visible"
+                  variants={fadeInUp}
+                  className=" flex  "
+                >
+                  <Link href="/about" passHref>
+                    <button
+                      className="group flex items-center relative justify-center gap-2 p-1 pl-4 text-gray-900 hover:text-black 
+    bg-gradient-to-r from-green-500/30 to-blue-500/30 
+    hover:from-green-500/50 hover:to-blue-500/50 
+    font-semibold text-base max-lg:text-2xl max-lg:font-thin rounded-full border border-blue-500/40
+    shadow-md hover:shadow-xl hover:scale-105 hover:border-blue-800 
+    transition-all duration-300 
+    focus:outline-none focus:ring-4 focus:ring-blue-300/50 active:scale-95"
+                      role="button"
+                      aria-label="Create a new digital notebook"
+                    >
+                     <div className="">
+                      <span className="max-lg:hidden">Know More</span> About Us
+                     </div>
+                      {/* Pencil Icon with group-hover animation */}
+                      <div
+                        className="bg-purple-500 rounded-full text-gray-200 p-2 transform transition-transform duration-300 
+      group-hover:rotate-45 "
+                      >
+                        <FaPencil size={28} />
+                      </div>
+                    </button>
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+          </div>
 
           {/* Right Side - Content */}
-          <div className=" w-full lg:w-auto flex-1">
-            {/* Header */}
+          <div className="space-y-6 md:space-y-8 w-full lg:w-auto">
             <div>
-              <h2 className="text-4xl lg:text-5xl font-libertinus font-bold text-gray-900 leading-tight mb-3 md:mb-4">
-                Study Smarter with DigiNote <br /> The AI-Powered Tool Built for
-                Students
+              <h2 className="text-4xl lg:text-5xl font-[roboto] font-bold text-blue-700  max-lg:text-center leading-tight mb-3 md:mb-4">
+                Study Smarter with DigiNote The AI-Powered Tool for Students
               </h2>
-
-              <p className="text-gray-700 text-lg mb-4">
+              <p className="text-gray-600 leading-relaxed text-base max-lg:text-center">
                 DigiNote is your all-in-one AI-powered study assistant. Whether
                 you're preparing for exams or reviewing a topic, DigiNote helps
                 you study smarter with features designed specifically for
@@ -44,84 +110,35 @@ export default function EducationAboutSection() {
             </div>
 
             {/* Services */}
-        <div className="flex flex-col lg:flex-row gap-6">
-  <div className="grid gap-4 md:gap-6 w-full">
-    {/* AI-Powered Education Services */}
-    <div className="flex items-start gap-3 md:gap-4">
-      <div className="bg-orange-100 rounded-full p-2 md:p-3 flex-shrink-0 mt-1">
-        <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
-      </div>
-      <div className="flex-1">
-        <h4 className="text-base md:text-lg font-bold text-gray-900">
-          AI-Powered Education Services
-        </h4>
-        <p className="text-gray-600 text-base leading-relaxed">
-          We provide smart, AI-generated notes to help students
-          grasp key concepts quickly and efficiently — perfect for
-          revision, self-study, or catching up on missed classes.
-        </p>
-      </div>
-    </div>
-
-    {/* Serving Students Worldwide */}
-    <div className="flex items-start gap-3 md:gap-4">
-      <div className="bg-orange-100 rounded-full p-2 md:p-3 flex-shrink-0 mt-1">
-        <Globe className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
-      </div>
-      <div className="flex-1">
-        <h4 className="text-base md:text-lg font-bold text-gray-900">
-          Serving Students Worldwide
-        </h4>
-        <p className="text-gray-600 text-base leading-relaxed">
-          Our platform is built for students across the globe — from
-          high school learners to university students — offering
-          multi-language support and curriculum-aligned content.
-        </p>
-      </div>
-    </div>
-
-    {/* Digital Future-Ready Notes */}
-    <div className="flex items-start gap-3 md:gap-4">
-      <div className="bg-orange-100 rounded-full p-2 md:p-3 flex-shrink-0 mt-1">
-        <FileText className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
-      </div>
-      <div className="flex-1">
-        <h4 className="text-base md:text-lg font-bold text-gray-900">
-          Future-Ready Digital Notes
-        </h4>
-        <p className="text-gray-600 text-base leading-relaxed">
-          Say goodbye to outdated notebooks — access organized, searchable, and cloud-synced notes anytime, anywhere, from any device.
-        </p>
-      </div>
-    </div>
-
-    {/* Environmentally Friendly */}
-    <div className="flex items-start gap-3 md:gap-4">
-      <div className="bg-orange-100 rounded-full p-2 md:p-3 flex-shrink-0 mt-1">
-        <Leaf className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
-      </div>
-      <div className="flex-1">
-        <h4 className="text-base md:text-lg font-bold text-gray-900">
-          Save Paper, Save the Planet
-        </h4>
-        <p className="text-gray-600 text-base leading-relaxed">
-          By going digital, you're not just learning smarter — you're also reducing paper waste and contributing to a more sustainable future.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-            {/* CTA Section */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center md:pt-6">
-              <button
-                className="bg-blue-500 hover:bg-blue-600 text-white 
-              rounded-4xl font-semibold transition-colors duration-300 flex items-center gap-3 text-sm md:text-lg
-              px-8 py-4"
-              >
-              Read More
-              </button>
+            <div className="grid gap-4 md:gap-6">
+              <ServiceItem
+                icon={
+                  <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                }
+                title="AI-Powered Education Services"
+                text="We provide smart, AI-generated notes to help students grasp key concepts quickly and efficiently — perfect for revision, self-study, or catching up on missed classes."
+              />
+              <ServiceItem
+                icon={
+                  <Globe className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                }
+                title="Serving Students Worldwide"
+                text="Our platform is built for students across the globe — from high school learners to university students — offering multi-language support and curriculum-aligned content."
+              />
+              <ServiceItem
+                icon={
+                  <Globe className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                }
+                title="Future-Ready Digital Notes"
+                text="Say goodbye to outdated notebooks — access organized, searchable, and cloud-synced notes anytime, anywhere, from any device."
+              />
+              <ServiceItem
+                icon={
+                  <Globe className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                }
+                title="Save Paper, Save the Planet"
+                text="By going digital, you're not just learning smarter — you're also reducing paper waste and contributing to a more sustainable future."
+              />
             </div>
           </div>
         </div>
@@ -129,3 +146,33 @@ export default function EducationAboutSection() {
     </section>
   );
 }
+
+function ServiceItem({ icon, title, text }) {
+  return (
+    <div className="flex items-start gap-3 md:gap-4">
+      <div className="bg-orange-100 rounded-full p-2 md:p-3 flex-shrink-0 mt-1">
+        {icon}
+      </div>
+      <div className="flex-1">
+        <h4 className="text-base md:text-lg font-bold text-gray-900">
+          {title}
+        </h4>
+        <p className="text-gray-600 text-base leading-relaxed">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+// Animation variant
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.2,
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  }),
+};

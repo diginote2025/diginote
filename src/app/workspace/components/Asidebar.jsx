@@ -123,7 +123,7 @@ export default function Asidebar({ setActive, active }) {
       id: "home",
       label: "Home",
       icon: Home,
-      href: "/workspace",
+      href: "/workspace/home",
       description: "Dashboard and overview",
     },
     {
