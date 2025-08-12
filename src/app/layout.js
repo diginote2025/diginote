@@ -21,6 +21,7 @@ export default function RootLayout({ children }) {
             gtag('config', 'G-FZWZBN9RBF');
           `}
         </Script>
+        
         <main>
           <Providers>{children}</Providers>
         </main>
