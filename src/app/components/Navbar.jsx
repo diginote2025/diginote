@@ -66,7 +66,7 @@ export default function MinimalNavbar() {
   return (
     <header 
       className={`w-full fixed top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-white shadow-sm'
+        scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg ' : 'bg-white shadow-sm '
       }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -173,7 +173,7 @@ export default function MinimalNavbar() {
 
         {/* Mobile Navigation Menu */}
         <div
-          className={`lg:hidden absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg transition-all duration-300 ease-in-out z-40 ${
+          className={`lg:hidden absolute h-screen left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg transition-all duration-300 ease-in-out z-40 ${
             open 
               ? 'max-h-screen opacity-100 visible' 
               : 'max-h-0 opacity-0 invisible'
@@ -183,7 +183,7 @@ export default function MinimalNavbar() {
             overflow: 'hidden'
           }}
         >
-          <div className="px-4 py-6 space-y-1 overflow-y-auto max-h-96">
+          <div className="px-4 py-6 space-y-1 overflow-y-auto max-h-screen">
             {links.map((link) =>
               link.dropdown ? (
                 <div key={link.name} className="space-y-1">
