@@ -58,37 +58,6 @@ export default function EducationAboutSection() {
                   />
                 </div>
 
-                {/* CTA Button */}
-                <motion.div
-                  custom={2}
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeInUp}
-                  className=" flex  "
-                >
-                  <Link href="/about" passHref>
-                    <button
-                      className="group flex items-center relative justify-center gap-2 p-1 pl-4 text-gray-900 hover:text-black 
-    bg-gradient-to-r from-green-500/30 to-blue-500/30 
-    hover:from-green-500/50 hover:to-blue-500/50 
-    font-semibold text-base rounded-full border border-blue-500/40
-    shadow-md hover:shadow-xl hover:scale-105 hover:border-blue-800 
-    transition-all duration-300 
-    focus:outline-none focus:ring-4 focus:ring-blue-300/50 active:scale-95"
-                      role="button"
-                      aria-label="Create a new digital notebook"
-                    >
-                     Know More About Us
-                      {/* Pencil Icon with group-hover animation */}
-                      <div
-                        className="bg-purple-500 rounded-full text-gray-200 p-2 transform transition-transform duration-300 
-      group-hover:rotate-45 "
-                      >
-                        <FaPencil size={28} />
-                      </div>
-                    </button>
-                  </Link>
-                </motion.div>
               </div>
             </div>
           </div>
