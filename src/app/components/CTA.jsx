@@ -28,7 +28,7 @@ const CTA = () => {
             </p>
             <div className="mt-10">
               <a
-                href="/workspace" // <-- Change this to your desired link
+                href="/workspace/home" // <-- Change this to your desired link
                 className="inline-block rounded-lg bg-yellow-400 px-8 py-3.5 text-base font-bold text-black shadow-sm transition-transform hover:scale-105 hover:bg-yellow-300 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
               >
                 Generate My Notes
