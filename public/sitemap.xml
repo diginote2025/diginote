@@ -9,13 +9,58 @@
 
 <url>
   <loc>https://www.diginote.in/</loc>
-  <lastmod>2025-07-23T08:00:09+00:00</lastmod>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://www.diginote.in/workspace/create</loc>
-  <lastmod>2025-07-23T08:00:09+00:00</lastmod>
+  <loc>https://www.diginote.in/about</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
   <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/features</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/blog</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/faq</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/contact</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/features/ai-notebook-maker</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/features/ai-mcq-practice</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/features/ai-unit-test</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/features/topic-wise-youtube-video</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.diginote.in/blog/the-future-of-ai-digital-notebook-makers</loc>
+  <lastmod>2025-08-12T11:24:41+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 
 
