@@ -29,7 +29,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative max-lg:py-24 flex justify-center items-center overflow-hidden bg-gradient-to-b from-white via-blue-50 to-white">
+    <section className="relative max-lg:py-24 lg:pt-[2rem] flex justify-center items-center overflow-hidden bg-gradient-to-b from-white via-blue-50 to-white">
       {/* Background Image */}
       <Image
         src="/images/homepage/hero/background-image-for-diginote-hero-section.png"
