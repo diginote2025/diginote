@@ -3,6 +3,15 @@ import Sidebar from "./components/Sidebar";
 import SectionTitle from "./components/SectionTitle";
 import Breadcrumb from "./Breadcrumb";
 
+export const metadata = {
+  title: "Study Smarter Blog | Tips, Tricks & EdTech News by DigiNote",
+  description:
+    "Explore the DigiNote blog for expert articles on effective study habits, exam strategies, productivity hacks, and how to leverage AI for academic success.",
+  keywords:
+    "Study tips, learning strategies, exam preparation, AI in education, edtech blog, student advice, academic success, productivity hacks, online learning, DigiNote blog.",
+  
+};
+
 export default function BlogPage() {
   const blogs = [
     {

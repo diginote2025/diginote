@@ -52,7 +52,7 @@ export default function Breadcrumb() {
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-3">
-          MCQ Practice
+          Topic Wise Youtube Video
         </h1>
 
         <nav className="text-sm md:text-base text-gray-600">
@@ -78,7 +78,7 @@ export default function Breadcrumb() {
               <div className="flex items-center">
                 <span className="text-gray-400">/</span>
                 <span className="ml-1 md:ml-2 font-medium text-gray-500">
-                  MCQ Practice
+                  Topic Wise Youtube Video
                 </span>
               </div>
             </li>
