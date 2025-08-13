@@ -1,18 +1,7 @@
-
-
-
-
 // import { useRouter } from "next/navigation";
 import Homepage from "./components/Homepage";
 
-
-
-
 export default function page() {
-
-
-   
-
 
     return (
       <div>

@@ -17,7 +17,7 @@ import { toggleTheme } from "@/redux/themeSlice";
 import { toggleAsidebar } from "@/redux/asidebarSlice";
 import Link from "next/link";
 import Image from "next/image";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "./useTheme";
 
 export default function Asidebar({ setActive, active }) {
   const dispatch = useDispatch();
@@ -333,7 +333,7 @@ export default function Asidebar({ setActive, active }) {
           )}
 
           {/* User section */}
-          {(!isCollapsed || !isMobile)  && (
+          {(!isCollapsed || !isMobile) && (
             <div className="pt-2 border-t  border-gray-200 dark:border-gray-700">
               <div
                 className={`flex items-center px-1
@@ -347,7 +347,7 @@ export default function Asidebar({ setActive, active }) {
                   <User className="w-4 h-4 " />
                 </div>
 
-                {(!isCollapsed || isMobile)  && (
+                {(!isCollapsed || isMobile) && (
                   <div className="flex-1 min-w-0">
                     <p className="text-sm lg:text-sm font-medium  truncate">
                       User
