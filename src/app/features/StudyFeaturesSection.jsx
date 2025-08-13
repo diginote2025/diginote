@@ -2,13 +2,14 @@ import Link from "next/link";
 import React from "react";
 import Image from "next/image";
 
+// Data for the feature cards
 const featuresData = [
   {
     title: "AI-Generated Notes",
     description:
       "Instantly get concise, well-structured notes for any topic or chapter, tailored to your syllabus, saving you time and effort in manual summarization.",
     imageUrl:
-      "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2070&auto=format&fit=crop",
+      "/images/homepage/hero/hero.png",
     isHighlighted: false,
     links: "/features/ai-notebook-maker",
   },
@@ -17,7 +18,7 @@ const featuresData = [
     description:
       "Reinforce your learning with topic-wise multiple-choice questions designed to help you assess and strengthen your knowledge.",
     imageUrl:
-      "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2070&auto=format&fit=crop",
+      "/images/homepage/hero/hero.png",
     isHighlighted: false,
     links: "/features/ai-mcq-practice",
   },
@@ -26,7 +27,7 @@ const featuresData = [
     description:
       "Access handpicked educational videos from trusted channels that explain complex topics in a simple, engaging way for visual learning.",
     imageUrl:
-      "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2070&auto=format&fit=crop",
+      "/images/homepage/hero/hero.png",
     isHighlighted: false,
     links: "/features/topic-wise-youtube-video",
   },
@@ -35,12 +36,13 @@ const featuresData = [
     description:
       "Create custom unit tests using either manual selection or AI-generated questions to simulate real exam conditions and boost your readiness.",
     imageUrl:
-      "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=2070&auto=format&fit=crop",
+      "/images/homepage/hero/hero.png",
     isHighlighted: false,
     links: "/features/ai-unit-test",
   },
 ];
 
+// Reusable Arrow Icon component with hover animation
 const ArrowIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +64,7 @@ const StudyFeaturesSection = () => {
   return (
     <div className="bg-slate-50 py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Heading */}
+        {/* Section Heading */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-2">
             <span className="p-1.5 rounded-full bg-lime-200">
@@ -72,6 +74,7 @@ const StudyFeaturesSection = () => {
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
+                {/* This is a complex icon path, kept as is. */}
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.512 5.73 6.512 5.73c.244-.244.64-.244.884 0l.001.001c.244.244.244.64 0 .884l-.001.001-1.54 1.54c-.21.21-.33.48-.33.78V12a.75.75 0 001.5 0V9.813a.75.75 0 00-.22-.53l-.53-.53.001.001c-.244-.244-.244-.64 0-.884l.001-.001.001-.001a.632.632 0 01.884 0l1.912 1.912a6.012 6.012 0 012.706 1.912c.244.244.244.64 0 .884l-.001.001a.632.632 0 01-.884 0l-1.912-1.912a4.51 4.51 0 00-1.28-1.28l-1.54-1.54c-.21-.21-.48-.33-.78-.33V4.5a.75.75 0 00-1.5 0v2.187a.75.75 0 00.22.53l.53.53-.001-.001c.244.244.244.64 0 .884l-.001.001-.001.001a.632.632 0 01-.884 0L8.028 9.168a4.51 4.51 0 00-1.28 1.28l-1.54 1.54c-.244.244-.64.244-.884 0l-.001-.001a.632.632 0 010-.884z"
@@ -88,8 +91,8 @@ const StudyFeaturesSection = () => {
           </h2>
         </div>
 
-        {/* Features grid */}
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+        {/* Features Grid */}
+        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2">
           {featuresData.map((feature) => (
             <div
               key={feature.title}

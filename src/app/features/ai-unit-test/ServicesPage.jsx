@@ -129,7 +129,7 @@ const ServicesPage = () => {
             <Image
               width={1000}
               height={1000}
-              src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2132&auto=format&fit=crop"
+              src="/images/features/ai-unit-test/ai-unit-test1.jpg"
               alt="Student reviewing test questions on a tablet"
               className="w-full h-full object-cover"
             />
@@ -138,7 +138,7 @@ const ServicesPage = () => {
             <Image
               width={1000}
               height={1000}
-              src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1974&auto=format&fit=crop"
+              src="/images/features/ai-unit-test/ai-unit-test2.jpg"
               alt="Students collaborating with technology"
               className="w-full h-full object-cover"
             />
