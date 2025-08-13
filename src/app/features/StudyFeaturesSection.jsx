@@ -100,7 +100,9 @@ const StudyFeaturesSection = () => {
               }`}
             >
               <div className="flex-shrink-0">
-                <img
+                <Image
+                  width={1000}
+                  height={1000}
                   className={`h-64 w-full object-cover ${
                     !feature.isHighlighted ? "grayscale" : ""
                   }`}
@@ -112,18 +114,14 @@ const StudyFeaturesSection = () => {
                 <div>
                   <h3
                     className={`text-xl font-bold ${
-                      feature.isHighlighted
-                        ? "text-gray-900"
-                        : "text-gray-800"
+                      feature.isHighlighted ? "text-gray-900" : "text-gray-800"
                     }`}
                   >
                     {feature.title}
                   </h3>
                   <p
                     className={`mt-3 text-base ${
-                      feature.isHighlighted
-                        ? "text-gray-800"
-                        : "text-gray-600"
+                      feature.isHighlighted ? "text-gray-800" : "text-gray-600"
                     }`}
                   >
                     {feature.description}

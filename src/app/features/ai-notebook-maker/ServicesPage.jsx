@@ -126,14 +126,18 @@ const ServicesPage = () => {
         {/* Section 3: Image Showcase */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 md:mb-20">
           <div className="rounded-lg overflow-hidden shadow-lg h-80">
-            <img
+            <Image
+              width={1000}
+              height={1000}
               src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?q=80&w=2070&auto=format&fit=crop"
               alt="Student using a laptop for AI-powered learning"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="rounded-lg overflow-hidden shadow-lg h-80">
-            <img
+            <Image
+              width={1000}
+              height={1000}
               src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1974&auto=format&fit=crop"
               alt="Students collaborating with technology"
               className="w-full h-full object-cover"
@@ -187,35 +191,43 @@ const ServicesPage = () => {
               <li className="flex items-start">
                 <CheckIcon className="h-6 w-6 text-green-400 mr-4 mt-1 flex-shrink-0" />
                 <span>
-                  <strong>Time-Saving Efficiency –</strong>  Instantly receive ready-to-use notes without manual writing.
+                  <strong>Time-Saving Efficiency –</strong> Instantly receive
+                  ready-to-use notes without manual writing.
                 </span>
               </li>
               <li className="flex items-start">
                 <CheckIcon className="h-6 w-6 text-green-400 mr-4 mt-1 flex-shrink-0" />
                 <span>
-                  <strong>Improved Retention –</strong>  Structured summaries enhance comprehension and memory.
+                  <strong>Improved Retention –</strong> Structured summaries
+                  enhance comprehension and memory.
                 </span>
               </li>
               <li className="flex items-start">
                 <CheckIcon className="h-6 w-6 text-green-400 mr-4 mt-1 flex-shrink-0" />
                 <span>
-                  <strong>Syllabus Accuracy –</strong> Every note aligns perfectly with your academic goals.
+                  <strong>Syllabus Accuracy –</strong> Every note aligns
+                  perfectly with your academic goals.
                 </span>
               </li>
               <li className="flex items-start">
                 <CheckIcon className="h-6 w-6 text-green-400 mr-4 mt-1 flex-shrink-0" />
                 <span>
-                  <strong> Consistency in Quality –</strong> Maintain the same high standard for every topic.
+                  <strong> Consistency in Quality –</strong> Maintain the same
+                  high standard for every topic.
                 </span>
-              </li> <li className="flex items-start">
+              </li>{" "}
+              <li className="flex items-start">
                 <CheckIcon className="h-6 w-6 text-green-400 mr-4 mt-1 flex-shrink-0" />
                 <span>
-                  <strong> Study Anytime, Anywhere –</strong>  Access notes on any device for flexible learning.
+                  <strong> Study Anytime, Anywhere –</strong> Access notes on
+                  any device for flexible learning.
                 </span>
-              </li> <li className="flex items-start">
+              </li>{" "}
+              <li className="flex items-start">
                 <CheckIcon className="h-6 w-6 text-green-400 mr-4 mt-1 flex-shrink-0" />
                 <span>
-                  <strong> Collaboration Made Easy –</strong> Share notes with classmates or study groups effortlessly.
+                  <strong> Collaboration Made Easy –</strong> Share notes with
+                  classmates or study groups effortlessly.
                 </span>
               </li>
             </ul>

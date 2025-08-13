@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Head from "next/head";
+import Image from "next/image";
 
 const samplePost = {
   title: "The Future of AI Digital Notebook Makers",
- date: 'August 11, 2025',
+  date: "August 11, 2025",
   author: {
     name: "D. Raju Rao",
     avatar: "/images/blog/raju.jpg",
@@ -16,87 +17,359 @@ const samplePost = {
   cover: "/images/blog/future_of_ai_digital_notebook.jpg",
   // For demo purposes we use HTML in `content`. In real usage, sanitize or render markdown safely.
   content: (
-   <>
-    <div class=" ">
-    <article class=" bg-white rounded-xl  mb-8">
-        <div class="prose prose-slate max-w-none text-slate-700 prose-p:leading-relaxed prose-h2:text-slate-800 prose-h3:text-slate-700">
-            <p>The humble notebook has been humanity's trusted companion for centuries, evolving from papyrus scrolls to leather-bound journals to digital apps. Now, we're witnessing the next evolutionary leap: AI-powered digital notebooks that don't just store our thoughts—they understand, enhance, and actively participate in our thinking process.</p>
-            
-            <h2 class="text-2xl sm:text-3xl font-bold border-b-2 border-blue-500 pb-2 mb-6 mt-12">The Intelligence Revolution in Note-Taking</h2>
-            <p>Traditional digital notebooks were essentially digital paper—static repositories for our thoughts. Today's AI-powered notebooks are dynamic thinking partners that adapt to your workflow, understand context, and provide intelligent assistance at every step.</p>
-            
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">Smart Content Understanding</h3>
-            <p>Modern AI notebook makers leverage advanced natural language processing to understand not just what you're writing, but the intent behind it. When you jot down "Meeting with Sarah tomorrow about Q3 budget," the system doesn't just store text—it recognizes this as a calendar-worthy event, identifies the key participants, and understands the business context. These systems can automatically:</p>
+    <>
+      <div class=" ">
+        <article class=" bg-white rounded-xl  mb-8">
+          <div class="prose prose-slate max-w-none text-slate-700 prose-p:leading-relaxed prose-h2:text-slate-800 prose-h3:text-slate-700">
+            <p>
+              The humble notebook has been humanity's trusted companion for
+              centuries, evolving from papyrus scrolls to leather-bound journals
+              to digital apps. Now, we're witnessing the next evolutionary leap:
+              AI-powered digital notebooks that don't just store our
+              thoughts—they understand, enhance, and actively participate in our
+              thinking process.
+            </p>
+
+            <h2 class="text-2xl sm:text-3xl font-bold border-b-2 border-blue-500 pb-2 mb-6 mt-12">
+              The Intelligence Revolution in Note-Taking
+            </h2>
+            <p>
+              Traditional digital notebooks were essentially digital
+              paper—static repositories for our thoughts. Today's AI-powered
+              notebooks are dynamic thinking partners that adapt to your
+              workflow, understand context, and provide intelligent assistance
+              at every step.
+            </p>
+
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              Smart Content Understanding
+            </h3>
+            <p>
+              Modern AI notebook makers leverage advanced natural language
+              processing to understand not just what you're writing, but the
+              intent behind it. When you jot down "Meeting with Sarah tomorrow
+              about Q3 budget," the system doesn't just store text—it recognizes
+              this as a calendar-worthy event, identifies the key participants,
+              and understands the business context. These systems can
+              automatically:
+            </p>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Extract actionable items</strong> from meeting notes and convert them into tasks</li>
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Identify key concepts</strong> and create automatic cross-references between related notes</li>
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Detect sentiment and priority</strong> to help you focus on what matters most</li>
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Generate summaries</strong> of lengthy brainstorming sessions or research notes</li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Extract actionable items</strong> from meeting notes and
+                convert them into tasks
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Identify key concepts</strong> and create automatic
+                cross-references between related notes
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Detect sentiment and priority</strong> to help you focus
+                on what matters most
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Generate summaries</strong> of lengthy brainstorming
+                sessions or research notes
+              </li>
             </ul>
 
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">Intelligent Organization Beyond Folders</h3>
-            <p>The future of digital notebooks transcends traditional hierarchical organization. AI-powered systems create dynamic, context-aware connections between your ideas, forming what researchers call "knowledge graphs" of your thoughts. Instead of rigid folder structures, these systems use:</p>
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              Intelligent Organization Beyond Folders
+            </h3>
+            <p>
+              The future of digital notebooks transcends traditional
+              hierarchical organization. AI-powered systems create dynamic,
+              context-aware connections between your ideas, forming what
+              researchers call "knowledge graphs" of your thoughts. Instead of
+              rigid folder structures, these systems use:
+            </p>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Semantic clustering</strong> that groups related ideas regardless of when or where you wrote them</li>
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Temporal connections</strong> that link ideas based on when they were created or last accessed</li>
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Contextual tagging</strong> that automatically applies relevant labels based on content analysis</li>
-                <li class="flex items-start"><span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg></span><strong>Relationship mapping</strong> that shows how different concepts in your notebook connect and influence each other</li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Semantic clustering</strong> that groups related ideas
+                regardless of when or where you wrote them
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Temporal connections</strong> that link ideas based on
+                when they were created or last accessed
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Contextual tagging</strong> that automatically applies
+                relevant labels based on content analysis
+              </li>
+              <li class="flex items-start">
+                <span class="flex-shrink-0 h-6 w-6 text-blue-500 mt-0.5 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    class="w-6 h-6"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </span>
+                <strong>Relationship mapping</strong> that shows how different
+                concepts in your notebook connect and influence each other
+              </li>
             </ul>
-            
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">Predictive Writing and Creative Enhancement</h3>
-            <p>AI notebook makers are evolving into creative collaborators, offering:</p>
+
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              Predictive Writing and Creative Enhancement
+            </h3>
+            <p>
+              AI notebook makers are evolving into creative collaborators,
+              offering:
+            </p>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li><strong>Context-aware writing suggestions</strong> that understand your field and project</li>
-                <li><strong>Style consistency</strong> for improvements while maintaining your voice</li>
-                <li><strong>Research integration</strong> to suggest sources and citations automatically</li>
-                <li><strong>Multi-language support</strong> with real-time translation and cultural context</li>
+              <li>
+                <strong>Context-aware writing suggestions</strong> that
+                understand your field and project
+              </li>
+              <li>
+                <strong>Style consistency</strong> for improvements while
+                maintaining your voice
+              </li>
+              <li>
+                <strong>Research integration</strong> to suggest sources and
+                citations automatically
+              </li>
+              <li>
+                <strong>Multi-language support</strong> with real-time
+                translation and cultural context
+              </li>
             </ul>
-            <p>They serve as brainstorming partners, generating related concepts, finding patterns, suggesting alternative perspectives, and connecting disparate ideas to spark innovation.</p>
+            <p>
+              They serve as brainstorming partners, generating related concepts,
+              finding patterns, suggesting alternative perspectives, and
+              connecting disparate ideas to spark innovation.
+            </p>
 
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">Real-World Applications Across Industries</h3>
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              Real-World Applications Across Industries
+            </h3>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li><strong>Education & Research:</strong> Automated bibliographies, adaptive study guides, finding knowledge gaps, collaborative idea synthesis.</li>
-                <li><strong>Business & Consulting:</strong> Automated action items, client profile aggregation, proposal generation, scenario modeling.</li>
-                <li><strong>Creative Industries:</strong> Character consistency, mood board generation, tracking creative influences, collaborative ideation.</li>
+              <li>
+                <strong>Education & Research:</strong> Automated bibliographies,
+                adaptive study guides, finding knowledge gaps, collaborative
+                idea synthesis.
+              </li>
+              <li>
+                <strong>Business & Consulting:</strong> Automated action items,
+                client profile aggregation, proposal generation, scenario
+                modeling.
+              </li>
+              <li>
+                <strong>Creative Industries:</strong> Character consistency,
+                mood board generation, tracking creative influences,
+                collaborative ideation.
+              </li>
             </ul>
 
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">Privacy, Security, and Ethical Considerations</h3>
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              Privacy, Security, and Ethical Considerations
+            </h3>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li><strong>Data ownership</strong> with local processing and granular privacy settings</li>
-                <li><strong>Encryption standards</strong> safeguard ideas and intellectual property</li>
-                <li><strong>Bias mitigation</strong> via diverse training data, cultural sensitivity, and transparent recommendations</li>
+              <li>
+                <strong>Data ownership</strong> with local processing and
+                granular privacy settings
+              </li>
+              <li>
+                <strong>Encryption standards</strong> safeguard ideas and
+                intellectual property
+              </li>
+              <li>
+                <strong>Bias mitigation</strong> via diverse training data,
+                cultural sensitivity, and transparent recommendations
+              </li>
             </ul>
 
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">The Technology Stack Behind AI Notebooks</h3>
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              The Technology Stack Behind AI Notebooks
+            </h3>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li><strong>NLP and transformer models</strong>, adapted for context-rich note-taking and multilingual support.</li>
-                <li><strong>Machine learning personalization</strong> via usage analysis and preference learning.</li>
-                <li><strong>Integration ecosystems</strong> connecting with calendars, research databases, communication platforms, and creative tools.</li>
+              <li>
+                <strong>NLP and transformer models</strong>, adapted for
+                context-rich note-taking and multilingual support.
+              </li>
+              <li>
+                <strong>Machine learning personalization</strong> via usage
+                analysis and preference learning.
+              </li>
+              <li>
+                <strong>Integration ecosystems</strong> connecting with
+                calendars, research databases, communication platforms, and
+                creative tools.
+              </li>
             </ul>
 
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">Challenges and Limitations</h3>
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              Challenges and Limitations
+            </h3>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li><strong>Computational demands</strong> affect battery life, cloud reliance, and cost.</li>
-                <li><strong>Potential for mistakes</strong>—AI hallucinations, context misunderstandings, bias risk, and user over-reliance.</li>
+              <li>
+                <strong>Computational demands</strong> affect battery life,
+                cloud reliance, and cost.
+              </li>
+              <li>
+                <strong>Potential for mistakes</strong>—AI hallucinations,
+                context misunderstandings, bias risk, and user over-reliance.
+              </li>
             </ul>
 
-            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">Looking Ahead: The Next Five Years</h3>
+            <h3 class="text-xl sm:text-2xl font-semibold mt-8 mb-4">
+              Looking Ahead: The Next Five Years
+            </h3>
             <ul class="space-y-3 my-6 list-none p-0">
-                <li><strong>Multimodal intelligence</strong>: Voice, handwriting, image, and video understanding</li>
-                <li><strong>Collaborative intelligence</strong>: Real-time editing, expertise matching, knowledge synthesis, and cultural adaptation</li>
-                <li><strong>Augmented reality integration</strong>: AR overlays, gesture controls, environmental adaptation, mixed reality collaboration</li>
+              <li>
+                <strong>Multimodal intelligence</strong>: Voice, handwriting,
+                image, and video understanding
+              </li>
+              <li>
+                <strong>Collaborative intelligence</strong>: Real-time editing,
+                expertise matching, knowledge synthesis, and cultural adaptation
+              </li>
+              <li>
+                <strong>Augmented reality integration</strong>: AR overlays,
+                gesture controls, environmental adaptation, mixed reality
+                collaboration
+              </li>
             </ul>
-            <p>When choosing your AI notebook, consider feature priorities, integrations, collaboration needs, privacy preferences, ease of use, customization, data portability, and cost structure.</p>
+            <p>
+              When choosing your AI notebook, consider feature priorities,
+              integrations, collaboration needs, privacy preferences, ease of
+              use, customization, data portability, and cost structure.
+            </p>
 
-            <h2 class="text-2xl sm:text-3xl font-bold border-b-2 border-blue-500 pb-2 mb-6 mt-12">Conclusion: Embracing the Intelligent Future</h2>
-            <p>AI digital notebook makers represent more than just technological advancement—they signal a shift toward more intelligent, responsive tools that understand and adapt to human needs. As these systems continue to evolve, they'll become increasingly integral to how we process information, generate ideas, and collaborate with others.</p>
-            <p>The key to success in this new landscape is approaching AI notebooks as partners rather than replacement tools. By understanding their capabilities and limitations, we can harness their power to augment our natural creativity and productivity while maintaining the human insight and intuition that drives true innovation.</p>
-            <p>Whether you're a student, researcher, creative professional, or business leader, the AI-powered digital notebook of the future promises to be your most intelligent and capable thinking companion yet. The question isn't whether to embrace this technology—it's how quickly you can learn to dance with it.</p>
-        </div>
-    </article>
-    </div>
-</>
-
+            <h2 class="text-2xl sm:text-3xl font-bold border-b-2 border-blue-500 pb-2 mb-6 mt-12">
+              Conclusion: Embracing the Intelligent Future
+            </h2>
+            <p>
+              AI digital notebook makers represent more than just technological
+              advancement—they signal a shift toward more intelligent,
+              responsive tools that understand and adapt to human needs. As
+              these systems continue to evolve, they'll become increasingly
+              integral to how we process information, generate ideas, and
+              collaborate with others.
+            </p>
+            <p>
+              The key to success in this new landscape is approaching AI
+              notebooks as partners rather than replacement tools. By
+              understanding their capabilities and limitations, we can harness
+              their power to augment our natural creativity and productivity
+              while maintaining the human insight and intuition that drives true
+              innovation.
+            </p>
+            <p>
+              Whether you're a student, researcher, creative professional, or
+              business leader, the AI-powered digital notebook of the future
+              promises to be your most intelligent and capable thinking
+              companion yet. The question isn't whether to embrace this
+              technology—it's how quickly you can learn to dance with it.
+            </p>
+          </div>
+        </article>
+      </div>
+    </>
   ),
 };
 
@@ -183,13 +456,17 @@ export default function BlogPostPage({ post = samplePost }) {
         {/* Hero */}
         <article className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <header className="lg:col-span-2">
-            <img
+            <Image
+              width={1000}
+              height={1000}
               src={post.cover}
               alt="cover"
               className="w-full rounded-xl object-cover mb-6"
             />
             <div className="flex items-center gap-4 mb-4">
-              <img
+              <Image
+                width={1000}
+                height={1000}
                 src={post.author.avatar}
                 alt={post.author.name}
                 className="w-12 h-12 rounded-full object-cover"
@@ -251,12 +528,10 @@ export default function BlogPostPage({ post = samplePost }) {
                       className="hover:underline truncate block"
                       onClick={(e) => {
                         e.preventDefault();
-                        document
-                          .getElementById(item.id)
-                          ?.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
+                        document.getElementById(item.id)?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
                       }}
                     >
                       {item.text}
@@ -292,7 +567,9 @@ export default function BlogPostPage({ post = samplePost }) {
 
             {/* Author card + CTA */}
             <div className=" border rounded-lg flex items-center gap-4 p-4">
-              <img
+              <Image
+                width={1000}
+                height={1000}
                 src={post.author.avatar}
                 alt={post.author.name}
                 className="w-16 h-16 rounded-full object-cover"
