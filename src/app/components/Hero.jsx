@@ -39,7 +39,7 @@ export default function Hero() {
         width={1920}
         height={1080}
         className="absolute inset-0 w-full h-full object-cover opacity-40 max-lg:opacity-100 blur-2xl scale-105"
-        priority
+        
       />
 
       {/* Content Container */}
