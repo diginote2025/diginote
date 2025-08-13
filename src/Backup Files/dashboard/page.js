@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signIn } from "next-auth/react";
-import Homepage from "../components/Homepage";
+import Homepage from "../../app/components/Homepage";
 
 export default function Dashboard() {
   const { data: session, status } = useSession();

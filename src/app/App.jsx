@@ -42,8 +42,13 @@ function AppBody({ children }) {
 }
 
 export default function RootLayout({ children }) {
+   const pathname = usePathname();
+   const canonicalUrl = `https://diginote.in${pathname}`;
   return (
     <html lang="en">
+      <head>
+        <link rel="canonical" href={canonicalUrl} />
+      </head>
       <body>
         <ReduxProvider store={store}>
           <SessionProvider>
