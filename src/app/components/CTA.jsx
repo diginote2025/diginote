@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const CTA = () => {
   return (
@@ -45,9 +46,11 @@ const CTA = () => {
           // transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
           // viewport={{ once: true }}
         >
-          <img
+          <Image
             src={"/images/homepage/CTA/contact_us.png"}
             alt="Smiling Doctor"
+            width={1000}
+            height={1000}
             className="w-[45rem] absolute max-lg:relative bottom-0 right-5"
           />
         </motion.div>
