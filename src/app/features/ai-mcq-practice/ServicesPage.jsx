@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 
 // A reusable SVG checkmark icon component for use in feature lists.
