@@ -103,30 +103,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <title>
-          DigiNote – AI Notebook Maker | MCQs, Chapter Videos & Tests
-        </title>
-        <meta
-          name="description"
-          content="DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests."
-        />
-        <meta
-          name="keywords"
-          content="diginote, ai notes taker, student notes, mcq tests, youtube video, unit tests, ai study tool, digital learning"
-        />
-        <meta
-          property="og:title"
-          content="DigiNote – AI Notebook Maker | MCQs, Chapter Videos & Tests"
-        />
-        <meta
-          property="og:description"
-          content="DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests."
-        />
-          <meta name="google-site-verification" content="lt26BMlkm0vfvrArTEIKCm1DT2gWldd_SMH3-cn6D0E" />
-       
-        <meta property="og:url" content="https://diginote.in" />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:url" content={`https://diginote.in${pathname}`} />
         <link rel="canonical" href={canonicalUrl} />
         <link rel="icon" href="/favicon.ico" />
         <script
