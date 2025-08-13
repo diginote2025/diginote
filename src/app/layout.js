@@ -7,37 +7,7 @@ const geist = Geist({ subsets: ["latin"], weight: ["400"] });
 
 // app/layout.js or app/layout.tsx
 
-export const metadata = {
-  title: "DigiNote – AI Notebook Maker | MCQs, Chapter Videos & Tests",
-  description:
-    "DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
-  keywords: [
-    "diginote",
-    "ai notes taker",
-    "student notes",
-    "mcq tests",
-    "youtube video",
-    "unit tests",
-    "ai study tool",
-    "digital learning",
-  ],
-  openGraph: {
-    title: "DigiNote – AI Notebook Maker | MCQs, Chapter Videos & Tests",
-    description:
-      "DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
 
-    siteName: "DigiNote",
-    images: [
-      {
-        url: "https://diginote.in/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "DigiNote – AI Notebook Maker",
-      },
-    ],
-    type: "website",
-  },
-};
 
 export default function RootLayout({ children }) {
   return (
