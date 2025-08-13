@@ -27,7 +27,7 @@ export const metadata = {
     title: "DigiNote - AI Notebook Maker | MCQs, chapter videos & tests",
     description:
       "DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
-url: "https://diginote.in",
+url: "/",
     siteName: "DigiNote",
     images: [
       {
