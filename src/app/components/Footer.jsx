@@ -69,9 +69,7 @@ const Footer = () => {
               </Link>
             </div>
             <p className="text-sm leading-relaxed text-gray-600">
-              DigiNote is an AI-powered notebook generator for students,
-              offering MCQ tests, chapter-related YouTube videos, and
-              customizable unit tests.
+              DigiNote is Best AI Tool for Students: Generate free notes, MCQs, YouTube summaries, and practice mock tests online.
             </p>
             <div className="flex space-x-4 pt-2">
               {socialLinks.map((social) => (

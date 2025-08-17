@@ -53,9 +53,7 @@ export default function Hero() {
           className={`text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-snug
             ${MerriweatherFont.className}`}
         >
-          Study Smarter with <span className="text-blue-600">DigiNote</span>{" "}
-          Your <span className="text-green-500">AI-Powered Notes</span> & Test
-          Companion
+       Generate free notes, MCQs, YouTube summaries, and practice mock tests online.
         </motion.h1>
 
         {/* Subtext */}

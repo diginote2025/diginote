@@ -9,6 +9,7 @@ import Navbar from './Navbar'
 import Signin from './Authentication/Signin'
 import DigiNoteImage from './DigiNoteImage'
 import Blog from './Blog'
+import ExamPreparation from './ExamPreparation'
 
 export default function Homepage() {
   return (
@@ -20,7 +21,7 @@ export default function Homepage() {
       <Features/>
       <About/>
       <WhoIsFor/>
-      
+      <ExamPreparation/>
       <CTA/>
       <Blog/>
       <FAQ/>
