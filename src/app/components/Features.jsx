@@ -57,7 +57,7 @@ export default function About() {
         {/* Content Right */}
         <div className="w-full text-left max-lg:flex max-lg:flex-col max-lg:justify-center max-lg:items-center">
           <h2 className="text-3xl max-lg:text-center sm:text-4xl font-extrabold text-gray-900 mb-6 flex justify-center md:justify-start items-center gap-2">
-            Study Smarter with DigiNote: Best AI Study Tools for Students
+            Study Smarter with DigiNote: Best AI Tools for Students
           </h2>
          
           <ul className="text-gray-700 text-base space-y-3 mt-6">
