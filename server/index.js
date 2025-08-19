@@ -8,5 +8,4 @@ app.post("/diginote/test", (req, res) => {
 
 app.listen(port, () => {
   console.log(`server is running on http://localhost:${port}/diginote/test`);
-  alert(`server is running on http://localhost:${port}/diginote/test`)
 });
