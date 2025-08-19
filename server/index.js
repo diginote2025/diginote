@@ -2,7 +2,7 @@ import express from "express";
 const app = express();
 const port = 3022;
 
-app.post("/diginote/test", (req, res) => {
+app.get("/diginote/test", (req, res) => {
   res.send("hello world");
 });
 
