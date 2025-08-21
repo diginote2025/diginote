@@ -246,7 +246,7 @@
         doc.setFontSize(window.innerWidth < 640 ? 20 : 24);
         doc.setFont(undefined, "bold");
         doc.setTextColor(255, 255, 255);
-        doc.text("📓 Study Notebook", margin, 25);
+        doc.text("Digital Notebook", margin, 25);
 
         doc.setFontSize(window.innerWidth < 640 ? 10 : 12);
         doc.setFont(undefined, "normal");
@@ -264,7 +264,7 @@
         doc.setFontSize(window.innerWidth < 640 ? 12 : 14);
         doc.setFont(undefined, "bold");
         doc.text(
-          `📊 Summary: ${totalChapters} Chapters • ${totalTopics} Topics`,
+          `Summary: ${totalChapters} Chapters • ${totalTopics} Topics`,
           margin,
           yPosition
         );
@@ -370,7 +370,7 @@
             doc.internal.pageSize.height - 8
           );
           doc.text(
-            "Study Notebook - AI Generated",
+            "DigiNote - AI Notebook Generator",
             window.innerWidth < 640 ? 15 : 25,
             doc.internal.pageSize.height - 8
           );

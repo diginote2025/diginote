@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowLeft, TruckElectric } from "lucide-react";
-import React, { useState, useEffect, useCallback } from "react";
+import { ArrowLeft, Camera, Upload, Loader2, X } from "lucide-react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -15,14 +15,14 @@ import MCQ from "./MCQ";
 import axios from "axios";
 import { motion } from "framer-motion";
 import TakeTest from "./TakeTest";
-import {
-  setSavedResponses,
-  updateSavedResponses,
-  setShowNotebook,
-} from "@/redux/studyToolSlice";
+import { setSavedResponses, setShowNotebook } from "@/redux/studyToolSlice";
 import Image from "next/image";
+import * as pdfjs from "pdfjs-dist";
 
-export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDark }) {
+// Configure the PDF.js worker from a CDN.
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+
+export default function AiStudyTool({ selectedSubject, isDark }) {
   const [hasMounted, setHasMounted] = useState(false);
   const [chapter, setChapter] = useState("");
   const [topic, setTopic] = useState("");
@@ -48,14 +48,223 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
   const [chapterInput, setChapterInput] = useState("");
   const [topicInput, setTopicInput] = useState("");
 
+  const [isParsingSyllabus, setIsParsingSyllabus] = useState(false);
+  const [parsingError, setParsingError] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // FIX: Add a ref to track if it's an initial load for a topic.
+  // This helps prevent the double API call.
+  const isInitialTopicLoad = useRef(true);
+
   const dispatch = useDispatch();
-  
   const router = useRouter();
   const isSubjectbarOpen = useSelector(
     (state) => state.subjectbar.isSubjectbarOpen
   );
   const savedResponses = useSelector((state) => state.studyTool.savedResponses);
   const showNotebook = useSelector((state) => state.studyTool.showNotebook);
+
+  // All your functions (fileToGenerativePart, pdfToImageParts, etc.) remain the same.
+  const fileToGenerativePart = async (file) => {
+    const base64EncodedData = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(",")[1]);
+      reader.readAsDataURL(file);
+    });
+    return {
+      inlineData: { mimeType: file.type, data: base64EncodedData },
+    };
+  };
+
+  const pdfToImageParts = async (file) => {
+    const fileBuffer = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument(fileBuffer).promise;
+    const imageParts = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      await page.render({ canvasContext: context, viewport: viewport }).promise;
+      const imageData = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
+      imageParts.push({
+        inlineData: { mimeType: "image/jpeg", data: imageData },
+      });
+    }
+    return imageParts;
+  };
+
+  const parseSyllabusToObject = (text) => {
+    const lines = text
+      .split("\n")
+      .filter((line) => line.trim() !== "" && !/unit/i.test(line));
+    const syllabus = {};
+    let currentChapter = "";
+
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+      if (
+        !trimmedLine.startsWith("-") &&
+        !trimmedLine.startsWith("*") &&
+        !/^\d+\./.test(trimmedLine)
+      ) {
+        currentChapter = trimmedLine.replace(/:$/, "").trim();
+        if (currentChapter) {
+          syllabus[currentChapter] = [];
+        }
+      } else if (currentChapter) {
+        const topic = trimmedLine.replace(/^[-*\d.]+\s*/, "").trim();
+        if (topic) {
+          syllabus[currentChapter].push(topic);
+        }
+      }
+    });
+
+    if (Object.keys(syllabus).length === 0 && lines.length > 0) {
+      syllabus["Imported Syllabus"] = lines.map((line) =>
+        line.replace(/^[-*\d.]+\s*/, "").trim()
+      );
+    }
+
+    return syllabus;
+  };
+
+  const handleSyllabusFile = async (file) => {
+    if (!file) return;
+
+    setIsParsingSyllabus(true);
+    setParsingError("");
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Gemini API key is not configured.");
+      }
+
+      const prompt = `
+        Analyze the provided syllabus image(s). Extract all **chapter** titles and the topics listed under each one.
+        **You must ignore any sections titled 'Unit' or 'Module'. Only focus on 'Chapter'.**
+        Format the output as plain text. Each chapter title should be on its own line. Each topic under a chapter should be on a new line, starting with a hyphen.
+        
+        Example:
+        Chapter 1: Introduction to Programming
+        - History of Programming
+        - Basic Syntax
+        Chapter 2: Control Flow
+        - Conditional Statements
+        - Loops
+      `;
+
+      let parts = [];
+      if (file.type === "application/pdf") {
+        parts = await pdfToImageParts(file);
+      } else {
+        parts = [await fileToGenerativePart(file)];
+      }
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }, ...parts] }],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error?.message || `API Error: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!resultText) {
+        throw new Error(
+          "Failed to parse the syllabus. The AI returned an empty response."
+        );
+      }
+
+      const parsedSyllabus = parseSyllabusToObject(resultText);
+
+      if (Object.keys(parsedSyllabus).length === 0) {
+        throw new Error(
+          "Could not identify any chapters. Please try a clearer image or a file that contains chapter headings."
+        );
+      }
+
+      setChapterTopics(parsedSyllabus);
+      const newExpandedState = Object.keys(parsedSyllabus).reduce(
+        (acc, chapter) => {
+          acc[chapter] = true;
+          return acc;
+        },
+        {}
+      );
+      setExpandedChapters(newExpandedState);
+    } catch (err) {
+      console.error("Syllabus parsing error:", err);
+      setParsingError(err.message);
+    } finally {
+      setIsParsingSyllabus(false);
+      setShowCamera(false);
+    }
+  };
+
+  const startCamera = async () => {
+    setShowCamera(true);
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        setParsingError("Could not access camera. Please check permissions.");
+        setShowCamera(false);
+      }
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+    }
+    setShowCamera(false);
+  };
+
+  const captureImage = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+
+      canvas.toBlob((blob) => {
+        const imageFile = new File([blob], "syllabus_capture.jpg", {
+          type: "image/jpeg",
+        });
+        handleSyllabusFile(imageFile);
+      }, "image/jpeg");
+
+      stopCamera();
+    }
+  };
 
   const handleAddChapter = () => {
     if (!chapterInput.trim()) return;
@@ -71,12 +280,11 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
       [chapterInput]: true,
     }));
 
+    setShowTopicInput(chapterInput);
     setChapterInput("");
     setShowChapterInput(false);
-    setShowTopicInput(chapterInput);
   };
 
-  // Add this function to handle adding topics
   const handleAddTopicToChapter = (chapterName) => {
     if (!topicInput.trim()) return;
 
@@ -92,7 +300,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     setShowTopicInput("");
   };
 
-  // Add this function to toggle chapter expansion
   const toggleChapter = (chapterName) => {
     setExpandedChapters((prev) => ({
       ...prev,
@@ -104,7 +311,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     dispatch(toggleSubjectbar());
   };
 
-  // YouTube video fetch function with better error handling
   const fetchYouTubeVideo = useCallback(async (topic) => {
     const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
 
@@ -132,7 +338,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
       const response = await axios.get(baseUrl, {
         params: {
           part: "snippet",
-          q: `${topic} tutorial explanation`,
+          q: `${selectedSubject} ${topic} tutorial explanation`,
           type: "video",
           maxResults: 20,
           order: "relevance",
@@ -211,9 +417,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     } finally {
       setVideoLoading(false);
     }
-  }, []);
+  }, [selectedSubject]);
 
-  // Download PDF function
   const downloadPDF = useCallback(async () => {
     const element = document.getElementById("notebook-content");
     if (!element) {
@@ -238,7 +443,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     }
   }, [selected.chapter]);
 
-  // Load for current subject
   useEffect(() => {
     setHasMounted(true);
 
@@ -274,7 +478,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     localStorage.setItem("savedResponses", JSON.stringify(allResponses));
   }, [selectedSubject, dispatch]);
 
-  // Save chapterTopics to localStorage
   useEffect(() => {
     if (!hasMounted) return;
     const allTopics = JSON.parse(localStorage.getItem("chapterTopics") || "{}");
@@ -282,7 +485,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     localStorage.setItem("chapterTopics", JSON.stringify(allTopics));
   }, [chapterTopics, hasMounted, selectedSubject]);
 
-  // Fixed fetchAIResponse function with better object handling
   const fetchAIResponse = useCallback(
     async (chapter, topic, forceRefresh = false) => {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -295,7 +497,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
         return;
       }
 
-      // Check if we already have a cached response and don't need to force refresh
       if (!forceRefresh && savedResponses[chapter]?.[topic]) {
         console.log("Using cached response for:", chapter, topic);
         setAiResponse(savedResponses[chapter][topic]);
@@ -304,33 +505,24 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
 
       setLoading(true);
       setApiError("");
-      setAiResponse(""); // Clear previous response
+      setAiResponse("");
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
       try {
-        // Modified prompt based on onlyDefinition and includeExamples toggles
-        let prompt = "";
+        let prompt = `In the subject of ${selectedSubject}, `;
         if (onlyDefinition) {
-          prompt = `Please provide a concise definition of the topic "${topic}" from the chapter "${chapter}". Keep it brief and to the point, focusing only on what it is and its key characteristics.`;
+          prompt += `please provide a concise definition of the topic "${topic}" from the chapter "${chapter}". Keep it brief and to the point.`;
         } else {
-          prompt = `Please provide a comprehensive explanation of the topic "${topic}" from the chapter "${chapter}".`;
+          prompt += `please provide a comprehensive explanation of the topic "${topic}" from the chapter "${chapter}".`;
           if (includeExamples) {
-            prompt += ` Include practical examples to illustrate the concept, ensuring the examples are relevant to the topic and chapter.`;
+            prompt += ` Include practical, relevant examples.`;
           }
         }
 
         const requestBody = {
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
+          contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.7,
             topK: 40,
@@ -355,12 +547,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          let errorData = {};
-          try {
-            errorData = await response.json();
-          } catch (e) {
-            console.warn("Could not parse error response as JSON");
-          }
+          const errorData = await response.json().catch(() => ({}));
           throw new Error(
             `HTTP ${response.status}: ${
               errorData.error?.message || response.statusText
@@ -368,31 +555,17 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
           );
         }
 
-        let data = {};
-        try {
-          data = await response.json();
-        } catch (e) {
-          throw new Error("Invalid JSON response from API");
-        }
+        const data = await response.json();
 
-        if (
-          !data.candidates ||
-          !data.candidates[0] ||
-          !data.candidates[0].content
-        ) {
+        if (!data.candidates?.[0]?.content) {
           throw new Error("Invalid response format from Gemini API");
         }
 
         const text =
           data.candidates[0].content.parts[0].text || "No response generated.";
 
-        if (text.includes("I can't") || text.includes("I cannot")) {
-          throw new Error("AI declined to provide information");
-        }
-
         setAiResponse(text);
 
-        // Create a completely new object to avoid extensibility issues
         const currentResponses = JSON.parse(JSON.stringify(savedResponses));
         if (!currentResponses[chapter]) {
           currentResponses[chapter] = {};
@@ -401,7 +574,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
 
         dispatch(setSavedResponses(currentResponses));
 
-        // Update localStorage with fresh object
         const allResponses = JSON.parse(
           localStorage.getItem("savedResponses") || "{}"
         );
@@ -411,29 +583,16 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
         allResponses[selectedSubject] = currentResponses;
 
         localStorage.setItem("savedResponses", JSON.stringify(allResponses));
-        localStorage.setItem(
-          "study_tool_responses",
-          JSON.stringify(currentResponses)
-        );
-
-        console.log("AI response fetched successfully for:", chapter, topic);
       } catch (error) {
         console.error("Error fetching AI response:", error);
-
         let errorMessage = "❌ Failed to get AI response. ";
-
         if (error.name === "AbortError") {
-          errorMessage += "Request timed out. Please try again.";
-        } else if (error.message.includes("403")) {
-          errorMessage += "API key is invalid or quota exceeded.";
+          errorMessage += "Request timed out.";
         } else if (error.message.includes("429")) {
-          errorMessage += "Too many requests. Please wait and try again.";
-        } else if (error.message.includes("400")) {
-          errorMessage += "Invalid request format.";
+          errorMessage += "API quota exceeded. Please wait and try again.";
         } else {
-          errorMessage += error.message || "Unknown error occurred.";
+          errorMessage += error.message;
         }
-
         setAiResponse(errorMessage);
         setApiError(error.message);
       } finally {
@@ -443,59 +602,46 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     [savedResponses, dispatch, selectedSubject, onlyDefinition, includeExamples]
   );
 
-  // Effect for fetching AI response when selected topic changes
+  // FIX: This is now the *only* useEffect responsible for fetching AI data.
   useEffect(() => {
-    if (!selected.chapter || !selected.topic) {
+    const { chapter, topic } = selected;
+
+    if (!chapter || !topic) {
       setAiResponse("");
       return;
     }
 
-    console.log("Selected changed:", selected.chapter, selected.topic);
-
-    // Check if we have a cached response
-    const existingResponse = savedResponses[selected.chapter]?.[selected.topic];
-
-    if (existingResponse) {
-      console.log("Found cached response");
-      setAiResponse(existingResponse);
+    // If it's the initial load for this topic, fetch normally (use cache if possible)
+    if (isInitialTopicLoad.current) {
+      console.log("New topic selected:", chapter, topic);
+      fetchAIResponse(chapter, topic, false);
+      isInitialTopicLoad.current = false; // Mark initial load as complete
     } else {
-      console.log("No cached response, fetching new one");
-      fetchAIResponse(selected.chapter, selected.topic);
+      // If it's not the initial load, it means a setting like 'onlyDefinition' changed.
+      // In this case, we *force* a refresh.
+      console.log("Settings changed, refetching AI response");
+      fetchAIResponse(chapter, topic, true);
     }
-  }, [selected.chapter, selected.topic, fetchAIResponse]);
+  }, [
+    selected.chapter,
+    selected.topic,
+    onlyDefinition,
+    includeExamples,
+    fetchAIResponse,
+  ]);
 
-  // Separate effect for YouTube video
+  // FIX: We need another small effect to reset our ref when the topic *actually* changes.
+  useEffect(() => {
+    isInitialTopicLoad.current = true;
+  }, [selected.topic]);
+
   useEffect(() => {
     if (!selected.topic) {
       setVideo(null);
       return;
     }
-
     fetchYouTubeVideo(selected.topic);
   }, [selected.topic, fetchYouTubeVideo]);
-
-  // Effect to refetch AI response when settings change
-  useEffect(() => {
-    if (selected.chapter && selected.topic) {
-      console.log("Settings changed, refetching AI response");
-      fetchAIResponse(selected.chapter, selected.topic, true); // Force refresh
-    }
-  }, [onlyDefinition, includeExamples]);
-
-  const handleAddTopic = (e) => {
-    e.preventDefault();
-    if (!chapter.trim() || !topic.trim()) return;
-
-    setChapterTopics((prev) => {
-      const curr = { ...prev };
-      if (!curr[chapter]) curr[chapter] = [];
-      if (!curr[chapter].includes(topic)) curr[chapter].push(topic);
-      return curr;
-    });
-
-    setChapter("");
-    setTopic("");
-  };
 
   const handleDeleteTopic = (chapName, topicName) => {
     if (
@@ -512,7 +658,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
       return curr;
     });
 
-    // Create a fresh copy to avoid extensibility issues
     const updated = JSON.parse(JSON.stringify(savedResponses));
     if (updated[chapName]) {
       delete updated[chapName][topicName];
@@ -549,7 +694,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
       return curr;
     });
 
-    // Create fresh copy to avoid extensibility issues
     const updated = JSON.parse(JSON.stringify(savedResponses));
     if (updated[chap] && updated[chap][oldT]) {
       updated[chap][newT] = updated[chap][oldT];
@@ -605,55 +749,9 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
     setShowMCQ((prev) => !prev);
   };
 
-  const clearAllSubjectData = () => {
-    if (!confirm("Are you sure you want to clear all data for this subject?"))
-      return;
-
-    setChapterTopics({});
-    dispatch(setSavedResponses({}));
-
-    const allTopics = JSON.parse(localStorage.getItem("chapterTopics") || "{}");
-    const allResponses = JSON.parse(
-      localStorage.getItem("savedResponses") || "{}"
-    );
-
-    delete allTopics[selectedSubject];
-    delete allResponses[selectedSubject];
-
-    localStorage.setItem("chapterTopics", JSON.stringify(allTopics));
-    localStorage.setItem("savedResponses", JSON.stringify(allResponses));
-    localStorage.setItem("study_tool_responses", JSON.stringify({}));
-
-    setSelected({ chapter: "", topic: "" });
-    setAiResponse("");
-    setVideo(null);
-
-    alert("All data cleared for this subject!");
-  };
-
-  const debugLocalStorage = () => {
-    console.log("=== DEBUG localStorage ===");
-    console.log(
-      "study_tool_responses:",
-      localStorage.getItem("study_tool_responses")
-    );
-    console.log("savedResponses:", localStorage.getItem("savedResponses"));
-    console.log("currentSubject:", localStorage.getItem("currentSubject"));
-    console.log("Redux savedResponses:", savedResponses);
-    console.log("Selected:", selected);
-    console.log("API Error:", apiError);
-    console.log("AI Response length:", aiResponse.length);
-    console.log("========================");
-  };
-
   const openNotebook = () => {
-    console.log("Opening notebook...");
-    debugLocalStorage();
-
     const currentData = { ...savedResponses };
     localStorage.setItem("study_tool_responses", JSON.stringify(currentData));
-    console.log("Synced data:", currentData);
-
     router.push("/workspace/notes");
   };
 
@@ -661,17 +759,37 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
 
   return (
     <div className="flex flex-row h-[100vh]">
-      <div className="w-full  overflow-y-auto custom-scrollbar">
+      {showCamera && (
+        <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50">
+          <video
+            ref={videoRef}
+            autoPlay
+            className="w-full max-w-4xl h-auto rounded-lg"
+          ></video>
+          <canvas ref={canvasRef} className="hidden"></canvas>
+          <div className="mt-4 flex gap-4">
+            <button
+              onClick={captureImage}
+              className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg"
+            >
+              Capture
+            </button>
+            <button
+              onClick={stopCamera}
+              className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="w-full overflow-y-auto custom-scrollbar">
         <div className="w-full flex justify-between max-lg:py-0">
-          {/* <button
-            onClick={() => setSelectedSubject("")}
-            className="hover:bg-gray-500/20 rounded-full"
-          >
-            <ArrowLeft size={20} />
-          </button> */}
           <button
-            className={`text-2xl p-[11px] ${isDark?"bg-gray-900 text-white":"bg-white"} z-40 rounded-xl absolute 
-            right-5 top-4  border border-gray-600  hidden max-lg:block`}
+            className={`text-2xl p-[11px] ${
+              isDark ? "bg-gray-900 text-white" : "bg-white"
+            } z-40 rounded-xl absolute 
+            right-5 top-4 border border-gray-600 hidden max-lg:block`}
             onClick={openSubjectbar}
           >
             {isSubjectbarOpen ? (
@@ -686,19 +804,13 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
           <NotebookView downloadPDF={downloadPDF} />
         ) : showMCQ ? (
           <>
-            {/* <div className="flex justify-between">
-              <h2 className="text-xl font-bold text-green-700 mb-4">
-                📝 Quiz: {selected.topic}
-              </h2>
-              <button
-                onClick={takeAMCQ}
-                className="mb-4 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300 text-sm"
-              >
-                🔙 Back to Chat
-              </button>
-            </div> */}
             {!quizFinished ? (
-              <MCQ selected={selected} takeAMCQ={takeAMCQ} aiResponse={aiResponse} isDark={isDark} />
+              <MCQ
+                selected={selected}
+                takeAMCQ={takeAMCQ}
+                aiResponse={aiResponse}
+                isDark={isDark}
+              />
             ) : (
               <>
                 <p className="text-xl font-semibold text-blue-600">
@@ -714,7 +826,12 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
             )}
           </>
         ) : takeTest ? (
-          <TakeTest selected={selected} takeATest={takeATest} aiResponse={aiResponse} isDark={isDark} />
+          <TakeTest
+            selected={selected}
+            takeATest={takeATest}
+            aiResponse={aiResponse}
+            isDark={isDark}
+          />
         ) : selected.topic ? (
           <>
             <div className="mb-6 border-b pb-3 px-4 max-lg:pt-20 py-4">
@@ -727,6 +844,27 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                 </span>
               </h2>
             </div>
+
+            {/* <div className="mb-4 px-4 flex gap-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={onlyDefinition}
+                  onChange={(e) => setOnlyDefinition(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                Only Definition
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={includeExamples}
+                  onChange={(e) => setIncludeExamples(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                Include Examples
+              </label>
+            </div> */}
 
             <div className="mb-6 px-4">
               {loading ? (
@@ -759,7 +897,9 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className={`border rounded-lg p-4 ${isDark?"bg-gray-800":"bg-gray-200"}`}
+                  className={`border rounded-lg p-4 ${
+                    isDark ? "bg-gray-800" : "bg-gray-200"
+                  }`}
                 >
                   <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
                     📺 Recommended Video
@@ -807,20 +947,20 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                 onClick={downloadPDF}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl transition-colors"
               >
-                Download PDF 
+                Download PDF
               </button>
             </div>
           </>
         ) : (
-          <p className="text-gray-600 relative text-lg p-4  h-[100vh] flex justify-center items-center">
+          <div className="text-gray-600 relative text-lg p-4 h-[100vh] flex justify-center items-center">
             <Image
               src={"/images/homepage/navbar/DN.png"}
               alt=""
-              className="opacity-10 rounded-2xl max-lg:w-30 max-lg:h-30"
+              className="opacity-10 rounded-2xl max-lg:w-[120px] max-lg:h-[120px]"
               height={150}
               width={150}
             />
-            {/* Animated background elements */}
+            
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div
                 className={`absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 ${
@@ -834,7 +974,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                 style={{ animationDelay: "1s" }}
               ></div>
             </div>
-          </p>
+          </div>
         )}
       </div>
 
@@ -868,28 +1008,66 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
           </h2>
         </div>
 
+        <div className="border border-gray-600 rounded-lg p-3 mb-4">
+          <h3 className="font-semibold mb-3 text-center">
+            Generate Syllabus with AI
+          </h3>
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept="application/pdf, image/png, image/jpeg"
+              onChange={(e) => handleSyllabusFile(e.target.files[0])}
+            />
+            <button
+              onClick={() => fileInputRef.current.click()}
+              disabled={isParsingSyllabus}
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-lg transition-all disabled:bg-gray-500"
+            >
+              <Upload size={18} /> Upload
+            </button>
+            <button
+              onClick={startCamera}
+              disabled={isParsingSyllabus}
+              className="flex-1 flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-3 rounded-lg transition-all disabled:bg-gray-500"
+            >
+              <Camera size={18} /> Scan
+            </button>
+          </div>
+          {isParsingSyllabus && (
+            <div className="flex items-center justify-center gap-2 mt-3 text-yellow-400">
+              <Loader2 className="animate-spin" size={20} />
+              <span>Parsing your syllabus...</span>
+            </div>
+          )}
+          {parsingError && (
+            <div className="mt-3 p-2 bg-red-900/50 border border-red-700 text-red-300 text-sm rounded-md">
+              <p className="font-bold">Error:</p>
+              <p>{parsingError}</p>
+            </div>
+          )}
+        </div>
+
         <>
-          {/* Add Chapter Button - Only show if no chapters exist */}
           {!showChapterInput && Object.keys(chapterTopics).length === 0 && (
             <button
               onClick={() => setShowChapterInput(true)}
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600
                to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-3 px-4
-                rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4"
+               rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-4"
             >
               <span className="text-lg">+</span>
-              Add Chapter
+              Add Chapter Manually
             </button>
           )}
 
-          {/* Chapters and Topics Display */}
           <div className="space-y-4 ">
             {Object.entries(chapterTopics).map(([chapterName, topics]) => (
               <div
                 key={chapterName}
                 className="border rounded-lg border-gray-600"
               >
-                {/* Chapter Header */}
                 <div
                   onClick={() => toggleChapter(chapterName)}
                   className={`flex items-center justify-between p-3 cursor-pointer rounded-t-lg `}
@@ -900,10 +1078,8 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                   </span>
                 </div>
 
-                {/* Expanded Chapter Content */}
-                {expandedChapters[chapterName] !== true && (
+                {expandedChapters[chapterName] && (
                   <div className="border-t border-gray-600 px-3 pb-3">
-                    {/* Topics List */}
                     <div className="space-y-1 mt-2">
                       {topics.map((topicName) => (
                         <div
@@ -911,11 +1087,13 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                           className={`group flex items-center justify-between p-2 rounded cursor-pointer transition-colors ${
                             selected.chapter === chapterName &&
                             selected.topic === topicName
-                              ? " "
+                              ? "bg-blue-900/50"
                               : ""
                           }
                           
-                          ${isDark?"hover:bg-gray-800":"hover:bg-gray-200"}`}
+                          ${
+                            isDark ? "hover:bg-gray-800" : "hover:bg-gray-200"
+                          }`}
                         >
                           {editing.chapter === chapterName &&
                           editing.topic === topicName ? (
@@ -966,12 +1144,12 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                               >
                                 {topicName}
                               </span>
-                              <div className="flex gap-1">
+                              <div className="flex gap-1  transition-opacity">
                                 <button
                                   onClick={() =>
                                     startEdit(chapterName, topicName)
                                   }
-                                  className="text-blue-600 hover:text-blue-800 text-xs"
+                                  className="text-blue-500 hover:text-blue-400 text-xs"
                                 >
                                   ✏️
                                 </button>
@@ -979,7 +1157,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                                   onClick={() =>
                                     handleDeleteTopic(chapterName, topicName)
                                   }
-                                  className="text-red-600 hover:text-red-800 text-xs"
+                                  className="text-red-500 hover:text-red-400 text-xs"
                                 >
                                   🗑️
                                 </button>
@@ -990,7 +1168,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                       ))}
                     </div>
 
-                    {/* Topic Input */}
                     {showTopicInput === chapterName ? (
                       <div className="mt-3">
                         <label className="block text-sm font-medium mb-2">
@@ -1028,7 +1205,7 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
                     ) : (
                       <button
                         onClick={() => setShowTopicInput(chapterName)}
-                        className="w-full mt-3 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+                        className="w-full mt-3 flex items-center justify-center gap-2 bg-green-600/20 hover:bg-green-600/40 text-green-300 py-2 px-4 rounded-lg transition-colors text-sm"
                       >
                         <span>+</span>
                         Add Topic
@@ -1040,7 +1217,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
             ))}
           </div>
 
-          {/* Chapter Input */}
           {showChapterInput && (
             <div className="border my-6 rounded-lg p-3  mb-4">
               <label className="block text-sm font-medium mb-2">
@@ -1075,7 +1251,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
             </div>
           )}
 
-          {/* Add Another Chapter Button (only show if chapters exist and no input is open) */}
           {Object.keys(chapterTopics).length > 0 &&
             !showChapterInput &&
             !showTopicInput && (
@@ -1096,18 +1271,6 @@ export default function AiStudyTool({ selectedSubject, setSelectedSubject, isDar
           >
             Open Notebook
           </button>
-          {/* <button
-           onClick={clearAllSubjectData}
-           className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-sm"
-         >
-           🗑️ Clear All Data
-         </button>
-         <button
-           onClick={debugLocalStorage}
-           className="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-lg text-sm"
-         >
-           🐛 Debug Storage
-         </button> */}
         </div>
       </div>
     </div>

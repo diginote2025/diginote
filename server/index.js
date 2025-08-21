@@ -2,8 +2,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { getData } from "./routes/getData.js";
-import { postData } from "./routes/postData.js";
+import { dataRouter } from "./routes/data.route.js";
 import connectDB from "./db/mongodb.js";
 
 dotenv.config();
@@ -15,8 +14,7 @@ app.use(express.json());
 
 await connectDB();
 
-app.get("/get", getData);
-app.post("/post", postData);
+app.use("/", dataRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

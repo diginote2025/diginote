@@ -53,7 +53,7 @@ export default function Hero() {
           className={`text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight leading-snug
             ${MerriweatherFont.className}`}
         >
-       Generate free notes, MCQs, YouTube summaries, and practice mock tests online.
+       Generate free AI Notebook, MCQs, practice tests online, and Related YouTube Video
         </motion.h1>
 
         {/* Subtext */}
