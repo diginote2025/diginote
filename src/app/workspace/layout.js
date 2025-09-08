@@ -25,7 +25,7 @@ export const metadata = {
   },
   metadataBase: new URL("https://diginote.in"),
   openGraph: {
-    title: "DigiNote - AI Notebook Maker | MCQs, chapter videos & tests",
+    title: "DigiNote - AI Notes Maker | MCQs, chapter videos & tests",
     description:
       "DigiNote is an AI-powered notebook generator for students, offering MCQ tests, chapter-related YouTube videos, and customizable unit tests.",
     url: "/workspace",

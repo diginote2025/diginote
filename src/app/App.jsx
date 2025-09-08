@@ -24,7 +24,7 @@ const Preloader = () => (
 
 function AppBody({ children }) {
   const pathname = usePathname();
-  const { status } = useSession(); // Get session status for loading check.
+  const { status } = useSession(); 
 
   const hideNavbar = pathname.startsWith("/workspace");
 

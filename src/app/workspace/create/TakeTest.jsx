@@ -1,11 +1,9 @@
 "use client";
-
 import React, { useEffect, useState, useRef } from "react";
 import {
   Loader2,
   CheckCircle,
   Clock,
-  BookOpen,
   ArrowLeft,
   Send,
 } from "lucide-react";
@@ -13,19 +11,19 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyA31o-dTbqh99GFesdP1ePILTiV4TvXVSE`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyAwEIU2DDhJn-UBkgHuhv8W8AOmkvlZQUA`;
 
-export default function TakeTest({ topic, onBack, selected, takeATest, aiResponse, isDark }) {
+export default function TakeTest({ selected, takeATest, aiResponse, isDark }) {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeSpent, setTimeSpent] = useState(0);
   const textareaRefs = useRef([]);
   const startTimeRef = useRef(Date.now());
 
+  // ✅ safer Gemini call
   const callGemini = async (prompt) => {
     try {
       const res = await fetch(GEMINI_URL, {
@@ -35,17 +33,26 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
           contents: [{ parts: [{ text: prompt }] }],
         }),
       });
+
       const data = await res.json();
-      return (
+
+      const text =
         data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "❌ Gemini did not return any questions."
-      );
+        data?.candidates?.[0]?.output_text ||
+        data?.candidates?.[0]?.content?.parts
+          ?.map((p) => p.text)
+          .join("\n") ||
+        null;
+
+      if (!text) return "❌ Gemini did not return any valid response.";
+      return text;
     } catch (error) {
       console.error("❌ API error:", error);
       return "❌ Failed to reach Gemini API.";
     }
   };
 
+  // Timer
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeSpent(Math.floor((Date.now() - startTimeRef.current) / 1000));
@@ -53,13 +60,20 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
     return () => clearInterval(timer);
   }, []);
 
+  // Fetch Questions
   useEffect(() => {
     const fetchQuestions = async () => {
-      const prompt = `You are a test maker. Create 10 numbered basic test questions according to this "${aiResponse}". Format clearly like:\n1. What is ...?\n2. Explain ...\n3. How does ...`;
+      const prompt = `You are a test maker. Create 10 numbered basic test questions according to this "${aiResponse}". Format clearly like:
+1. What is ...?
+2. Explain ...
+3. How does ...`;
+
       const responseText = await callGemini(prompt);
+
       const list = responseText
         .split("\n")
         .filter((line) => line.trim().match(/^\d+\./));
+
       setQuestions(
         list.length > 0
           ? list
@@ -71,6 +85,7 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
     fetchQuestions();
   }, [aiResponse]);
 
+  // Auto-resize textarea
   const resizeTextarea = (index) => {
     const textarea = textareaRefs.current[index];
     if (textarea) {
@@ -83,20 +98,25 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
     questions.forEach((_, index) => resizeTextarea(index));
   }, [questions, answers]);
 
+  // Submit test
   const handleSubmit = async () => {
     setSubmitting(true);
-    const evalPrompt = `Evaluate the following test answers on the topic "${aiResponse}". 
-    Give total marks out of 10 with detailed feedback for each answer.\n\n${questions
-      .map(
-        (q, i) =>
-          `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`
-      )
-      .join("\n\n")}`;
+    const evalPrompt = `Evaluate the following test answers on the topic "${aiResponse}".
+Give total marks out of 10 with detailed feedback for each answer.
+
+${questions
+  .map(
+    (q, i) =>
+      `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`
+  )
+  .join("\n\n")}`;
+
     const responseText = await callGemini(evalPrompt);
     setResult(responseText);
     setSubmitting(false);
   };
 
+  // Helpers
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -110,6 +130,7 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
     return (answeredQuestions / questions.length) * 100;
   };
 
+  // Theme classes
   const baseBg = isDark
     ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
     : "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50";
@@ -117,7 +138,6 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
   const cardBg = isDark ? "bg-gray-800 text-white" : "bg-white text-gray-800";
   const borderColor = isDark ? "border-gray-700" : "border-gray-200";
   const inputBg = isDark ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-800";
-  const progressBg = isDark ? "bg-gray-700" : "bg-gray-200";
   const mutedText = isDark ? "text-gray-400" : "text-gray-600";
 
   if (loading) {
@@ -128,7 +148,9 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
             <Loader2 className="animate-spin text-blue-600" size={32} />
           </div>
           <h3 className="text-xl font-semibold mb-2">Preparing Your Test</h3>
-          <p className={`${mutedText}`}>Generating questions on {selected.topic}...</p>
+          <p className={`${mutedText}`}>
+            Generating questions on {selected.topic}...
+          </p>
         </div>
       </div>
     );
@@ -138,25 +160,23 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
     <div className={`min-h-screen ${baseBg}`}>
       {/* Header */}
       <div className={`border-b sticky top-0 z-10  ${cardBg}`}>
-        <div className={`max-w-4xl mx-auto px-6 pt-4 max-lg:pt-18 ${cardBg}`}>
+        <div className={`max-w-4xl mx-auto px-6 pt-4 ${cardBg}`}>
           <div className="flex flex-col gap-4">
             <div className="flex items-center space-x-4">
               <button
                 onClick={takeATest}
-                className={`flex items-center space-x-2 ${mutedText}  transition-colors`}
+                className={`flex items-center space-x-2 ${mutedText} transition-colors`}
               >
                 <ArrowLeft size={20} />
               </button>
-              <div className={`h-6 w-px bg-gray-400 ${borderColor}`}></div>
+              <div className={`h-6 w-px ${borderColor}`}></div>
               <h1 className="text-xl font-bold">{selected.topic}</h1>
             </div>
 
             <div className="flex items-center space-x-6 justify-between">
               <div className={`text-sm ${mutedText}`}>
-                {
-                  Object.keys(answers).filter((key) => answers[key]?.trim())
-                    .length
-                }{" "}
+                {Object.keys(answers).filter((key) => answers[key]?.trim())
+                  .length}{" "}
                 / {questions.length} answered
               </div>
               <div className={`flex items-center space-x-2 text-sm ${mutedText}`}>
@@ -186,7 +206,16 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
             >
               <div className="p-6">
                 <p className="font-bold leading-relaxed flex gap-2">
-                  {i + 1}. <ReactMarkdown>{q}</ReactMarkdown>
+                  {i + 1}.{" "}
+                  <ReactMarkdown
+                    components={{
+                      p: ({ node, ...props }) => (
+                        <span {...props} className="font-normal" />
+                      ),
+                    }}
+                  >
+                    {q}
+                  </ReactMarkdown>
                 </p>
 
                 <div className="relative mt-4">
@@ -214,16 +243,10 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
         </div>
 
         {/* Action Buttons */}
-        <div className={`rounded-xl shadow-sm border p-6 ${cardBg} ${borderColor}`}>
+        <div
+          className={`rounded-xl shadow-sm border p-6 ${cardBg} ${borderColor}`}
+        >
           <div className="flex items-center justify-center">
-            {/* <button
-              onClick={onBack}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${mutedText} hover:bg-gray-100`}
-            >
-              <ArrowLeft size={16} />
-              <span>Back</span>
-            </button> */}
-
             <button
               onClick={handleSubmit}
               disabled={
@@ -254,7 +277,9 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
 
         {/* Result */}
         {result && (
-          <div className={`mt-8 rounded-xl shadow-sm border overflow-hidden ${cardBg} ${borderColor}`}>
+          <div
+            className={`mt-8 rounded-xl shadow-sm border overflow-hidden ${cardBg} ${borderColor}`}
+          >
             <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
               <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
                 <CheckCircle size={20} />
@@ -266,17 +291,32 @@ export default function TakeTest({ topic, onBack, selected, takeATest, aiRespons
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   rehypePlugins={[rehypeRaw]}
-                  className={`${isDark ? "text-white" : "text-gray-700"}`}
+                  components={{
+                    p: ({ node, ...props }) => (
+                      <p
+                        {...props}
+                        className={`${isDark ? "text-white" : "text-gray-700"}`}
+                      />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li
+                        {...props}
+                        className={`${isDark ? "text-white" : "text-gray-700"}`}
+                      />
+                    ),
+                  }}
                 >
                   {result}
                 </ReactMarkdown>
               </div>
 
               <div className="mt-6 pt-4 border-t px-4 pb-4 flex items-center justify-between text-sm">
-                <span className={mutedText}>Test completed in {formatTime(timeSpent)}</span>
                 <span className={mutedText}>
-                  {Object.keys(answers).filter((key) => answers[key]?.trim()).length} questions
-                  answered
+                  Test completed in {formatTime(timeSpent)}
+                </span>
+                <span className={mutedText}>
+                  {Object.keys(answers).filter((key) => answers[key]?.trim()).length}{" "}
+                  questions answered
                 </span>
               </div>
             </div>
