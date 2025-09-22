@@ -327,9 +327,9 @@ const BlogPages = () => {
             )}
 
             <div
-            className=""
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+              className="[&>h1]:text-4xl [&>h1]:font-extrabold [&>h1]:text-gray-900 [&>h1]:leading-tight prose max-w-none prose-lg md:prose-xl text-gray-800 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
 
             <div className="flex items-center gap-6 mt-8 border-t border-gray-200 pt-6">
               <button
