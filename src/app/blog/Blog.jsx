@@ -1,220 +1,295 @@
-import { Search, ArrowRight, PlayCircle } from "lucide-react";
-import Image from "next/image";
+"use client";
 
-// --- COMPONENT: SearchBar ---
-// A simple search bar component.
-const SearchBar = () => {
-  return (
-    <div className="relative w-full">
-      <input
-        type="text"
-        placeholder="Search"
-        className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pl-4 pr-12 text-gray-700 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
-      />
-      <Search className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-    </div>
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import Head from "next/head";
+import Image from "next/image"; // Import the Next.js Image component
+import { SlCalender } from "react-icons/sl";
+import { GrInstagram } from "react-icons/gr";
+import { FaFacebookF, FaLinkedinIn } from "react-icons/fa";
+import { IoLogoYoutube } from "react-icons/io";
+import { BiTime } from "react-icons/bi";
+import { HiOutlineArrowRight } from "react-icons/hi";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import Breadcrumb from "./Breadcrumb";
+
+// Slugify helper
+const slugify = (str = "") =>
+  encodeURIComponent(
+    str
+      .toString()
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
   );
-};
 
-// --- COMPONENT: PopularTags ---
-// Displays a list of popular topic tags.
-const PopularTags = () => {
-  const tags = [
-    "SEO",
-    "Email Marketing",
-    "PPC",
-    "Affiliate Marketing",
-    "Local SEO",
-    "Influencer Marketing",
-  ];
-  return (
-    <div>
-      <h3 className="mb-4 text-xl font-semibold text-gray-800">Popular Tags</h3>
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <button
-            key={tag}
-            className="rounded-md border border-gray-300 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-green-100 hover:text-green-700 hover:border-green-300"
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
+const Blog = () => {
+  const [blogs, setBlogs] = useState([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [categories, setCategories] = useState(["All"]);
+  const [currentPage, setCurrentPage] = useState(1);
 
-// --- COMPONENT: RecentPostItem ---
-// Represents a single post in the "Recent Posts" list.
-const RecentPostItem = ({ image, title, date }) => {
-  return (
-    <div className="flex items-center space-x-4">
-      <Image
-        width={1000}
-        height={1000}
-        src={image}
-        alt={title}
-        className="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
-      />
-      <div>
-        <h4 className="font-semibold text-gray-800 leading-tight">{title}</h4>
-        <p className="text-sm text-gray-500">{date}</p>
-      </div>
-    </div>
-  );
-};
+  const blogsPerPage = 6;
 
-// --- COMPONENT: RecentPosts ---
-// A list of recent blog posts.
-const RecentPosts = () => {
-  const posts = [
-    {
-      image: "https://placehold.co/150x150/e2e8f0/334155?text=SEO+Audit",
-      title: "How to Perform a Full SEO Audit in 2025",
-      date: "19 May 2025",
-    },
-    {
-      image: "https://placehold.co/150x150/e2e8f0/334155?text=PPC+Mistakes",
-      title: "5 Common PPC Mistakes That Drain Your Budget",
-      date: "18 May 2025",
-    },
-    {
-      image: "https://placehold.co/150x150/e2e8f0/334155?text=Blog+Posts",
-      title: "How to Write SEO-Friendly Blog Posts That Convert",
-      date: "17 May 2025",
-    },
-  ];
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const res = await fetch("https://diginote-3b4g.onrender.com/blog");
+        const data = await res.json();
 
-  return (
-    <div>
-      <h3 className="mb-4 text-xl font-semibold text-gray-800">Recent Post</h3>
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <RecentPostItem key={post.title} {...post} />
-        ))}
-      </div>
-    </div>
-  );
-};
+        const sorted = (data.data || data).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
 
-// --- COMPONENT: HireUsCard ---
-// A promotional card to encourage user engagement.
-const HireUsCard = () => {
-  return (
-    <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-xl">
-      <Image
-        width={1000}
-        height={1000}
-        src="https://placehold.co/600x800/a3a3a3/ffffff?text=Team"
-        alt="A team of professionals working together"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-      <div className="relative z-10 flex h-full flex-col items-start justify-end p-6 text-white">
-        <h3 className="mb-2 text-2xl font-bold">Hire Us</h3>
-        <p className="mb-4 text-base">
-          Looking to Elevate Your Digital Presence?
-        </p>
-        <button className="rounded-lg bg-green-500 px-6 py-3 font-semibold text-white transition-transform hover:scale-105">
-          View More
-        </button>
-      </div>
-    </div>
-  );
-};
+        setBlogs(sorted);
 
-// --- COMPONENT: BlogPostCard ---
-// The main card for displaying a full blog post summary.
-const BlogPostCard = ({ image, category, date, title, excerpt }) => {
-  return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md transition-shadow hover:shadow-lg">
-      <div className="relative">
-        <Image
-          width={1000}
-          height={1000}
-          src={image}
-          alt={title}
-          className="h-auto w-full object-cover"
-        />
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <button className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500 bg-opacity-80 text-white backdrop-blur-sm transition-transform hover:scale-110">
-            <PlayCircle size={32} />
-          </button>
-        </div>
-      </div>
-      <div className="p-6">
-        <div className="mb-4 flex items-center space-x-4">
-          <span className="rounded-md bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
-            {category}
-          </span>
-          <span className="text-sm text-gray-500">{date}</span>
-        </div>
-        <h2 className="mb-3 text-2xl font-bold text-gray-800">{title}</h2>
-        <p className="mb-6 text-gray-600">{excerpt}</p>
-        <a
-          href="#"
-          className="inline-flex items-center font-semibold text-green-600 hover:text-green-700"
-        >
-          Read More <ArrowRight className="ml-2 h-4 w-4" />
-        </a>
-      </div>
-    </div>
-  );
-};
+        const uniqueCategories = [
+          "All",
+          ...new Set(sorted.map((blog) => blog.category).filter(Boolean)),
+        ];
+        setCategories(uniqueCategories);
+      } catch (err) {
+        console.error("Error fetching blogs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-// --- PAGE COMPONENT: BlogPage ---
-// This is the main component that assembles the entire page.
-export default function App() {
-  const mainPost = {
-    image: "https://placehold.co/800x500/a3a3a3/ffffff?text=Ad+Campaigns",
-    category: "Paid Advertising",
-    date: "15 May 2025",
-    title:
-      "A Beginner's Guide to Running Profitable Ad Campaigns: Strategies That Actually Work",
-    excerpt:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...",
+    fetchBlogs();
+  }, []);
+
+  const filteredBlogs = blogs.filter((blog) => {
+    const matchesSearch = blog.title
+      ?.toLowerCase()
+      .includes(query.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" || blog.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const paginatedBlogs = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
+  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
-  const secondPost = {
-    image: "https://placehold.co/800x500/a3a3a3/ffffff?text=Team+Meeting",
-    category: "Content Marketing",
-    date: "14 May 2025",
-    title: "How to Build a Content Strategy That Drives Engagement",
-    excerpt:
-      "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
-  };
-
-  return (
-    <div className="bg-gray-50 font-sans">
-      <div className="container mx-auto px-4 py-12">
-        {/* Header */}
-        <header className="mb-12 text-center">
-          <div className="inline-flex items-center gap-2">
-            <span className="h-4 w-4 rounded-full bg-green-500"></span>
-            <p className="text-lg font-semibold text-gray-600">News & Blogs</p>
-          </div>
-          <h1 className="text-5xl font-extrabold text-gray-900">
-            Our Latest News & Blogs
-          </h1>
-        </header>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-          {/* Blog Posts Column */}
-          <div className="space-y-12 lg:col-span-2">
-            <BlogPostCard {...mainPost} />
-            <BlogPostCard {...secondPost} />
-          </div>
-
-          {/* Sidebar Column */}
-          <aside className="space-y-10 lg:col-span-1">
-            <SearchBar />
-            <PopularTags />
-            <RecentPosts />
-            <HireUsCard />
-          </aside>
-        </div>
+  const LoadingSkeleton = () => (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
+      <div className="w-full h-48 bg-gray-300"></div>
+      <div className="p-6 space-y-4">
+        <div className="h-4 bg-gray-300 w-3/4 rounded"></div>
+        <div className="h-4 bg-gray-300 rounded"></div>
+        <div className="h-4 bg-gray-300 w-2/3 rounded"></div>
       </div>
     </div>
   );
-}
+
+  return (
+    <div className="font-sans text-gray-800 bg-gray-100">
+      <Breadcrumb/>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12 md:px-8 md:py-16 flex flex-col md:flex-row gap-8 lg:gap-12">
+        {/* Articles Section */}
+        <div className="flex-1">
+          {/* Articles Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-8">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => <LoadingSkeleton key={i} />)
+            ) : (
+              paginatedBlogs.map((article) => (
+                <article key={article._id} className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105">
+                  {/* Updated Link Component usage */}
+                  <a href={`/blog/${slugify(article.title)}`}>
+                    <div className="relative h-48 sm:h-56">
+                      <Image
+                        src={`http://localhost:3000/blog/image/${article._id}`}
+                        alt={article.title}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        unoptimized
+                      />
+                      <div className="absolute top-3 left-3 bg-gray-900 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                        {article.category || "Blog"}
+                      </div>
+                    </div>
+
+                    <div className="p-5">
+                      <div className="flex items-center text-sm text-gray-500 mb-3 gap-4">
+                        <div className="flex items-center gap-1">
+                          <SlCalender />
+                          {new Date(article.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+
+                      <h3 className="text-lg font-semibold mb-3 line-clamp-2">{article.title}</h3>
+
+                      <p
+                        className="text-sm text-gray-600 mb-4 line-clamp-3"
+                        dangerouslySetInnerHTML={{
+                          __html: article.content?.substring(0, 120) + "...",
+                        }}
+                      />
+
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span className="text-gray-600 font-medium">
+                          By {article.author || "SP Advertising"}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-blue-600 group-hover:text-blue-800 transition-colors duration-300">
+                          Read more
+                          <HiOutlineArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </article>
+              ))
+            )}
+          </div>
+
+          {/* No Results */}
+          {filteredBlogs.length === 0 && !loading && (
+            <div className="text-center p-16">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-2xl font-bold text-gray-700 mb-2">No articles found</h3>
+              <p className="text-gray-500">
+                Try adjusting your search or category filter
+              </p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-12">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 rounded-md bg-white border border-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              >
+                Prev
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`px-4 py-2 rounded-md transition-colors ${
+                    currentPage === i + 1 ? "bg-blue-600 text-white" : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 rounded-md bg-white border border-gray-300 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center p-16 text-gray-500">
+              <AiOutlineLoading3Quarters className="animate-spin text-4xl mb-4" />
+              <p>Loading amazing content...</p>
+            </div>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <aside className="w-full md:w-80">
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            {/* Search */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold mb-4">Search Articles</h3>
+              <input
+                type="text"
+                placeholder="Search articles..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+              />
+            </div>
+
+   
+
+            {/* Recent Posts */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold mb-4">Recent Posts</h3>
+              <div className="space-y-4">
+                {blogs.slice(0, 5).map((article) => (
+                  <a
+                    key={article._id}
+                    href={`/blog/${slugify(article.title)}`}
+                  >
+                    <p className="block hover:text-blue-600 transition-colors duration-200">
+                      <h4 className="font-semibold mb-1 text-base">{article.title}</h4>
+                      <p className="text-sm text-gray-500">
+                        {new Date(article.createdAt).toLocaleDateString()}
+                      </p>
+                    </p>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+
+
+            {/* Social Follow */}
+            <div>
+              <h3 className="text-xl font-bold mb-4">Follow Us</h3>
+              <div className="flex flex-wrap gap-4">
+                <a
+                  href=""
+                  className="flex items-center gap-2 p-2 rounded-full text-white bg-pink-500 hover:bg-pink-600 transition-colors duration-200"
+                >
+                  <GrInstagram className="text-lg" />
+                  <span className="sr-only">Instagram</span>
+                </a>
+                <a
+                  href=""
+                  className="flex items-center gap-2 p-2 rounded-full text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                >
+                  <FaFacebookF className="text-lg" />
+                  <span className="sr-only">Facebook</span>
+                </a>
+                <a
+                  href=""
+                  className="flex items-center gap-2 p-2 rounded-full text-white bg-blue-700 hover:bg-blue-800 transition-colors duration-200"
+                >
+                  <FaLinkedinIn className="text-lg" />
+                  <span className="sr-only">LinkedIn</span>
+                </a>
+                <a
+                  href=""
+                  className="flex items-center gap-2 p-2 rounded-full text-white bg-red-600 hover:bg-red-700 transition-colors duration-200"
+                >
+                  <IoLogoYoutube className="text-lg" />
+                  <span className="sr-only">YouTube</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+};
+
+export default Blog;
