@@ -66,7 +66,7 @@ export default function MinimalNavbar() {
   return (
     <header 
       className={`w-full fixed top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg ' : 'bg-white shadow-sm '
+        scrolled ? 'bg-white backdrop-blur-md shadow-lg ' : 'bg-white shadow-sm '
       }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
