@@ -326,10 +326,19 @@ const BlogPages = () => {
               />
             )}
 
-            <div
-              className="[&>h1]:text-4xl [&>h1]:font-extrabold [&>h1]:text-gray-900 [&>h1]:leading-tight prose max-w-none prose-lg md:prose-xl text-gray-800 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
+          <div
+  className="
+    [&>h1]:text-4xl [&>h1]:font-extrabold [&>h1]:text-gray-900 [&>h1]:leading-tight
+    [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-gray-800 [&>h2]:mt-6 [&>h2]:mb-4
+    [&>h3]:text-2xl [&>h3]:font-semibold [&>h3]:text-gray-700 [&>h3]:mt-4 [&>h3]:mb-2
+    [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mt-2 [&>ul]:mb-2
+    [&>br]:my-2
+    [&>a]:text-blue-600 [&>a]:underline [&>a]:hover:text-blue-800
+    prose max-w-none prose-lg md:prose-xl text-gray-800 leading-relaxed
+  "
+  dangerouslySetInnerHTML={{ __html: post.content }}
+/>
+
 
             <div className="flex items-center gap-6 mt-8 border-t border-gray-200 pt-6">
               <button
