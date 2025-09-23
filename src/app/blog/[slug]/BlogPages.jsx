@@ -326,18 +326,31 @@ const BlogPages = () => {
               />
             )}
 
-          <div
+      <div
   className="
-    [&>h1]:text-4xl [&>h1]:font-extrabold [&>h1]:text-gray-900 [&>h1]:leading-tight
-    [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-gray-800 [&>h2]:mt-6 [&>h2]:mb-4
+    [&>h1]:text-4xl [&>h1]:font-extrabold [&>h1]:text-gray-900 [&>h1]:leading-tight [&>h1]:mt-6 [&>h1]:mb-4
+    [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-gray-800 [&>h2]:mt-5 [&>h2]:mb-3
     [&>h3]:text-2xl [&>h3]:font-semibold [&>h3]:text-gray-700 [&>h3]:mt-4 [&>h3]:mb-2
-    [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mt-2 [&>ul]:mb-2
+    [&>h4]:text-xl [&>h4]:font-semibold [&>h4]:text-gray-700 [&>h4]:mt-3 [&>h4]:mb-2
+    [&>h5]:text-lg [&>h5]:font-medium [&>h5]:text-gray-600 [&>h5]:mt-2 [&>h5]:mb-1
+    [&>h6]:text-base [&>h6]:font-medium [&>h6]:text-gray-600 [&>h6]:mt-2 [&>h6]:mb-1
+
+    [&>p]:mb-4 [&>p]:leading-relaxed [&>p]:text-gray-800
+    [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ul]:mt-2
+    [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>ol]:mt-2
+    [&>li]:mb-2
+    [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-gray-600 [&>blockquote]:my-4
+    [&>code]:bg-gray-100 [&>code]:text-sm [&>code]:px-1 [&>code]:py-[2px] [&>code]:rounded
+    [&>pre]:bg-gray-100 [&>pre]:p-4 [&>pre]:rounded [&>pre]:overflow-x-auto [&>pre]:my-4
     [&>br]:my-2
     [&>a]:text-blue-600 [&>a]:underline [&>a]:hover:text-blue-800
+    [&>img]:my-4 [&>img]:rounded [&>img]:shadow-md [&>img]:max-w-full [&>img]:h-auto
+
     prose max-w-none prose-lg md:prose-xl text-gray-800 leading-relaxed
   "
   dangerouslySetInnerHTML={{ __html: post.content }}
 />
+
 
 
             <div className="flex items-center gap-6 mt-8 border-t border-gray-200 pt-6">
