@@ -164,7 +164,7 @@ const Dashboard = () => {
       if (typeof window !== "undefined") {
         const token = localStorage.getItem("token");
         if (!token) {
-          router.push("/admin");
+          router.push("/blog/auth/admin");
           return;
         }
         try {
@@ -179,7 +179,7 @@ const Dashboard = () => {
           setMessage(data.message);
         } catch {
           localStorage.removeItem("token");
-          router.push("/admin");
+          router.push("/blog/auth/admin");
         }
       }
     };
@@ -188,7 +188,7 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    router.push("/admin");
+    router.push("/blog/auth/admin");
   };
 
   return (

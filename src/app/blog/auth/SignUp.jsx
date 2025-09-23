@@ -18,7 +18,7 @@ export default function SignUp() {
         form
       );
       setMessage(res.data.message);
-      setTimeout(() => navigate("/admin"), 1500);
+      setTimeout(() => navigate("/blog/auth/admin"), 1500);
     } catch (err) {
       setMessage(err.response?.data?.error || "Error occurred");
     }

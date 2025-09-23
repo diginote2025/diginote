@@ -14,7 +14,7 @@ export default function Dashboard() {
       if (typeof window !== "undefined") {
         const token = localStorage.getItem("token");
         if (!token) {
-          router.push("/admin");
+          router.push("/blog/auth/admin");
           return;
         }
 
@@ -28,7 +28,7 @@ export default function Dashboard() {
           setMessage(res.data.message);
         } catch {
           localStorage.removeItem("token");
-          router.push("/admin");
+          router.push("/blog/auth/admin");
         }
       }
     };
@@ -37,7 +37,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    router.push("/admin");
+    router.push("/blog/auth/admin");
   };
 
   return (
