@@ -80,7 +80,7 @@ const RightSidePanel = ({ tags, recentBlogs }) => (
 const BlogPages = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const slug = pathname.split('/').pop();
+  const slug = pathname.split("/").pop();
 
   const [post, setPost] = useState(null);
   const [recentBlogs, setRecentBlogs] = useState([]);
@@ -90,13 +90,16 @@ const BlogPages = () => {
   const [newComment, setNewComment] = useState("");
 
   // You would typically get the user ID from a context or session
-  const userId = typeof window !== 'undefined' ? localStorage.getItem("userId") || FALLBACK_USER_ID : FALLBACK_USER_ID;
+  const userId =
+    typeof window !== "undefined"
+      ? localStorage.getItem("userId") || FALLBACK_USER_ID
+      : FALLBACK_USER_ID;
 
   useEffect(() => {
     if (!slug) {
-        setLoading(false);
-        setPost(null);
-        return;
+      setLoading(false);
+      setPost(null);
+      return;
     }
 
     const fetchPostAndData = async () => {
@@ -288,10 +291,10 @@ const BlogPages = () => {
               <span>Back to Blogs</span>
             </button>
 
-           <h1
-  className="text-4xl font-extrabold text-gray-900 leading-tight"
-  dangerouslySetInnerHTML={{ __html: post.title }}
-/>
+            <h1
+              className="text-4xl font-extrabold text-gray-900 leading-tight"
+              dangerouslySetInnerHTML={{ __html: post.title }}
+            />
 
             <div className="flex items-center gap-4 mb-6 text-gray-600">
               {post.author && (
@@ -326,8 +329,8 @@ const BlogPages = () => {
               />
             )}
 
-      <div
-  className="
+            <div
+              className="
     [&>h1]:text-4xl [&>h1]:font-extrabold [&>h1]:text-gray-900 [&>h1]:leading-tight [&>h1]:mt-6 [&>h1]:mb-4
     [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-gray-800 [&>h2]:mt-5 [&>h2]:mb-3
     [&>h3]:text-2xl [&>h3]:font-semibold [&>h3]:text-gray-700 [&>h3]:mt-4 [&>h3]:mb-2
@@ -348,10 +351,8 @@ const BlogPages = () => {
 
     prose max-w-none prose-lg md:prose-xl text-gray-800 leading-relaxed
   "
-  dangerouslySetInnerHTML={{ __html: post.content }}
-/>
-
-
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
 
             <div className="flex items-center gap-6 mt-8 border-t border-gray-200 pt-6">
               <button

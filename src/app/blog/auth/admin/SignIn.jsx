@@ -56,12 +56,12 @@ export default function SignIn() {
         <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
           Sign In
         </button>
-        <p className="text-sm mt-2 text-center">
+        {/* <p className="text-sm mt-2 text-center">
           Don't have an account?{" "}
           <Link href="/signup" className="text-green-600">
             Sign Up
           </Link>
-        </p>
+        </p> */}
         <p className="text-sm mt-1 text-center">
           <Link href="/forgot-password" className="text-purple-600">
             Forgot Password?
