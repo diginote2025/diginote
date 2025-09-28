@@ -304,7 +304,7 @@ const AllBlogs = ({ currentUserId }) => {
               />
             </div>
             <Link
-              href="/create"
+              href="blog/dashboard/create"
               className="inline-flex items-center gap-2 py-3 px-6 rounded-full border-none text-base font-semibold transition-all bg-blue-600 text-white hover:bg-blue-700 shadow-md"
             >
               <PlusCircle size={20} />
