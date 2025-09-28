@@ -307,7 +307,7 @@ const CreateBlog = () => {
       if (!res.ok) throw new Error("Failed to create blog");
 
       setSuccess("Blog created successfully! Redirecting...");
-      setTimeout(() => router.push("/admin"), 2000);
+      setTimeout(() => router.push("/blog/auth/admin"), 2000);
     } catch (err) {
       setError(
         "Failed to create blog. Please check your connection and try again."
