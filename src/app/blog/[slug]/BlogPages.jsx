@@ -28,7 +28,7 @@ const RightSidePanel = ({ tags, recentBlogs }) => (
           tags.map((tag, i) => (
             <Link
               key={i}
-              href={`/blogs?tag=${tag}`}
+              href={`/blog`}
               className="bg-gray-100 text-gray-700 hover:bg-green-500 hover:text-white transition-colors duration-300 px-4 py-2 rounded-full text-sm font-medium"
             >
               {tag}
