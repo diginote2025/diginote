@@ -145,7 +145,7 @@ const Footer = () => {
       {/* Bottom Bar */}
       <div className="bg-gray-200 py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl text-center mx-auto flex flex-col sm:flex-row justify-center items-center text-sm space-y-2 sm:space-y-0">
-          <p>&copy; {currentYear} DigiNote. All Rights Reserved.</p>
+          <p>&copy; {currentYear} <a href="/">DigiNote</a>. All Rights Reserved.</p>
           {/* <div className="flex space-x-6">
             <Link href="/terms" className="hover:text-white transition-colors duration-300">
               Terms & Conditions
