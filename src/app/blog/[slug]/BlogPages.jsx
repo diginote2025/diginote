@@ -263,11 +263,11 @@ export const BlogPages = () => {
   };
 
   return (
-    <div className="pt-20 flex justify-center bg-gray-50 min-h-screen">
+    <div className="pt-10 flex justify-center bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 md:px-8 lg:px-12 py-10 flex flex-col md:flex-row gap-4 max-w-7xl">
         {/* Main Content Area */}
         <main className="w-full md:flex-1 space-y-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+          <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6">
             {/* Use router.back() for back navigation */}
             <button
               onClick={() => router.back()}
@@ -295,7 +295,7 @@ export const BlogPages = () => {
               dangerouslySetInnerHTML={{ __html: post.title }}
             />
 
-            <div className="flex items-center gap-4 mb-6 text-gray-600">
+            <div className="flex items-center gap-4 mb-6 text-gray-600 pt-4">
               {post.author && (
                 <div className="flex items-center gap-2">
                   <img
@@ -324,7 +324,7 @@ export const BlogPages = () => {
                 src={`${API_ROOT}/image/${post._id}`}
                 alt={post.title}
                 onError={(e) => (e.currentTarget.style.display = "none")}
-                className="w-full h-80 object-cover rounded-xl mb-6 shadow-md"
+                className="w-full h-80 max-lg:h-40 object-cover rounded-xl mb-6 shadow-md"
               />
             )}
 
