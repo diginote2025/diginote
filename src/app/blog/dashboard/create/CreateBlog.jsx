@@ -186,7 +186,7 @@ const CreateBlog = () => {
 
   const handleTagsChange = (e) => {
     const tags = e.target.value
-      .split(" ")
+      .split(", ")
       .map((tag) => tag.trim())
       .filter((tag) => tag);
     setBlog({ ...blog, tags });
