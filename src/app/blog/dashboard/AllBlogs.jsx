@@ -82,7 +82,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, children }) => {
 const BlogCard = ({ post, onEdit, onDelete, onToggleLike, currentUserId }) => {
   const slug = post.slug ?? slugify(post.title);
   const excerpt =
-    post.content?.substring(0, 140) + (post.content?.length > 100 ? "..." : "");
+    post.content?.substring(0, 160) + (post.content?.length > 100 ? "..." : "");
   const isLiked = post.likes?.includes(currentUserId);
 
   return (
