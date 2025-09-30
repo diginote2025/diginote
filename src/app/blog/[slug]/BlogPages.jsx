@@ -77,7 +77,7 @@ const RightSidePanel = ({ tags, recentBlogs }) => (
   </aside>
 );
 
-const BlogPages = () => {
+export const BlogPages = () => {
   const router = useRouter();
   const pathname = usePathname();
   const slug = pathname.split("/").pop();
@@ -435,4 +435,4 @@ const BlogPages = () => {
   );
 };
 
-export default BlogPages;
+
