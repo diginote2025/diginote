@@ -43,7 +43,7 @@ export async function generateMetadata({ params }) {
 
   const title = post?.title || "Blog";
   const contentSnippet = post?.content
-    ? post.content.replace(/<[^>]+>/g, "").slice(0, 240) 
+    ? post.content.replace(/<[^>]+>/g, "").slice(0, 160) 
     : "DigiNote blog post";
 
   const keywords = post?.tags?.length
