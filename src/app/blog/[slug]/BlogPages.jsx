@@ -19,27 +19,7 @@ const generateSlug = (title) => {
 };
 
 const RightSidePanel = ({ tags, recentBlogs }) => (
-  <aside className="w-full md:w-80 space-y-4 sticky top-4 self-start">
-    {/* ... (Tags section remains the same) */}
-    <div className="bg-white rounded-2xl shadow-lg p-6">
-      <h3 className="text-xl font-bold mb-4 text-gray-800">Explore Tags</h3>
-      <div className="flex flex-wrap gap-2">
-        {tags && tags.length > 0 ? (
-          tags.map((tag, i) => (
-            <Link
-              key={i}
-              href={`/blog`}
-              className="bg-gray-100 text-gray-700 hover:bg-green-500 hover:text-white transition-colors duration-300 px-4 py-2 rounded-full text-sm font-medium"
-            >
-              {tag}
-            </Link>
-          ))
-        ) : (
-          <p className="text-gray-500 text-sm">No tags available.</p>
-        )}
-      </div>
-    </div>
-
+  <aside className="w-full md:w-80 space-y-4 sticky top-18 self-start">
     <div className="bg-white rounded-2xl shadow-lg p-4">
       <h3 className="text-xl font-bold mb-4 text-gray-800">Recent Blogs</h3>
       <ul className="space-y-4">
@@ -73,6 +53,25 @@ const RightSidePanel = ({ tags, recentBlogs }) => (
           <p className="text-gray-500 text-sm">No recent blogs.</p>
         )}
       </ul>
+    </div>
+    {/* ... (Tags section remains the same) */}
+    <div className="bg-white rounded-2xl shadow-lg p-6">
+      <h3 className="text-xl font-bold mb-4 text-gray-800">Explore Tags</h3>
+      <div className="flex flex-wrap gap-2">
+        {tags && tags.length > 0 ? (
+          tags.map((tag, i) => (
+            <Link
+              key={i}
+              href={`/blog`}
+              className="bg-gray-100 text-gray-700 hover:bg-green-500 hover:text-white transition-colors duration-300 px-4 py-2 rounded-full text-sm font-medium"
+            >
+              {tag}
+            </Link>
+          ))
+        ) : (
+          <p className="text-gray-500 text-sm">No tags available.</p>
+        )}
+      </div>
     </div>
   </aside>
 );
@@ -434,5 +433,3 @@ export const BlogPages = () => {
     </div>
   );
 };
-
-
