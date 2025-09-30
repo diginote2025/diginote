@@ -7,44 +7,55 @@ const API_ROOT = "https://diginote-3b4g.onrender.com/blog";
 const generateSlug = (title) =>
   title.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
 
-// Async function to fetch post title
-async function getPostTitle(slug) {
+// Async function to fetch post details (title + content + tags)
+async function getPostDetails(slug) {
   const res = await fetch(API_ROOT);
-  if (!res.ok) return "Blog"; // fallback
+  if (!res.ok) return null;
 
   const data = await res.json();
   const blogs = data.data || [];
 
   const blogsWithSlug = blogs.map((b) => ({ ...b, slug: generateSlug(b.title) }));
   const post = blogsWithSlug.find((p) => p.slug === slug);
-  return post ? post.title : "Blog";
+
+  if (!post) return null;
+
+  // fetch single post to get full content and tags
+  const singleRes = await fetch(`${API_ROOT}/${post._id}`);
+  if (!singleRes.ok)
+    return { title: post.title, content: "", tags: post.tags || [] };
+
+  const singlePost = await singleRes.json();
+  return {
+    title: singlePost.title || post.title,
+    content: singlePost.content || "",
+    tags: singlePost.tags || [],
+  };
 }
 
 // Next.js App Router: generate dynamic metadata
 export async function generateMetadata({ params }) {
   const slug = params.slug; // assuming route like /blog/[slug]
-  const title = await getPostTitle(slug);
+  const post = await getPostDetails(slug);
+
+  const title = post?.title || "Blog";
+  const contentSnippet =
+    post?.content
+      ? post.content.replace(/<[^>]+>/g, "").slice(0, 160) // remove HTML + trim
+      : "DigiNote blog post";
+
+  // Use tags as keywords (fallback to default)
+  const keywords = post.tags
+     
 
   return {
     title: `${title}`,
-    description:
-      "DigiNote is an all-in-one AI-powered study assistant that helps students study smarter with AI-generated notes, MCQ practice, curated YouTube videos, and custom unit tests. Save time, reduce paper waste, and enhance your learning efficiency.",
-    keywords: [
-      "AI study tool",
-      "digital notes",
-      "MCQ practice",
-      "AI notebook",
-      "online learning",
-      "student resources",
-      "study smarter",
-      "unit test builder",
-      "AI-powered education",
-    ],
+    description: contentSnippet,
+    keywords,
     metadataBase: new URL("https://diginote.in"),
     openGraph: {
-      title: `Study Smarter Blog | Tips, Tricks & EdTech News by DigiNote`,
-      description:
-        "DigiNote is an all-in-one AI-powered study assistant that helps students study smarter with AI-generated notes, MCQ practice, curated YouTube videos, and custom unit tests. Save time, reduce paper waste, and enhance your learning efficiency.",
+      title: title,
+      description: contentSnippet,
       url: `/blog/${slug}`,
       siteName: "DigiNote",
       images: [
