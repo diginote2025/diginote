@@ -610,7 +610,7 @@ export default function EditBlog() {
                 </label>
                 <input
                   type="text"
-                  value={blog.tags.join(", ")}
+                  value={blog.tags}
                   onChange={handleTagsChange}
                   placeholder="e.g., tech, coding, javascript..."
                   className="w-full border border-gray-300 rounded-lg p-3 transition-colors focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40"

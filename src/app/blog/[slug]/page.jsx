@@ -47,7 +47,7 @@ export async function generateMetadata({ params }) {
     : "DigiNote blog post";
 
   const keywords = post?.tags?.length
-    ? post.tags.join(" ")
+    ? post.tags
     : "DigiNote blog post";
 
   return {
