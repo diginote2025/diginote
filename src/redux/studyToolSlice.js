@@ -1,5 +1,3 @@
-// studyToolSlice.js में ये actions add करें
-
 import { createSlice } from '@reduxjs/toolkit';
 
 const studyToolSlice = createSlice({
@@ -7,7 +5,9 @@ const studyToolSlice = createSlice({
   initialState: {
     savedResponses: {},
     showNotebook: false,
-    downloadPDF: null, // Add this new state
+    downloadPDF: null,
+    // New state to hold data sent from SyllabusComponent
+    activeSyllabusContent: null, 
   },
   reducers: {
     setSavedResponses: (state, action) => {
@@ -19,9 +19,12 @@ const studyToolSlice = createSlice({
     setShowNotebook: (state, action) => {
       state.showNotebook = action.payload;
     },
-    // Add this new action
     setDownloadPDF: (state, action) => {
       state.downloadPDF = action.payload;
+    },
+    // New Action to set the syllabus content
+    setActiveSyllabusContent: (state, action) => {
+      state.activeSyllabusContent = action.payload;
     },
   },
 });
@@ -30,7 +33,8 @@ export const {
   setSavedResponses, 
   updateSavedResponses, 
   setShowNotebook,
-  setDownloadPDF // Export the new action
+  setDownloadPDF,
+  setActiveSyllabusContent // Exporting the new action
 } = studyToolSlice.actions;
 
 export default studyToolSlice.reducer;

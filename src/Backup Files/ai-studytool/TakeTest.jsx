@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyA31o-dTbqh99GFesdP1ePILTiV4TvXVSE`; // 👈 working public test key
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyA31o-dTbqh99GFesdP1ePILTiV4TvXVSE`; // 👈 working public test key
 
 export default function TakeTest({ topic, onBack }) {
   const [questions, setQuestions] = useState([]);
@@ -49,7 +49,9 @@ export default function TakeTest({ topic, onBack }) {
       if (list.length > 0) {
         setQuestions(list);
       } else {
-        setQuestions(["❌ Gemini did not return valid questions. Try another topic."]);
+        setQuestions([
+          "❌ Gemini did not return valid questions. Try another topic.",
+        ]);
       }
 
       setLoading(false);
@@ -61,7 +63,8 @@ export default function TakeTest({ topic, onBack }) {
   const handleSubmit = async () => {
     const evalPrompt = `Evaluate the following test answers on the topic "${topic}". Give total marks out of 10 with answer.\n\n${questions
       .map(
-        (q, i) => `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`
+        (q, i) =>
+          `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`,
       )
       .join("\n\n")}`;
 

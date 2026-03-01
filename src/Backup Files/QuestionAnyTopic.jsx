@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
@@ -117,46 +117,42 @@ const QuestionAnyTopic = () => {
 
   const formatText = (text) => {
     return text
-      .replace(
-        /\*\*(.*?)\*\*/g,
-        "<strong class='font-bold '>$1</strong>"
-      )
+      .replace(/\*\*(.*?)\*\*/g, "<strong class='font-bold '>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em class='italic '>$1</em>")
       .replace(/\*(.*?)/g, "<p class='italic '>$1<br/></p>")
       .replace(
         /\\boxed\{([^}]+)\}/g,
-        "<code class='bg-gray-800 text-yellow-200 px-2 py-0.5 rounded-md font-mono text-sm shadow-sm border border-gray-700'>$1</code>"
+        "<code class='bg-gray-800 text-yellow-200 px-2 py-0.5 rounded-md font-mono text-sm shadow-sm border border-gray-700'>$1</code>",
       )
       .replace(/__([^_]+)__/g, "<u class='underline'>$1</u>")
       .replace(/~~(.*?)~~/g, "<del class='line-through '>$1</del>")
       .replace(
         /`([^`]+)`/g,
-        "<code class=' px-2 py-0.5 rounded-md font-mono text-sm shadow-sm'>$1</code>"
+        "<code class=' px-2 py-0.5 rounded-md font-mono text-sm shadow-sm'>$1</code>",
       )
       .replace(
         /### (.*?)(?:\n|$)/g,
-        "<h3 class='text-xl font-semibold  mt-4 mb-2'>$1</h3>"
+        "<h3 class='text-xl font-semibold  mt-4 mb-2'>$1</h3>",
       )
       .replace(
         /## (.*?)(?:\n|$)/g,
-        "<h2 class='text-2xl font-bold  mb-3'>$1</h2>"
+        "<h2 class='text-2xl font-bold  mb-3'>$1</h2>",
       )
       .replace(
         /# (.*?)(?:\n|$)/g,
-        "<h1 class='text-3xl font-extrabold  mt-8 mb-4'>$1</h1>"
+        "<h1 class='text-3xl font-extrabold  mt-8 mb-4'>$1</h1>",
       )
       .replace(
         /(?:\n|^)- (.*?)(?=\n|$)/g,
-        (match, p1) =>
-          "<ul class='list-disc ml-6 '><li>$1</li></ul>"
+        (match, p1) => "<ul class='list-disc ml-6 '><li>$1</li></ul>",
       )
       .replace(
         /\n>\s(.*?)(?=\n|$)/g,
-        "<blockquote class='border-l-4 border-blue-500 pl-4 italic text-gray-300 my-2'>$1</blockquote>"
+        "<blockquote class='border-l-4 border-blue-500 pl-4 italic text-gray-300 my-2'>$1</blockquote>",
       )
       .replace(
         /\[([^\]]+)\]\(([^)]+)\)/g,
-        "<a href='$2' class='text-blue-400 underline hover:text-blue-300 transition-colors'>$1</a>"
+        "<a href='$2' class='text-blue-400 underline hover:text-blue-300 transition-colors'>$1</a>",
       )
       .replace(/\n/g, "<br>")
       .replace(/(<\/ul><ul class='list-disc ml-6 '>)+/g, "")
@@ -165,11 +161,11 @@ const QuestionAnyTopic = () => {
       .replace(/(?:<li.*?>.*?<\/li>)+/g, "<ul class='list-disc ml-6'>$&</ul>")
       .replace(
         /\n>\s(.*?)(?=\n|$)/g,
-        "<blockquote class='border-l-4 border-blue-500 pl-4 italic text-gray-300 my-2'>$1</blockquote>"
+        "<blockquote class='border-l-4 border-blue-500 pl-4 italic text-gray-300 my-2'>$1</blockquote>",
       )
       .replace(
         /\[(.*?)\]\((.*?)\)/g,
-        "<a href='$2' class='text-blue-400 underline hover:text-blue-300 transition-colors'>$1</a>"
+        "<a href='$2' class='text-blue-400 underline hover:text-blue-300 transition-colors'>$1</a>",
       );
   };
 
@@ -198,7 +194,7 @@ const QuestionAnyTopic = () => {
       if (!videos || videos.length === 0) return null;
 
       const reputableVideos = videos.filter((video) =>
-        Object.values(reputableChannels).includes(video.snippet.channelId)
+        Object.values(reputableChannels).includes(video.snippet.channelId),
       );
       const bestVideo =
         reputableVideos.length > 0 ? reputableVideos[0] : videos[0];
@@ -269,7 +265,7 @@ const QuestionAnyTopic = () => {
     setIsLoading(true);
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -285,7 +281,7 @@ const QuestionAnyTopic = () => {
               },
             ],
           }),
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to fetch clarification.");
       const data = await res.json();
@@ -363,7 +359,7 @@ const QuestionAnyTopic = () => {
 
       try {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -379,7 +375,7 @@ const QuestionAnyTopic = () => {
                 },
               ],
             }),
-          }
+          },
         );
         if (!res.ok) throw new Error("Failed to fetch definition.");
         const data = await res.json();
@@ -406,7 +402,7 @@ const QuestionAnyTopic = () => {
         setIsLoading(false);
       }
     },
-    [input, scannedQuestion, userName, lastTopic]
+    [input, scannedQuestion, userName, lastTopic],
   );
 
   const fetchAIQuestion = useCallback(async () => {
@@ -425,7 +421,7 @@ const QuestionAnyTopic = () => {
           .filter((item) => item.type === "definition")
           .slice(-1)[0]?.text || "";
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -441,7 +437,7 @@ const QuestionAnyTopic = () => {
               },
             ],
           }),
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to fetch question.");
       const data = await res.json();
@@ -476,7 +472,7 @@ const QuestionAnyTopic = () => {
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -502,7 +498,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
               },
             ],
           }),
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to check answer.");
       const data = await res.json();
@@ -544,7 +540,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
       const pastMcqQuestions = previousMcqQuestions.join("\n");
 
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -568,7 +564,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
               },
             ],
           }),
-        }
+        },
       );
 
       if (!res.ok) throw new Error("Failed to generate MCQ.");
@@ -622,7 +618,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
       ]);
       setPreviousMcqQuestions((prev) => [...prev, mcqData.question]);
       speakText(
-        `${mcqData.question} A) ${mcqData.options.A} B) ${mcqData.options.B} C) ${mcqData.options.C} D) ${mcqData.options.D}`
+        `${mcqData.question} A) ${mcqData.options.A} B) ${mcqData.options.B} C) ${mcqData.options.C} D) ${mcqData.options.D}`,
       );
     } catch (error) {
       setError(`⚠️ Failed to generate MCQ: ${error.message}`);
@@ -693,7 +689,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
 
   const downloadDefinitionAsWord = () => {
     const definition = conversationHistory.find(
-      (item) => item.type === "definition"
+      (item) => item.type === "definition",
     )?.text;
     if (!definition) return;
 
@@ -712,7 +708,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
               }),
             ],
             spacing: { after: 300 },
-          })
+          }),
         );
       } else if (line.startsWith("## ")) {
         formattedParagraphs.push(
@@ -725,7 +721,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
               }),
             ],
             spacing: { after: 250 },
-          })
+          }),
         );
       } else if (line.startsWith("### ")) {
         formattedParagraphs.push(
@@ -738,7 +734,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
               }),
             ],
             spacing: { after: 200 },
-          })
+          }),
         );
       } else if (line.startsWith("- ")) {
         formattedParagraphs.push(
@@ -746,7 +742,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
             text: line.replace("- ", ""),
             bullet: { level: 0 },
             spacing: { after: 150 },
-          })
+          }),
         );
       } else if (/\*\*(.*?)\*\*/.test(line)) {
         formattedParagraphs.push(
@@ -758,7 +754,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
                 size: 24,
               }),
             ],
-          })
+          }),
         );
       } else if (/\*(.*?)\*/.test(line)) {
         formattedParagraphs.push(
@@ -770,7 +766,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
                 size: 24,
               }),
             ],
-          })
+          }),
         );
       } else if (/__(.*?)__/.test(line)) {
         formattedParagraphs.push(
@@ -782,14 +778,14 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
                 size: 24,
               }),
             ],
-          })
+          }),
         );
       } else {
         formattedParagraphs.push(
           new Paragraph({
             text: line,
             spacing: { after: 100 },
-          })
+          }),
         );
       }
     });
@@ -979,7 +975,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
           </div>
         </div>
 
-            {/* Search bar */}
+        {/* Search bar */}
         <div className="justify-center flex items-center">
           <div className="bg-[#303030]  border border-gray-600 lg:rounded-3xl rounded-t-3xl px-4 py-2 w-3xl">
             <div className="flex relative items-center flex-col justify-between gap-2 max-md:flex-col">
@@ -1077,7 +1073,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
                        hover:bg-gray-300 transition-colors  disabled:cursor-not-allowed"
                     >
                       <Link href={"/Councilor"} aria-label={"Speed Test"}>
-                      <Image src={student_councilor} className="" />
+                        <Image src={student_councilor} className="" />
                       </Link>
                     </motion.button>
 
@@ -1088,7 +1084,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
                       className=" w-[45px] h-[45px]  rounded-full text-sm font-medium transition-colors
                        disabled:cursor-not-allowed"
                     >
-                     <Image src={question} className="" alt="" />
+                      <Image src={question} className="" alt="" />
                     </motion.button>
 
                     {/* generate MCQ */}
@@ -1097,7 +1093,7 @@ If the user requests an explanation (e.g., by saying 'Explain it,' 'I don’t kn
                       disabled={
                         isLoading ||
                         !conversationHistory.some(
-                          (item) => item.type === "definition"
+                          (item) => item.type === "definition",
                         )
                       }
                       className=" w-[40px] h-[45px] rounded-full text-sm font-medium hover:bg-gray-300

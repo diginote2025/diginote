@@ -1,17 +1,11 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import {
-  Loader2,
-  CheckCircle,
-  Clock,
-  ArrowLeft,
-  Send,
-} from "lucide-react";
+import { Loader2, CheckCircle, Clock, ArrowLeft, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`;
 
 export default function TakeTest({ selected, takeATest, aiResponse, isDark }) {
   const [questions, setQuestions] = useState([]);
@@ -39,9 +33,7 @@ export default function TakeTest({ selected, takeATest, aiResponse, isDark }) {
       const text =
         data?.candidates?.[0]?.content?.parts?.[0]?.text ||
         data?.candidates?.[0]?.output_text ||
-        data?.candidates?.[0]?.content?.parts
-          ?.map((p) => p.text)
-          .join("\n") ||
+        data?.candidates?.[0]?.content?.parts?.map((p) => p.text).join("\n") ||
         null;
 
       if (!text) return "❌ Gemini did not return any valid response.";
@@ -77,7 +69,7 @@ export default function TakeTest({ selected, takeATest, aiResponse, isDark }) {
       setQuestions(
         list.length > 0
           ? list
-          : ["❌ Gemini did not return valid questions. Try another topic."]
+          : ["❌ Gemini did not return valid questions. Try another topic."],
       );
       setLoading(false);
     };
@@ -106,8 +98,7 @@ Give total marks out of 10 with detailed feedback for each answer.
 
 ${questions
   .map(
-    (q, i) =>
-      `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`
+    (q, i) => `Q${i + 1}: ${q}\nAnswer: ${answers[i] || "No answer provided"}`,
   )
   .join("\n\n")}`;
 
@@ -125,7 +116,7 @@ ${questions
 
   const getProgressPercentage = () => {
     const answeredQuestions = Object.keys(answers).filter((key) =>
-      answers[key]?.trim()
+      answers[key]?.trim(),
     ).length;
     return (answeredQuestions / questions.length) * 100;
   };
@@ -137,12 +128,16 @@ ${questions
 
   const cardBg = isDark ? "bg-gray-800 text-white" : "bg-white text-gray-800";
   const borderColor = isDark ? "border-gray-700" : "border-gray-200";
-  const inputBg = isDark ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-800";
+  const inputBg = isDark
+    ? "bg-gray-700 text-white"
+    : "bg-gray-50 text-gray-800";
   const mutedText = isDark ? "text-gray-400" : "text-gray-600";
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${baseBg} flex items-center justify-center`}>
+      <div
+        className={`min-h-screen ${baseBg} flex items-center justify-center`}
+      >
         <div className={`rounded-2xl shadow-xl p-8 text-center ${cardBg}`}>
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Loader2 className="animate-spin text-blue-600" size={32} />
@@ -175,11 +170,15 @@ ${questions
 
             <div className="flex items-center space-x-6 justify-between">
               <div className={`text-sm ${mutedText}`}>
-                {Object.keys(answers).filter((key) => answers[key]?.trim())
-                  .length}{" "}
+                {
+                  Object.keys(answers).filter((key) => answers[key]?.trim())
+                    .length
+                }{" "}
                 / {questions.length} answered
               </div>
-              <div className={`flex items-center space-x-2 text-sm ${mutedText}`}>
+              <div
+                className={`flex items-center space-x-2 text-sm ${mutedText}`}
+              >
                 <Clock size={16} />
                 <span>{formatTime(timeSpent)}</span>
               </div>
@@ -233,7 +232,9 @@ ${questions
                       resizeTextarea(i);
                     }}
                   />
-                  <div className={`absolute bottom-2 right-2 text-xs ${mutedText}`}>
+                  <div
+                    className={`absolute bottom-2 right-2 text-xs ${mutedText}`}
+                  >
                     {answers[i]?.length || 0} characters
                   </div>
                 </div>
@@ -251,11 +252,13 @@ ${questions
               onClick={handleSubmit}
               disabled={
                 submitting ||
-                Object.keys(answers).filter((key) => answers[key]?.trim()).length === 0
+                Object.keys(answers).filter((key) => answers[key]?.trim())
+                  .length === 0
               }
               className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
                 submitting ||
-                Object.keys(answers).filter((key) => answers[key]?.trim()).length === 0
+                Object.keys(answers).filter((key) => answers[key]?.trim())
+                  .length === 0
                   ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                   : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               }`}
@@ -315,7 +318,10 @@ ${questions
                   Test completed in {formatTime(timeSpent)}
                 </span>
                 <span className={mutedText}>
-                  {Object.keys(answers).filter((key) => answers[key]?.trim()).length}{" "}
+                  {
+                    Object.keys(answers).filter((key) => answers[key]?.trim())
+                      .length
+                  }{" "}
                   questions answered
                 </span>
               </div>

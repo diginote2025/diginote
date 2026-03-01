@@ -24,7 +24,7 @@ const MCQApp = ({ onBack }) => {
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -43,17 +43,18 @@ C) Option C
 D) Option D
 Correct Answer: [A/B/C/D]
 
-Do not include explanations, numbering, or extra formatting.`
-                  }
-                ]
-              }
-            ]
-          })
-        }
+Do not include explanations, numbering, or extra formatting.`,
+                  },
+                ],
+              },
+            ],
+          }),
+        },
       );
 
       const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+      const text =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 
       const mcqsRaw = text
         .split(/Question:/)
@@ -64,7 +65,8 @@ Do not include explanations, numbering, or extra formatting.`
           const mcq = { question: "", options: {}, correctAnswer: "" };
 
           lines.forEach((line) => {
-            if (line.startsWith("Question:")) mcq.question = line.slice(9).trim();
+            if (line.startsWith("Question:"))
+              mcq.question = line.slice(9).trim();
             else if (/^[A-D]\)/.test(line)) {
               const [key, ...rest] = line.split(")");
               mcq.options[key.trim()] = rest.join(")").trim();
@@ -108,8 +110,8 @@ Do not include explanations, numbering, or extra formatting.`
         question: current.question,
         correct: current.correctAnswer,
         selected: selectedOption,
-        options: current.options
-      }
+        options: current.options,
+      },
     ]);
 
     setSelectedOption("");
@@ -146,7 +148,9 @@ Do not include explanations, numbering, or extra formatting.`
       ) : finished ? (
         <div className="text-left">
           <h2 className="text-2xl font-bold text-center">🎉 Quiz Finished</h2>
-          <p className="text-lg mt-3 text-center">Your Score: {score} / {mcqs.length}</p>
+          <p className="text-lg mt-3 text-center">
+            Your Score: {score} / {mcqs.length}
+          </p>
 
           <h3 className="mt-6 text-xl font-semibold">❌ Wrong Answers Only</h3>
 
@@ -173,8 +177,8 @@ Do not include explanations, numbering, or extra formatting.`
                             isCorrect
                               ? "text-green-700 font-semibold"
                               : isSelected
-                              ? "text-red-600"
-                              : "text-gray-700"
+                                ? "text-red-600"
+                                : "text-gray-700"
                           }`}
                         >
                           {key}) {value}

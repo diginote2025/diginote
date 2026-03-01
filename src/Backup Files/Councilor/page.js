@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect, useRef } from "react";
 import { FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { MdVolumeUp, MdVolumeOff } from "react-icons/md";
@@ -50,7 +50,7 @@ export default function Councilor() {
               similarity_boost: 0.75,
             },
           }),
-        }
+        },
       );
 
       const audioBlob = await response.blob();
@@ -70,7 +70,7 @@ export default function Councilor() {
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -85,7 +85,7 @@ export default function Councilor() {
               },
             ],
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -161,7 +161,8 @@ export default function Councilor() {
         <div className="bg-gray-100 p-4 rounded shadow-inner mt-4">
           <strong className="text-blue-700">Counselor says:</strong>
           <div className="mt-2 text-gray-800 text-sm whitespace-pre-wrap">
-            <ReactMarkdown>{aiResponse}</ReactMarkdown> {/* Render markdown response */}
+            <ReactMarkdown>{aiResponse}</ReactMarkdown>{" "}
+            {/* Render markdown response */}
           </div>
         </div>
       )}

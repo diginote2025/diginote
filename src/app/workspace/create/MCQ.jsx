@@ -35,7 +35,7 @@ const MCQ = ({ onBack, selected, takeAMCQ, aiResponse, isDark }) => {
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -61,7 +61,7 @@ Do not include explanations, numbering, or extra formatting.`,
               },
             ],
           }),
-        }
+        },
       );
 
       const data = await res.json();
@@ -162,12 +162,12 @@ Do not include explanations, numbering, or extra formatting.`,
         return "border-red-500 bg-red-100 dark:bg-red-900 dark:border-red-400";
       }
     }
-    
+
     return selectedOption === key
       ? "border-blue-100 bg-blue-100 dark:bg-blue-500 "
       : isDark
-      ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600 "
-      : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100";
+        ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600 "
+        : "border-gray-200 bg-gray-50 hover:border-gray-300 hover:bg-gray-100";
   };
 
   const baseBg = isDark
@@ -202,13 +202,19 @@ Do not include explanations, numbering, or extra formatting.`,
               exit={{ opacity: 0, y: -20 }}
               className="text-center mt-20"
             >
-              <div className={`rounded-2xl shadow-xl p-8 max-w-md mx-auto ${cardBg}`}>
+              <div
+                className={`rounded-2xl shadow-xl p-8 max-w-md mx-auto ${cardBg}`}
+              >
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <BookOpen className="w-10 h-10 text-white" />
                 </div>
                 <h2 className="text-3xl font-bold">Practice MCQs</h2>
                 <div className="flex justify-center items-center py-4 gap-2 mb-4">
-                  <p className={`${isDark ? "text-gray-400" : "text-gray-600"}`}>Topic:</p>
+                  <p
+                    className={`${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  >
+                    Topic:
+                  </p>
                   <p className="text-lg font-semibold text-blue-400">
                     {selected?.topic || "General Knowledge"}
                   </p>
@@ -232,7 +238,9 @@ Do not include explanations, numbering, or extra formatting.`,
               exit={{ opacity: 0, scale: 0.9 }}
               className="text-center mt-20"
             >
-              <div className={`rounded-2xl shadow-xl p-8 max-w-2xl mx-auto ${cardBg}`}>
+              <div
+                className={`rounded-2xl shadow-xl p-8 max-w-2xl mx-auto ${cardBg}`}
+              >
                 <div className="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Trophy className="w-10 h-10 text-white" />
                 </div>
@@ -244,8 +252,8 @@ Do not include explanations, numbering, or extra formatting.`,
                   {score === mcqs.length
                     ? "Perfect Score! 🎉"
                     : score >= mcqs.length * 0.7
-                    ? "Great Job! 👏"
-                    : "Keep Practicing! 📚"}
+                      ? "Great Job! 👏"
+                      : "Keep Practicing! 📚"}
                 </p>
                 <div className="flex gap-4 justify-center">
                   <motion.button
@@ -277,10 +285,14 @@ Do not include explanations, numbering, or extra formatting.`,
               exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center mt-32"
             >
-              <div className={`rounded-2xl shadow-xl p-12 text-center ${cardBg}`}>
+              <div
+                className={`rounded-2xl shadow-xl p-12 text-center ${cardBg}`}
+              >
                 <Loader className="animate-spin mb-6 w-12 h-12 text-blue-500 mx-auto" />
                 <p className="text-xl mb-2">Generating questions...</p>
-                <p className={`${isDark ? "text-gray-400" : "text-gray-600"} text-sm`}>
+                <p
+                  className={`${isDark ? "text-gray-400" : "text-gray-600"} text-sm`}
+                >
                   This may take a few moments
                 </p>
               </div>
@@ -313,22 +325,32 @@ Do not include explanations, numbering, or extra formatting.`,
                       </span>
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
-                        <span className={timeLeft <= 10 ? "text-red-600 font-bold" : ""}>
+                        <span
+                          className={
+                            timeLeft <= 10 ? "text-red-600 font-bold" : ""
+                          }
+                        >
                           {timeLeft}s
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className={`w-full rounded-full h-2 ${isDark ? "bg-gray-700" : "bg-gray-200"}`}>
+                  <div
+                    className={`w-full rounded-full h-2 ${isDark ? "bg-gray-700" : "bg-gray-200"}`}
+                  >
                     <div
                       className="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((currentIndex + 1) / mcqs.length) * 100}%` }}
+                      style={{
+                        width: `${((currentIndex + 1) / mcqs.length) * 100}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
 
                 {/* Timer Bar */}
-                <div className={`mb-6 w-full rounded-full h-1 ${isDark ? "bg-gray-700" : "bg-gray-200"}`}>
+                <div
+                  className={`mb-6 w-full rounded-full h-1 ${isDark ? "bg-gray-700" : "bg-gray-200"}`}
+                >
                   <div
                     className={`h-1 rounded-full transition-all duration-1000 ${
                       timeLeft <= 10 ? "bg-red-500" : "bg-green-500"
@@ -359,12 +381,17 @@ Do not include explanations, numbering, or extra formatting.`,
                       <XCircle className="w-6 h-6 text-red-600" />
                     )}
                     <div>
-                      <p className={`font-semibold ${currentResult.isCorrect ? "text-green-800 dark:text-green-200" : "text-red-800 dark:text-red-200"}`}>
+                      <p
+                        className={`font-semibold ${currentResult.isCorrect ? "text-green-800 dark:text-green-200" : "text-red-800 dark:text-red-200"}`}
+                      >
                         {currentResult.isCorrect ? "Correct!" : "Incorrect!"}
                       </p>
                       {!currentResult.isCorrect && (
-                        <p className={`text-sm ${isDark ? "text-red-300" : "text-red-600"}`}>
-                          Correct answer: {currentResult.correct}) {currentResult.options[currentResult.correct]}
+                        <p
+                          className={`text-sm ${isDark ? "text-red-300" : "text-red-600"}`}
+                        >
+                          Correct answer: {currentResult.correct}){" "}
+                          {currentResult.options[currentResult.correct]}
                         </p>
                       )}
                     </div>
@@ -373,43 +400,57 @@ Do not include explanations, numbering, or extra formatting.`,
 
                 {/* Options */}
                 <div className="space-y-3 mb-8">
-                  {Object.entries(mcqs[currentIndex]?.options || {}).map(([key, value]) => (
-                    <motion.label
-                      key={key}
-                      whileHover={!showResult ? { scale: 1.02 } : {}}
-                      whileTap={!showResult ? { scale: 0.98 } : {}}
-                      className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 ${
-                        showResult ? "cursor-default" : "cursor-pointer"
-                      } ${optionBg(key)}`}
-                    >
-                      <input
-                        type="radio"
-                        name="mcq"
-                        value={key}
-                        checked={selectedOption === key}
-                        onChange={() => !showResult && setSelectedOption(key)}
-                        disabled={showResult}
-                        className="w-5 h-5 text-blue-600"
-                      />
-                      <span className={`text-lg ${
-                        showResult && currentResult
-                          ? key === currentResult.correct
-                            ? "text-green-800 dark:text-green-200 font-semibold"
-                            : key === currentResult.selected && !currentResult.isCorrect
-                            ? "text-red-800 dark:text-red-200 font-semibold"
-                            : isDark ? "text-white" : "text-gray-700"
-                          : isDark ? "text-white" : "text-gray-700"
-                      }`}>
-                        <span className="font-semibold">{key})</span> {value}
-                        {showResult && currentResult && key === currentResult.correct && (
-                          <CheckCircle className="w-4 h-4 text-green-600 inline ml-2" />
-                        )}
-                        {showResult && currentResult && key === currentResult.selected && !currentResult.isCorrect && (
-                          <XCircle className="w-4 h-4 text-red-600 inline ml-2" />
-                        )}
-                      </span>
-                    </motion.label>
-                  ))}
+                  {Object.entries(mcqs[currentIndex]?.options || {}).map(
+                    ([key, value]) => (
+                      <motion.label
+                        key={key}
+                        whileHover={!showResult ? { scale: 1.02 } : {}}
+                        whileTap={!showResult ? { scale: 0.98 } : {}}
+                        className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 ${
+                          showResult ? "cursor-default" : "cursor-pointer"
+                        } ${optionBg(key)}`}
+                      >
+                        <input
+                          type="radio"
+                          name="mcq"
+                          value={key}
+                          checked={selectedOption === key}
+                          onChange={() => !showResult && setSelectedOption(key)}
+                          disabled={showResult}
+                          className="w-5 h-5 text-blue-600"
+                        />
+                        <span
+                          className={`text-lg ${
+                            showResult && currentResult
+                              ? key === currentResult.correct
+                                ? "text-green-800 dark:text-green-200 font-semibold"
+                                : key === currentResult.selected &&
+                                    !currentResult.isCorrect
+                                  ? "text-red-800 dark:text-red-200 font-semibold"
+                                  : isDark
+                                    ? "text-white"
+                                    : "text-gray-700"
+                              : isDark
+                                ? "text-white"
+                                : "text-gray-700"
+                          }`}
+                        >
+                          <span className="font-semibold">{key})</span> {value}
+                          {showResult &&
+                            currentResult &&
+                            key === currentResult.correct && (
+                              <CheckCircle className="w-4 h-4 text-green-600 inline ml-2" />
+                            )}
+                          {showResult &&
+                            currentResult &&
+                            key === currentResult.selected &&
+                            !currentResult.isCorrect && (
+                              <XCircle className="w-4 h-4 text-red-600 inline ml-2" />
+                            )}
+                        </span>
+                      </motion.label>
+                    ),
+                  )}
                 </div>
 
                 {/* Submit Button */}
