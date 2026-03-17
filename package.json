@@ -35,7 +35,7 @@
     "next": "^15.4.1",
     "next-auth": "^4.24.11",
     "npm": "^11.6.4",
-    "pdfjs-dist": "^5.4.54",
+    "pdfjs-dist": "^5.5.207",
     "prismjs": "^1.30.0",
     "react": "^19.2.1",
     "react-chartjs-2": "^5.3.0",
@@ -55,6 +55,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.1",
     "tailwindcss": "^4"
