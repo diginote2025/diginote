@@ -201,7 +201,7 @@ export default function MainContent({
         }
 
         const requestBody = {
-          contents: [{ parts: [{ text:  `please provide a concise definition of the topic "${topic}" from the chapter "${chapter}". Keep it brief and to the point.` }] }],
+          contents: [{ parts: [{ text:  `please provide a comprehensive explanation of the topic "${topic}" from the chapter "${chapter}".` }] }],
           generationConfig: {
             temperature: 0.7,
             topK: 40,
