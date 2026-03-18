@@ -210,7 +210,7 @@ export default function MainContent({
   return (
     <div className={`w-full overflow-y-auto custom-scrollbar h-screen ${isDark ? "bg-[#0b0f1a] text-white" : "bg-white text-black"}`}>
       {/* Mobile Toggle */}
-      <div className="w-full flex justify-between p-4 lg:hidden">
+      <div className="w-full flex justify-end p-4 lg:hidden">
         <button
           className={`text-2xl p-2 rounded-xl border ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-300"}`}
           onClick={openSubjectbar}
@@ -257,7 +257,7 @@ export default function MainContent({
           </div>
 
           {/* Toggle Definition/Detailed */}
-          <div className="flex items-center gap-4 mb-8 bg-gray-100 dark:bg-gray-800 w-fit p-1.5 rounded-2xl">
+          {/* <div className="flex items-center gap-4 mb-8 bg-gray-100 dark:bg-gray-800 w-fit p-1.5 rounded-2xl">
             <button
               onClick={() => setIsDetailed(false)}
               className={`px-5 py-2 rounded-xl text-sm transition-all ${!isDetailed ? 'bg-white dark:bg-gray-700 shadow-md font-bold' : 'text-gray-500'}`}
@@ -270,7 +270,7 @@ export default function MainContent({
             >
               Explanation
             </button>
-          </div>
+          </div> */}
 
           {/* AI Content */}
           <div className="mb-10 min-h-[400px]">
