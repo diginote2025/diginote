@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from "react-icons/tb";
 import NotebookView from "./NotebookView";
@@ -23,64 +22,59 @@ export default function MainContent({
   canvasRef,
   setShowCamera,
 }) {
+  const dispatch = useDispatch();
+  const savedResponses = useSelector((state) => state.studyTool.savedResponses);
+  
+  // Persistent State Logic: Check localStorage on initial load
   const [aiResponse, setAiResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const [video, setVideo] = useState(null);
   const [videoLoading, setVideoLoading] = useState(false);
-  const [apiError, setApiError] = useState("");
   const [showMCQ, setShowMCQ] = useState(false);
   const [takeTest, setTakeTest] = useState(false);
   const [quizFinished, setQuizFinished] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
+  const [isDetailed, setIsDetailed] = useState(true);
 
-  // New Toggle State: false = Definition, true = Detailed Explanation
-  const [isDetailed, setIsDetailed] = useState(false);
-
-  const dispatch = useDispatch();
-  const savedResponses = useSelector((state) => state.studyTool.savedResponses);
-  
-  // Ref to prevent infinite loops by accessing latest state without triggering useCallback
+  // Use a Ref to avoid stale closures in callbacks
   const savedResponsesRef = useRef(savedResponses);
   useEffect(() => {
     savedResponsesRef.current = savedResponses;
   }, [savedResponses]);
 
-  // --- YouTube Logic (Full logic with channel filtering) ---
-  const fetchYouTubeVideo = useCallback(
-    async (topic) => {
-      const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
-      if (!apiKey) {
-        setVideo({ error: "YouTube API key is missing." });
-        return;
-      }
-
-      const reputableChannels = {
-        "Traversy Media": "UC29ju8bIPH5as8OGnQzwJyA",
-        "freeCodeCamp.org": "UC8butISFwT-Wl7EV0hUK0BQ",
-        "The Net Ninja": "UCW5YeuERMmlnqo4oq8vwUpg",
-      };
-
+  // --- 1. Hydrate Redux from LocalStorage on Mount ---
+  useEffect(() => {
+    const localData = localStorage.getItem("savedResponses");
+    if (localData) {
       try {
-        setVideoLoading(true);
-        const response = await axios.get("https://www.googleapis.com/youtube/v3/search", {
-          params: {
-            part: "snippet",
-            q: `${selected.subject} ${topic} tutorial explanation`,
-            type: "video",
-            maxResults: 10,
-            key: apiKey,
-          },
-        });
+        dispatch(setSavedResponses(JSON.parse(localData)));
+      } catch (e) {
+        console.error("Failed to parse saved responses", e);
+      }
+    }
+  }, [dispatch]);
 
-        const videos = response.data.items || [];
-        if (videos.length === 0) {
-          setVideo({ error: "No videos found." });
-          return;
-        }
+  // --- 2. YouTube Logic ---
+  const fetchYouTubeVideo = useCallback(async (topic) => {
+    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
+    if (!apiKey || !topic) return;
 
-        const bestVideo = videos[0]; // Simplified for performance
+    try {
+      setVideoLoading(true);
+      const response = await axios.get("https://www.googleapis.com/youtube/v3/search", {
+        params: {
+          part: "snippet",
+          q: `${selected.subject} ${topic} tutorial explanation`,
+          type: "video",
+          maxResults: 5,
+          key: apiKey,
+        },
+      });
+      const videos = response.data.items || [];
+      if (videos.length > 0) {
+        const bestVideo = videos[0];
         setVideo({
           title: bestVideo.snippet.title,
           url: `https://www.youtube.com/watch?v=${bestVideo.id.videoId}`,
@@ -88,35 +82,15 @@ export default function MainContent({
           thumbnail: bestVideo.snippet.thumbnails?.medium?.url,
           description: bestVideo.snippet.description?.slice(0, 100) + "...",
         });
-      } catch (error) {
-        setVideo({ error: "Failed to fetch video." });
-      } finally {
-        setVideoLoading(false);
       }
-    },
-    [selected.subject]
-  );
-
-  // --- PDF Logic ---
-  const downloadPDF = useCallback(async () => {
-    const element = document.getElementById("notebook-content");
-    if (!element) return;
-    try {
-      const html2pdf = (await import("html2pdf.js")).default;
-      const opt = {
-        margin: 0.5,
-        filename: `${selected.topic || "StudyNotes"}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-      };
-      await html2pdf().set(opt).from(element).save();
     } catch (error) {
-      alert("PDF generation failed.");
+      console.error("YouTube Fetch Error", error);
+    } finally {
+      setVideoLoading(false);
     }
-  }, [selected.topic]);
+  }, [selected.subject]);
 
-  // --- Gemini AI Logic (FIXED LOOP & PROMPT) ---
+  // --- 3. Gemini AI Logic (With Persistence Fix) ---
   const fetchAIResponse = useCallback(
     async (chapter, topic, forceRefresh = false) => {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -125,24 +99,26 @@ export default function MainContent({
         return;
       }
 
-      // Check cache with unique key (topic + mode)
       const cacheKey = `${topic}_${isDetailed ? "detail" : "def"}`;
-      if (!forceRefresh && savedResponsesRef.current[chapter]?.[cacheKey]) {
-        setAiResponse(savedResponsesRef.current[chapter][cacheKey]);
+      
+      // CRITICAL FIX: Don't clear state if data is already in cache
+      const cachedData = savedResponsesRef.current[chapter]?.[cacheKey];
+      if (!forceRefresh && cachedData) {
+        setAiResponse(cachedData);
         return;
       }
 
       setLoading(true);
-      setAiResponse("");
+      // Only clear response if we are actually fetching new data
+      if (forceRefresh) setAiResponse(""); 
 
       try {
-        // Correct Dynamic Prompt
-        const prompt = isDetailed 
-          ? `Provide a detailed, comprehensive explanation of "${topic}" in the context of ${selected.subject} (${chapter}). Include key points, bullet points, and examples.` 
+        const prompt = isDetailed
+          ? `Provide a detailed, comprehensive explanation of "${topic}" in the context of ${selected.subject} (${chapter}). Include key points, bullet points, and examples.`
           : `Provide a short, 2-sentence formal definition of "${topic}" in ${selected.subject}.`;
 
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -150,29 +126,31 @@ export default function MainContent({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
                 temperature: 0.7,
-                maxOutputTokens: isDetailed ? 1200 : 150,
+                maxOutputTokens: isDetailed ? 1500 : 200,
               },
             }),
           }
         );
 
-        if (!response.ok) throw new Error("API Limit Reached or Error");
-
+        if (!response.ok) throw new Error("API Limit Reached");
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
-        
+
         setAiResponse(text);
 
-        // Update Redux
-        const currentData = { ...savedResponsesRef.current };
-        if (!currentData[chapter]) currentData[chapter] = {};
-        currentData[chapter][cacheKey] = text;
+        // Update Redux and LocalStorage
+        const updatedCache = { 
+          ...savedResponsesRef.current,
+          [chapter]: {
+            ...(savedResponsesRef.current[chapter] || {}),
+            [cacheKey]: text
+          }
+        };
         
-        dispatch(setSavedResponses(currentData));
-        localStorage.setItem("savedResponses", JSON.stringify(currentData));
-
+        dispatch(setSavedResponses(updatedCache));
+        localStorage.setItem("savedResponses", JSON.stringify(updatedCache));
       } catch (error) {
-        setAiResponse("❌ AI quota exceeded or Network error.");
+        setAiResponse("❌ Error fetching AI response. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -180,19 +158,40 @@ export default function MainContent({
     [selected.subject, isDetailed, dispatch]
   );
 
-  // --- Effects ---
+  // --- 4. Main Effect to trigger loads ---
   useEffect(() => {
-    if (selected.topic) {
-      fetchAIResponse(selected.chapter, selected.topic);
+    if (selected.topic && selected.chapter) {
+      const cacheKey = `${selected.topic}_${isDetailed ? "detail" : "def"}`;
+      const existingData = savedResponses[selected.chapter]?.[cacheKey];
+
+      if (existingData) {
+        setAiResponse(existingData);
+      } else {
+        fetchAIResponse(selected.chapter, selected.topic);
+      }
       fetchYouTubeVideo(selected.topic);
     }
-  }, [selected.chapter, selected.topic, isDetailed, fetchAIResponse, fetchYouTubeVideo]);
+  }, [selected.topic, selected.chapter, isDetailed, fetchAIResponse, fetchYouTubeVideo, savedResponses]);
 
-  // --- Quiz Functions ---
+  // --- 5. PDF & Quiz Logic ---
+  const downloadPDF = async () => {
+    const element = document.getElementById("notebook-content");
+    if (!element) return;
+    const html2pdf = (await import("html2pdf.js")).default;
+    const opt = {
+      margin: 0.5,
+      filename: `${selected.topic}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+    };
+    html2pdf().set(opt).from(element).save();
+  };
+
   const startQuiz = () => {
     const mock = [
-      { question: `Which best describes ${selected.topic}?`, options: ["Option A", "Option B", "Option C", "Option D"], correct: 0 },
-      { question: `Common application of ${selected.topic}?`, options: ["App A", "App B", "App C", "App D"], correct: 1 },
+      { question: `Which best describes ${selected.topic}?`, options: ["Concept A", "Concept B", "Concept C", "Concept D"], correct: 0 },
+      { question: `Identify a key feature of ${selected.topic}.`, options: ["Feature 1", "Feature 2", "Feature 3", "Feature 4"], correct: 2 },
     ];
     setQuestions(mock);
     setCurrent(0);
@@ -207,14 +206,10 @@ export default function MainContent({
     else setQuizFinished(true);
   };
 
-  const takeATest = () => setTakeTest((prev) => !prev);
-  const takeAMCQ = () => setShowMCQ((prev) => !prev);
-
-  // --- UI Render ---
+  // --- 6. UI Rendering ---
   return (
     <div className={`w-full overflow-y-auto custom-scrollbar h-screen ${isDark ? "bg-[#0b0f1a] text-white" : "bg-white text-black"}`}>
-      
-      {/* Sidebar Toggle for Mobile */}
+      {/* Mobile Toggle */}
       <div className="w-full flex justify-between p-4 lg:hidden">
         <button
           className={`text-2xl p-2 rounded-xl border ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-300"}`}
@@ -231,7 +226,7 @@ export default function MainContent({
           {!quizFinished ? (
             <MCQ
               selected={selected}
-              takeAMCQ={takeAMCQ}
+              takeAMCQ={() => setShowMCQ(false)}
               aiResponse={aiResponse}
               isDark={isDark}
               handleAnswer={handleAnswer}
@@ -239,57 +234,56 @@ export default function MainContent({
               current={current}
             />
           ) : (
-            <motion.div initial={{scale: 0.9}} animate={{scale:1}} className="text-center p-10 bg-blue-50 dark:bg-gray-800 rounded-3xl">
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="text-center p-10 bg-blue-50 dark:bg-gray-800 rounded-3xl">
               <h2 className="text-4xl mb-4">🎉</h2>
               <p className="text-2xl font-bold mb-4">Quiz Finished!</p>
               <p className="text-xl">Score: <span className="text-blue-500">{score}</span> / {questions.length}</p>
-              <button onClick={() => setShowMCQ(false)} className="mt-6 bg-blue-600 text-white px-8 py-2 rounded-full">Back</button>
+              <button onClick={() => setShowMCQ(false)} className="mt-6 bg-blue-600 text-white px-8 py-2 rounded-full">Back to Lesson</button>
             </motion.div>
           )}
         </div>
       ) : takeTest ? (
-        <TakeTest selected={selected} takeATest={takeATest} aiResponse={aiResponse} isDark={isDark} />
+        <TakeTest selected={selected} takeATest={() => setTakeTest(false)} aiResponse={aiResponse} isDark={isDark} />
       ) : selected.topic ? (
         <div className="max-w-5xl mx-auto p-6">
-          
-          {/* Header Section */}
+          {/* Header */}
           <div className="mb-8 border-b border-gray-200 dark:border-gray-800 pb-6">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <h2 className="text-4xl font-extrabold tracking-tight">
-                <span className="text-blue-600 uppercase text-sm tracking-widest block mb-2">{selected.chapter}</span>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+              <h2 className="text-4xl font-extrabold">
+                <span className="text-blue-600 uppercase text-xs tracking-widest block mb-2">{selected.chapter}</span>
                 <span className="font-serif italic">{selected.topic}</span>
               </h2>
             </motion.div>
           </div>
 
-          {/* New Toggle Switch (Detailed vs Definition) */}
-          <div className="flex items-center gap-4 mb-8 bg-gray-100 dark:bg-gray-800 w-fit p-2 rounded-2xl border border-gray-200 dark:border-gray-700">
-             <button 
-                onClick={() => setIsDetailed(false)}
-                className={`px-4 py-2 rounded-xl transition-all ${!isDetailed ? 'bg-white dark:bg-gray-700 shadow-md font-bold' : 'text-gray-500'}`}
-             >
-                Definition
-             </button>
-             <button 
-                onClick={() => setIsDetailed(true)}
-                className={`px-4 py-2 rounded-xl transition-all ${isDetailed ? 'bg-blue-600 text-white shadow-lg font-bold' : 'text-gray-500'}`}
-             >
-                Explanation
-             </button>
+          {/* Toggle Definition/Detailed */}
+          <div className="flex items-center gap-4 mb-8 bg-gray-100 dark:bg-gray-800 w-fit p-1.5 rounded-2xl">
+            <button
+              onClick={() => setIsDetailed(false)}
+              className={`px-5 py-2 rounded-xl text-sm transition-all ${!isDetailed ? 'bg-white dark:bg-gray-700 shadow-md font-bold' : 'text-gray-500'}`}
+            >
+              Definition
+            </button>
+            <button
+              onClick={() => setIsDetailed(true)}
+              className={`px-5 py-2 rounded-xl text-sm transition-all ${isDetailed ? 'bg-blue-600 text-white shadow-lg font-bold' : 'text-gray-500'}`}
+            >
+              Explanation
+            </button>
           </div>
 
-          {/* AI Content Section */}
-          <div className="mb-10 min-h-[300px]">
+          {/* AI Content */}
+          <div className="mb-10 min-h-[400px]">
             {loading ? (
-              <div className="space-y-4">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6 animate-pulse"></div>
+              <div className="space-y-6 animate-pulse">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
               </div>
             ) : (
-              <motion.div 
+              <motion.div
                 id="notebook-content"
-                initial={{ opacity: 0 }} 
+                initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="prose prose-blue dark:prose-invert max-w-none leading-relaxed text-lg"
               >
@@ -298,53 +292,51 @@ export default function MainContent({
             )}
           </div>
 
-          {/* Video Recommendation Section */}
+          {/* Video Section */}
           <AnimatePresence>
             {video && !videoLoading && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`mb-10 p-6 rounded-3xl border ${isDark ? "bg-gray-800/50 border-gray-700" : "bg-gray-50 border-gray-200"}`}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={`mb-10 p-6 rounded-3xl border ${isDark ? "bg-gray-800/40 border-gray-700" : "bg-gray-50 border-gray-200"}`}
               >
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span className="text-red-500">📺</span> Master this Topic
+                  <span className="text-red-500">📺</span> Recommended Video
                 </h3>
                 <div className="flex flex-col md:flex-row gap-6">
                   {video.thumbnail && (
-                    <img src={video.thumbnail} alt="thumb" className="w-full md:w-48 rounded-2xl object-cover shadow-lg" />
+                    <img src={video.thumbnail} alt="video" className="w-full md:w-56 rounded-2xl object-cover shadow-md" />
                   )}
-                  <div>
-                    <a href={video.url} target="_blank" rel="noreferrer" className="text-xl font-semibold text-blue-500 hover:underline block mb-2">
+                  <div className="flex-1">
+                    <a href={video.url} target="_blank" rel="noreferrer" className="text-xl font-semibold text-blue-500 hover:underline mb-2 block">
                       {video.title}
                     </a>
-                    <p className="text-gray-500 text-sm mb-2 font-medium">Channel: {video.channel}</p>
-                    <p className="text-gray-400 text-sm italic">{video.description}</p>
+                    <p className="text-gray-400 text-sm mb-4">Channel: {video.channel}</p>
+                    <p className="text-gray-500 text-sm line-clamp-2">{video.description}</p>
                   </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Action Footer Buttons */}
-          <div className="flex flex-wrap gap-4 mt-10 border-t pt-8 border-gray-100 dark:border-gray-800">
-            <button onClick={startQuiz} className="flex-1 min-w-[150px] bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-2xl transition-all hover:scale-[1.02]">
+          {/* Actions */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10 border-t pt-8 border-gray-100 dark:border-gray-800">
+            <button onClick={startQuiz} className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-2xl transition-transform active:scale-95">
               Practice MCQs
             </button>
-            <button onClick={takeATest} className="flex-1 min-w-[150px] bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl transition-all hover:scale-[1.02]">
+            <button onClick={() => setTakeTest(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl transition-transform active:scale-95">
               Take a Test
             </button>
-            <button onClick={downloadPDF} className="flex-1 min-w-[150px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-2xl transition-all hover:scale-[1.02]">
+            <button onClick={downloadPDF} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-2xl transition-transform active:scale-95">
               Download PDF
             </button>
           </div>
         </div>
       ) : (
         /* Empty State */
-        <div className="h-full flex flex-col items-center justify-center p-10 text-center">
-          <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 4 }}>
-            <Image src="/images/homepage/navbar/DN.png" alt="Logo" height={150} width={150} className="opacity-10 grayscale" />
-          </motion.div>
-          <p className="mt-6 text-gray-400 font-medium tracking-widest uppercase text-sm">Select a topic to start learning</p>
+        <div className="h-full flex flex-col items-center justify-center p-10 text-center opacity-40">
+           <Image src="/images/homepage/navbar/DN.png" alt="Logo" height={120} width={120} className="grayscale mb-6" />
+           <p className="text-gray-400 font-medium tracking-widest uppercase text-xs">Select a topic from the sidebar to begin</p>
         </div>
       )}
     </div>
